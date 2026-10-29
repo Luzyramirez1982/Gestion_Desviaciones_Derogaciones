@@ -67,9 +67,9 @@ begin
     criticidad = coalesce(p_data ->> 'criticidad', ''),
     vigencia_inicio = nullif(p_data ->> 'vigenciaInicio', '')::date,
     vigencia_fin = nullif(p_data ->> 'vigenciaFin', '')::date,
-    -- los campos de evaluación y de cierre no los llena quien envía
+    -- los campos de evaluación y de cierre no los llena quien envía (las medidas de control sí: las escribe en la solicitud)
     data = conservar_campos(v_reg.data,
-             conservar_campos(v_reg.data, p_data, array['conceptoEvaluacion','controlesCompensatorios','observacionesAprobacion']),
+             conservar_campos(v_reg.data, p_data, array['conceptoEvaluacion','observacionesAprobacion']::text[]),
              array['observacionesCierre','cumplimientoControl']),
     version = version + 1,
     actualizado_en = now()

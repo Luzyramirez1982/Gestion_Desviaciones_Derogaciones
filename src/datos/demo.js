@@ -10,6 +10,8 @@ import { PERSONAS_DEMO, CLAVE_DEMO, AREAS_DEMO, TIPOS_DEMO, registrosDemo } from
 const copia = (x) => structuredClone(x);
 const falla = (msg, codigo) => { const e = new Error(msg); if(codigo) e.codigo = codigo; return e; };
 const CONSERVAR_EVAL = ["conceptoEvaluacion", "controlesCompensatorios", "observacionesAprobacion"];
+// Mientras es borrador, las medidas de control las escribe quien hace la solicitud (igual que en la base de datos).
+const CONSERVAR_EVAL_BORRADOR = ["conceptoEvaluacion", "observacionesAprobacion"];
 const CONSERVAR_CIERRE = ["observacionesCierre", "cumplimientoControl"];
 
 export function crearAdaptadorDemo(){
@@ -110,7 +112,7 @@ export function crearAdaptadorDemo(){
       if(u.rol === "Responsable del proceso" && !esDueno(u, r) && u.area !== r.area) throw falla("No puede editar este registro.");
       if(r.version !== version) throw falla("Otra persona cambió este registro mientras usted lo editaba. Vuelva a abrirlo.", "conflicto_version");
       const nuevo = copia(registroAData(data));
-      if(!(["Aprobador autorizado", "Administrador"].includes(u.rol) && r.stage === 1)) conservar(r, nuevo, CONSERVAR_EVAL);
+      if(!(["Aprobador autorizado", "Administrador"].includes(u.rol) && r.stage === 1)) conservar(r, nuevo, r.borrador ? CONSERVAR_EVAL_BORRADOR : CONSERVAR_EVAL);
       if(!(r.stage === 2 && (u.rol === "Administrador" || r.reportadoPorId === u.id))) conservar(r, nuevo, CONSERVAR_CIERRE);
       if(!r.borrador){ nuevo.tipoGestion = r.tipoGestion; nuevo.area = r.area; }
       const { firmas, adjuntos, bitacora, id: _id, stage, borrador, devuelta, cerrado, resultado, reportadoPorId, version: _v, creadoEn, actualizadoEn } = r;
@@ -128,7 +130,7 @@ export function crearAdaptadorDemo(){
       const err = validarVigencia(data);
       if(err) throw falla(err);
       const nuevo = copia(registroAData(data));
-      conservar(r, nuevo, CONSERVAR_EVAL); conservar(r, nuevo, CONSERVAR_CIERRE);
+      conservar(r, nuevo, CONSERVAR_EVAL_BORRADOR); conservar(r, nuevo, CONSERVAR_CIERRE);
       const reenvio = r.devuelta;
       if(id.startsWith("BOR-")){
         registros.delete(id);

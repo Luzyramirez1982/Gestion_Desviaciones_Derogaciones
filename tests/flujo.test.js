@@ -380,3 +380,20 @@ describe("protecciones", () => {
     expect(b.area).toBe("Producción");
   });
 });
+
+describe("medidas de control que escribe quien hace la solicitud", () => {
+  it("en un borrador se guardan y llegan al enviarlo; ya enviada, solo el Aprobador las cambia", async () => {
+    let b = await como(RESP_CALIDAD, () => crear(solicitud({ controlesCompensatorios: "Control inicial" }), true));
+    expect(b.data.controlesCompensatorios).toBe("Control inicial");
+    b = await guardar(RESP_CALIDAD, b, { controlesCompensatorios: "Control corregido", conceptoEvaluacion: "intento de aprobarme" });
+    expect(b.data.controlesCompensatorios).toBe("Control corregido");
+    expect(b.data.conceptoEvaluacion).toBeUndefined();
+    const enviado = await como(RESP_CALIDAD, () => uno("select * from enviar_registro($1, $2, $3::jsonb, $4)",
+      [b.id, b.version, JSON.stringify({ ...b.data, controlesCompensatorios: "Control al enviar" }), firmaDe(RESP_CALIDAD)]));
+    expect(enviado.data.controlesCompensatorios).toBe("Control al enviar");
+    const intento = await guardar(RESP_CALIDAD, enviado, { controlesCompensatorios: "Lo cambio otra vez" });
+    expect(intento.data.controlesCompensatorios).toBe("Control al enviar");
+    const aprobado = await guardar(APROBADOR, intento, { controlesCompensatorios: "Control del Aprobador" });
+    expect(aprobado.data.controlesCompensatorios).toBe("Control del Aprobador");
+  });
+});

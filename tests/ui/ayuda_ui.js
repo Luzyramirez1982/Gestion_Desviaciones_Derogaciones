@@ -5,6 +5,7 @@ import { CLAVE_DEMO } from "../../src/datos/ejemplo.js";
 
 // jsdom no trae canvas: se simula lo mínimo para que el recuadro de firma "dibuje".
 export function simularCanvas(){
+  window.scrollTo = () => {};
   HTMLCanvasElement.prototype.getContext = () => ({ beginPath(){}, moveTo(){}, lineTo(){}, stroke(){}, clearRect(){} });
   HTMLCanvasElement.prototype.toDataURL = () => "data:image/png;base64,AAAA";
 }
@@ -16,12 +17,15 @@ export async function hasta(condicion, mensaje = "la condición", intentos = 80)
   throw new Error("No se cumplió a tiempo: " + mensaje);
 }
 
+let anterior = null;
 export async function montarApp(){
+  if(anterior) anterior.destruir();
   document.body.innerHTML = '<div id="app"></div>';
   location.hash = "";
   const repo = { ...crearAdaptadorDemo(), demo: true, alEventoSesion: () => () => {} };
   const raiz = document.getElementById("app");
   const ctx = await arrancar(raiz, repo);
+  anterior = ctx;
   return { raiz, repo, ctx };
 }
 

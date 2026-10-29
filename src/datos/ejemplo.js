@@ -31,7 +31,7 @@ export const TIPOS_DEMO = [
 export const AREAS_DEMO = DEFAULT_AREAS.map((nombre, orden) => ({nombre, orden}));
 
 const base = (o) => ({
-  tipoGestion: "Desviación", criticidad: "Menor", recurrente: false, cargo: "Analista", areaSolicitante: "", procesoSolicitante: "Proceso de ejemplo",
+  tipoGestion: "Desviación", criticidad: "Menor", recurrente: false, cargo: "Analista", areaSolicitante: "Área de ejemplo", procesoSolicitante: "Proceso de ejemplo",
   ot: "OT-0000", proyecto: "Proyecto de ejemplo", lineaNegocio: "Logística", requisitoIncumplido: "Procedimiento de ejemplo",
   equipoInvolucrado: "Equipo de ejemplo", tareaDescripcion: "Tarea de ejemplo", motivoDesviacion: "Motivo de ejemplo",
   consecuenciasPotenciales: "Consecuencia de ejemplo", controlesCompensatorios: "",
@@ -44,7 +44,7 @@ export function registrosDemo(){
   const bit = (etapa, rol, usuario, comentario) => ({etapa, rol, usuario, fecha: todayISO(), comentario});
   const d8 = emptyD8();
   return [
-    {...base({area: "Calidad Producto", tipoEspecifico: "Fuera de especificación (OOS)", reportadoPor: "Camilo Calidad"}),
+    {...base({area: "Calidad Producto", tipoEspecifico: "Fuera de especificación (OOS)", reportadoPor: "Camilo Calidad", controlesCompensatorios: "Inspección visual cada turno."}),
       id: "MTC-001", stage: 1, borrador: false, devuelta: false, cerrado: false, resultado: "", reportadoPorId: "u-calidad", version: 1,
       firmas: {sol: firma("Camilo Calidad", "Responsable del proceso", "u-calidad")}, adjuntos: [],
       bitacora: [bit("Solicitud", "Responsable del proceso", "Camilo Calidad", "Solicitud creada y firmada.")]},

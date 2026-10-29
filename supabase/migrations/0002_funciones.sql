@@ -277,8 +277,11 @@ begin
   end if;
 
   -- Campos de la evaluación: si no le corresponden, se conserva lo que ya había.
+  -- Las medidas de control también las escribe quien hace la solicitud mientras es borrador, por eso ahí no se protegen.
   if not (v_rol in ('Aprobador autorizado', 'Administrador') and v_reg.etapa = 1) then
-    v_datos := conservar_campos(v_reg.data, v_datos, array['conceptoEvaluacion', 'controlesCompensatorios', 'observacionesAprobacion']);
+    v_datos := conservar_campos(v_reg.data, v_datos,
+      case when v_reg.borrador then array['conceptoEvaluacion', 'observacionesAprobacion']::text[]
+           else array['conceptoEvaluacion', 'controlesCompensatorios', 'observacionesAprobacion']::text[] end);
   end if;
   -- Campos del cierre.
   if not (v_reg.etapa = 2 and (v_rol = 'Administrador' or v_reg.reportado_por_id = auth.uid())) then

@@ -109,7 +109,8 @@ export async function arrancar(raiz, repo, { hashInicial = "" } = {}){
     if(ctx.vista === "eliminados" && ctx.esAdmin()) ctx.eliminados = await repo.listarEliminados().catch(() => ctx.eliminados);
     ctx.render();
   };
-  window.addEventListener("hashchange", () => { ctx.rutear(); });
+  const alCambiarRuta = () => { ctx.rutear(); };
+  window.addEventListener("hashchange", alCambiarRuta);
 
   ctx.entrar = async (perfil) => {
     ctx.yo = perfil;
@@ -131,9 +132,16 @@ export async function arrancar(raiz, repo, { hashInicial = "" } = {}){
   };
 
   // Avisa si se intenta cerrar la pestaña con cambios sin guardar.
-  window.addEventListener("beforeunload", e => {
+  const alCerrarPestana = e => {
     if([...ctx.pendientes].some(g => g.hayPendientes())){ e.preventDefault(); e.returnValue = ""; }
-  });
+  };
+  window.addEventListener("beforeunload", alCerrarPestana);
+  // Quita lo que la aplicación dejó escuchando (las pruebas montan la aplicación varias veces).
+  ctx.destruir = () => {
+    window.removeEventListener("hashchange", alCambiarRuta);
+    window.removeEventListener("beforeunload", alCerrarPestana);
+    ctx.detenerEnVivo?.();
+  };
 
   repo.alEventoSesion?.(evento => {
     if(evento === "recuperar"){ ctx.auth = {modo: "recuperar", forzado: true, err: "", msg: "", cargando: false}; ctx.render(); }

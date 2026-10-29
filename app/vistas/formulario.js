@@ -315,7 +315,11 @@ export function montar(ctx, el){
     const btn = $("btnEnviar");
     const oculto = (c) => c.closest('[style*="display:none"], [style*="display: none"]');
     const faltante = [...form.querySelectorAll("[required]")].find(c => !oculto(c) && !String(c.value).trim());
-    if(faltante){ faltante.focus(); return ctx.error(new Error("Complete los campos obligatorios antes de enviar. Si aún no termina, use «Guardar borrador».")); }
+    if(faltante){
+      faltante.focus();
+      const nombre = faltante.closest(".field")?.querySelector("label")?.textContent || "un campo obligatorio";
+      return ctx.error(new Error(`Falta completar «${nombre}». Si aún no termina, use «Guardar borrador».`));
+    }
     if(!firma.hayFirma()) return ctx.error(new Error("Por favor dibuje su firma en el recuadro antes de enviar la solicitud."));
     if(!form.elements.confirmaVeraz.checked) return ctx.error(new Error("Marque la confirmación de que la información es veraz."));
     const datos = leer();
