@@ -4,7 +4,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { iniciarBD } from "./ayuda_bd.js";
 import { exportacion, U_ADMIN, U_JUAN } from "./fixture_v1.js";
 import { planificar } from "../src/migracion/v1a2.js";
-import { aplicarPlan, decodificarDataUrl } from "../src/migracion/aplicar.js";
+import { aplicarPlan, decodificarDataUrl, proyectoCoincide } from "../src/migracion/aplicar.js";
 
 let db, como, q, crear;
 const subidos = [];
@@ -121,5 +121,18 @@ describe("archivos en formato de datos", () => {
   it("rechaza lo que no es un archivo en ese formato", () => {
     expect(() => decodificarDataUrl("no es un archivo")).toThrow(/formato de datos válido/);
     expect(() => decodificarDataUrl("")).toThrow(/formato de datos válido/);
+  });
+});
+
+describe("protección contra el proyecto equivocado", () => {
+  it("el identificador debe ser el de la dirección de Supabase", () => {
+    expect(proyectoCoincide("https://abcdefghij.supabase.co", "abcdefghij")).toBe(true);
+    expect(proyectoCoincide("https://abcdefghij.supabase.co", "ABCDEFGHIJ")).toBe(true);
+    expect(proyectoCoincide("https://abcdefghij.supabase.co", "otroproyecto")).toBe(false);
+    expect(proyectoCoincide("https://abcdefghij.supabase.co", "abc")).toBe(false);
+    expect(proyectoCoincide("https://abcdefghij.supabase.co", "")).toBe(false);
+    expect(proyectoCoincide("https://abcdefghij.supabase.co", undefined)).toBe(false);
+    expect(proyectoCoincide("no-es-una-url", "abcdefghij")).toBe(false);
+    expect(proyectoCoincide("https://malo.com/abcdefghij.supabase.co", "abcdefghij")).toBe(false);
   });
 });

@@ -78,3 +78,11 @@ export async function aplicarPlan(plan, cliente, { alAvanzar = () => {}, permiti
   await paso("consecutivo", () => cliente.establecerConsecutivo(plan.consecutivo));
   return hecho;
 }
+
+// Protección contra aplicar la migración en el proyecto equivocado (por ejemplo, el real en vez del de pruebas):
+// hay que escribir el identificador del proyecto, y debe aparecer en la dirección de Supabase que se está usando.
+export function proyectoCoincide(url, identificador){
+  const id = String(identificador || "").trim().toLowerCase();
+  if(id.length < 6) return false;
+  try { return new URL(url).hostname.toLowerCase().split(".")[0] === id; } catch { return false; }
+}

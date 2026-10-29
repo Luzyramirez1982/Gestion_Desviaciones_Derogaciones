@@ -283,3 +283,9 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - Módulo para convertir los datos de la versión anterior al modelo nuevo (`src/migracion/`): registros de cualquier modelo antiguo, personas, áreas, tipos, firmas, adjuntos y registros eliminados. Se probó guardando el resultado en la base nueva y restaurando un registro migrado.
 - 124 pruebas automáticas.
 - Se crearon `PLAN.md` (qué falta y cómo va) y `CLAUDE.md` (reglas del equipo).
+
+**Migración de datos lista para ensayar:**
+- Comando `scripts/migrar-v1-a-v2.mjs` con tres pasos: `exportar` (copia la versión anterior a archivos), `simular` (dice qué se migraría y qué avisos hay, sin escribir nada) y `aplicar` (guarda todo en la base nueva).
+- Se puede repetir sin duplicar. Se niega a pisar una base que ya tiene registros y pide el identificador del proyecto, para no migrar en el equivocado por error.
+- Nuevo paso `0005`: continúa el consecutivo después del último número usado (incluidos los registros eliminados) y nunca retrocede.
+- 154 pruebas. Falta correrlo contra un Supabase real.

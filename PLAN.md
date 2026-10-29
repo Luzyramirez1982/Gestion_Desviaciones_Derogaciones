@@ -46,13 +46,13 @@ Dónde está cada cosa en el repositorio:
 | Carpeta o archivo | Qué contiene |
 |---|---|
 | `index.html`, `config.js`, `supabase_schema.sql` | La aplicación **actual** (versión 1). No se modifica hasta el cambio final. |
-| `supabase/migrations/` | La base de datos nueva, en 5 pasos numerados (0000 a 0004). |
+| `supabase/migrations/` | La base de datos nueva, en 6 pasos numerados (0000 a 0005). |
 | `src/dominio/` | Las reglas del procedimiento (etapas, firmas, 8D, vigencias, quién ve qué). |
 | `src/util/` | Fechas con hora de Colombia y protección de enlaces. |
 | `src/migracion/` | Convierte los datos de la versión 1 al modelo nuevo. |
 | `src/respaldo/`, `scripts/`, `docs/respaldo-diario.yml` | Cifrado y copia de respaldos, y la plantilla del flujo diario de GitHub. |
 | `docs/` | Guías (por ahora, respaldos y restauración). |
-| `tests/` | Pruebas automáticas (141). |
+| `tests/` | Pruebas automáticas (154). |
 
 ## 4. Fallas que se están corrigiendo
 
@@ -86,6 +86,7 @@ Dónde está cada cosa en el repositorio:
 - [x] `0002_funciones.sql`: crear, guardar (con control de versión), eliminar con huella, espacio usado.
 - [x] `0003_flujo.sql`: firmar, devolver, rechazar, retroceder, enviar, restaurar, convertir a derogación, ajustar alcance, adjuntos, renombrar áreas.
 - [x] `0004_almacenamiento.sql`: bucket privado de archivos (5 MB, solo documentos e imágenes).
+- [x] `0005_migracion.sql`: función para continuar el consecutivo tras migrar (solo la clave del servidor la puede usar).
 - [x] Pruebas de todo lo anterior sobre un PostgreSQL de prueba (incluye partir de una base con la versión 1).
 - [ ] Ejecutar las migraciones en el Supabase de **pruebas** y repetir las pruebas allí (hasta ahora solo se probó en un PostgreSQL simulado). 🔑
 - [ ] Activar actualización en vivo (Realtime) en la tabla `registros` para que varias personas vean los cambios sin recargar.
@@ -112,8 +113,8 @@ Dónde está cada cosa en el repositorio:
 ### Fase 3 — Migración de los datos de la versión 1
 - [x] `src/migracion/v1a2.js`: convierte registros (incluso de modelos muy antiguos), personas, áreas, tipos, firmas, adjuntos y huellas de eliminados. Avisa de lo que no se puede migrar.
 - [x] Pruebas: la conversión, guardarla en la base nueva y restaurar un registro migrado.
-- [ ] `scripts/migrar-v1-a-v2.mjs`: lee la exportación, hace una **simulación** (informe sin escribir nada) y luego aplica: sube los archivos a Storage y carga las tablas. Se puede repetir sin duplicar.
-- [ ] Crear las cuentas de acceso de las personas que no la tienen (el informe las lista como "sin cuenta").
+- [x] `scripts/migrar-v1-a-v2.mjs` con tres pasos: **exportar** la versión anterior, **simular** (informe sin escribir nada) y **aplicar** (sube archivos y carga tablas). Se puede repetir sin duplicar, se niega a pisar una base con registros y pide el identificador del proyecto para no migrar en el equivocado. Probado contra la base de pruebas; falta correrlo contra un Supabase real. 🔑
+- [ ] Crear las cuentas de acceso de las personas que no la tienen (el informe las lista como "sin cuenta"), con la función `admin-usuarios`. 🔑
 - [ ] Ensayar todo en pruebas y comparar conteos y una muestra de registros. 🔑
 - [ ] Hacerlo en el proyecto real, conservando las tablas `*_v1` hasta que la clienta confirme que todo está bien. 🔑
 
@@ -159,5 +160,5 @@ Dónde está cada cosa en el repositorio:
 
 ```bash
 npm install     # una sola vez
-npm test        # corre las 141 pruebas (tardan unos 5 segundos, no necesitan internet)
+npm test        # corre las 154 pruebas (tardan unos 5 segundos, no necesitan internet)
 ```
