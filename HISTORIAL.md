@@ -289,3 +289,27 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - Se puede repetir sin duplicar. Se niega a pisar una base que ya tiene registros y pide el identificador del proyecto, para no migrar en el equivocado por error.
 - Nuevo paso `0005`: continúa el consecutivo después del último número usado (incluidos los registros eliminados) y nunca retrocede.
 - 154 pruebas. Falta correrlo contra un Supabase real.
+
+## Sesión 9 — 29/10/2026
+
+### Solicitud 20
+> Construir la aplicación nueva con Vite (Fase 2 del plan) y dejarla completa, en tareas cortas con un commit por tarea.
+
+**Qué quedó hecho** (todo en la rama `feat/v2`; el `index.html` antiguo no se tocó):
+- **Capa de datos** (`src/datos/`): una sola interfaz y dos adaptadores intercambiables. El de **demostración** guarda todo en memoria con las mismas reglas básicas; el de **Supabase** solo escribe por las funciones de la base (`crear_registro`, `firmar_etapa`...), nunca directo en las tablas. El de Supabase se probó contra las funciones reales de la base de prueba.
+- **Ingreso y menú por rol:** ingreso con correo y contraseña, olvido de contraseña, cambio de contraseña y cambio **obligatorio** en el primer ingreso. El menú cambia según el rol (Administrador, Responsable del proceso, Aprobador autorizado). El primer Administrador ya no se activa desde la pantalla.
+- **Pantallas** (mismo diseño y textos de la versión 1): panel, lista con filtros y paginación, formulario de nuevo registro (tipo «Otro», GTC 45 para SST, vigencia temporal o definitiva, 8D con 5W2H, 5 Porqués y tablas D3/D5, firma, borradores y reenvío tras devolución), detalle (etapas, firmas con requisitos, devolver, rechazar, retroceder, convertir en derogación, ajustar alcance, bitácora, adjuntos), usuarios, áreas, tipos, registros eliminados e instructivo.
+- **Guardado confiable:** los campos de cada rol se guardan solos y se ve «Guardando», «Guardado» o «Error al guardar» (con «Reintentar»). Si se cae la conexión reintenta con espera. Si otra persona cambió el registro, avisa y ofrece recargar en vez de pisar su trabajo. Avisa si se intenta cerrar la pestaña con cambios sin guardar.
+- **Archivos:** las fotos se reducen en el navegador (máximo 1600 px), límite de 5 MB por archivo y 10 por cargue, y se abren con enlaces temporales. Panel «Uso del almacenamiento» para el Administrador, con avisos al 70 % y al 90 %.
+- **PDF y Excel:** PDF de trazabilidad y Excel histórico (Registros, Bitácora, Acciones 8D y Eliminados). Para el Excel se eligió `write-excel-file`, porque la librería `xlsx` 0.18.5 tiene vulnerabilidades conocidas; `npm audit` da 0 problemas.
+- **Enlace de acceso:** el campo se llena solo con la dirección publicada (nunca con localhost ni un archivo local), como pidió la clienta. La tarjeta para compartir muestra enlace, usuario y contraseña temporal.
+- **En vivo:** nueva migración `0006_tiempo_real.sql` (se puede repetir sin problema). La lista se refresca sola cuando otra persona cambia algo, al volver a la pestaña y al volver la conexión, sin borrar lo que se está escribiendo.
+- **Cabeceras de seguridad** para Cloudflare Pages (`app/public/_headers`) con política estricta y la guía `docs/CABECERAS.md`.
+- **Script del primer Administrador** (`scripts/crear-primer-admin.mjs`): crea la cuenta y el perfil con contraseña temporal que se muestra una sola vez, y las áreas y tipos iniciales.
+- **Documentos:** `docs/MANUAL_ADMINISTRADOR.md` (para una persona no técnica) y README al día.
+
+**Un error real que encontraron las pruebas:** al guardar un borrador o al enviarlo, la base descartaba las «medidas de control» que escribe quien hace la solicitud (porque las trataba como campo del Aprobador). Se corrigió en `0002` y `0003` (mientras es borrador se guardan; ya enviada, solo las cambia el Aprobador) y quedó con prueba.
+
+**Cómo se probó:** más de 260 pruebas automáticas sin internet (base de datos simulada, adaptadores, reglas e interfaz completa en jsdom con recorridos de crear, evaluar, devolver, rechazar, cerrar y permisos por rol). Además se recorrió la aplicación construida en un Chromium real, con la política de seguridad puesta: sin errores, y se descargaron el PDF y el Excel. No se agregó Playwright a las pruebas del repositorio.
+
+**Lo que falta (necesita las cuentas de la clienta):** probar todo contra un Supabase real, desplegar la función `admin-usuarios`, copiar el flujo de respaldo a `.github/workflows/`, crear el primer Administrador, y publicar en Cloudflare Pages. Ver PLAN.md.

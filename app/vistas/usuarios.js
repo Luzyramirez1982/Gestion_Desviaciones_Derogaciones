@@ -1,13 +1,13 @@
 // Usuarios (se crean con la función del servidor), tarjeta para compartir el acceso, enlace de acceso
 // a la aplicación y áreas de los Responsables del proceso.
-import { esc } from "../../src/util/html.js";
+import { esc, urlSegura } from "../../src/util/html.js";
 import { ROLES } from "../../src/dominio/constantes.js";
 import { mensajeAcceso } from "../../src/dominio/mensajes.js";
 import { direccionPublicada, enlaceValido } from "../../src/util/enlace.js";
 import { icon, areaBadge, confirmar, pedirTexto, informar } from "../ui.js";
 
 // El enlace sale del que guardó el Administrador o, si no hay, de la dirección publicada. Nunca de localhost ni de un archivo local.
-export const enlaceAcceso = (ctx) => (ctx.base.configuracion.enlace_acceso || {}).url || direccionPublicada(location.href);
+export const enlaceAcceso = (ctx) => urlSegura((ctx.base.configuracion.enlace_acceso || {}).url) || direccionPublicada(location.href);
 
 const opcionesArea = (ctx, elegida) => `<option value="" ${!elegida ? "selected" : ""}>— Sin área —</option>` +
   ctx.nombresAreas().map(a => `<option value="${esc(a)}" ${elegida === a ? "selected" : ""}>${esc(a)}</option>`).join("");

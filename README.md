@@ -2,7 +2,7 @@
 
 Proyecto creado el 28/09/2026 a partir del artefacto publicado
 "GESTIÓN DE DESVIACIONES MATEC" (https://claude.ai/artifact/2uRRgnkJRp4Te5gb5GLvkR).
-Última actualización: 25/10/2026.
+Última actualización: 29/10/2026.
 
 ## Archivos
 - `index.html` — el aplicativo completo (ingreso, panel de control, registros, nuevo registro,
@@ -38,9 +38,38 @@ Sin `config.js` (o sin conexión a Supabase) el aplicativo funciona en **modo lo
 - Eliminar un usuario en el aplicativo le quita el acceso; su cuenta queda en *Authentication → Users* de Supabase y se puede borrar allí.
 
 ## Versión 2 (en construcción, rama `feat/v2`)
-Se está preparando una versión más segura y que no pierde datos. Mientras tanto, todo lo de arriba sigue siendo válido para la aplicación actual.
-- `supabase/migrations/` — base de datos nueva (tablas, permisos y funciones). Se ejecuta primero en un proyecto de pruebas.
-- `src/` — reglas del procedimiento ya separadas del `index.html`.
-- `tests/` — pruebas automáticas. Para correrlas: `npm install` y luego `npm test`.
-- [PLAN.md](PLAN.md) — qué falta por hacer y cómo va cada fase (**empezar por aquí si se une alguien al proyecto**).
-- [CLAUDE.md](CLAUDE.md) — reglas de trabajo del equipo (git, comentarios, pruebas, seguridad).
+La aplicación nueva está en `app/` (hecha con Vite). Es más segura y no pierde datos. Mientras no se publique, todo lo de arriba sigue siendo válido para la aplicación actual (`index.html`).
+
+### Qué hay en el repositorio
+- `app/` — la aplicación nueva: pantallas (`app/vistas/`), entrada `app/index.html`, estilos y cabeceras de seguridad (`app/public/_headers`).
+- `src/` — lo que comparten pantallas, pruebas y scripts: reglas del procedimiento (`dominio/`), capa de datos con dos adaptadores intercambiables (`datos/`: Supabase y demostración), PDF y Excel (`exportar/`), fechas de Colombia y enlaces seguros (`util/`).
+- `supabase/migrations/` — base de datos nueva en pasos numerados (`0000` a `0006`) y `supabase/functions/admin-usuarios/` (crear cuentas, solo Administrador).
+- `scripts/` — migración de datos de la versión 1, primer Administrador y respaldos.
+- `tests/` — pruebas automáticas (base de datos, reglas, adaptadores, interfaz).
+- [PLAN.md](PLAN.md) — qué falta y cómo va cada fase (**empezar por aquí si se une alguien al proyecto**). [CLAUDE.md](CLAUDE.md) — reglas de trabajo del equipo. [HISTORIAL.md](HISTORIAL.md) — historia de cambios.
+- `docs/` — [Manual del Administrador](docs/MANUAL_ADMINISTRADOR.md), [Respaldos](docs/RESPALDOS.md), [Cabeceras de seguridad](docs/CABECERAS.md).
+
+### Cómo correrla, probarla y construirla
+```bash
+npm install        # una sola vez
+npm run dev        # abre la aplicación en el navegador (http://localhost:5173)
+npm test           # todas las pruebas (sin internet, unos segundos)
+npm run build      # genera la carpeta dist/ que se publica
+npm run preview    # ve el resultado de build antes de publicar
+```
+- **Modo demostración:** si no hay `.env`, la aplicación arranca con datos de ejemplo inventados y un aviso amarillo. Las cuentas de prueba aparecen en la pantalla de ingreso (contraseña `Demo2026`). Los datos viven en memoria: al recargar se pierden. Nunca se conecta a producción.
+- **Conectarla a Supabase:** copie `.env.example` como `.env` y complete `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY` (solo URL y clave **pública**). La clave `service_role` jamás va aquí ni en el navegador.
+
+### Puesta en marcha de la versión 2 (una sola vez)
+1. **Base de datos (proyecto de pruebas primero):** en *SQL Editor* ejecutar en orden `supabase/migrations/0000` … `0006`. Se pueden repetir sin borrar datos.
+2. **Autenticación:** apagar *Allow new users to sign up*, exigir contraseñas de 8+ con letras y números, y configurar *Site URL* y *Redirect URLs* con el enlace publicado.
+3. **Función de usuarios:** `supabase functions deploy admin-usuarios` (usa los secretos que Supabase ya pone solo).
+4. **Primer Administrador:**
+   ```bash
+   SUPABASE_URL=https://<proyecto>.supabase.co SUPABASE_SERVICE_ROLE_KEY=<clave del servidor> \
+   node scripts/crear-primer-admin.mjs --nombre "Nombre Apellido" --correo persona@empresa.com --proyecto <identificador>
+   ```
+   Muestra una contraseña temporal una sola vez y crea las áreas y tipos iniciales.
+5. **Publicar en Cloudflare Pages:** conectar el repositorio con *Build command* `npm run build`, *Build output directory* `dist` y las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY`. Las cabeceras de seguridad salen de `app/public/_headers` (ver [CABECERAS.md](docs/CABECERAS.md)).
+6. **Respaldos:** copiar `docs/respaldo-diario.yml` a `.github/workflows/respaldo.yml` (ver [RESPALDOS.md](docs/RESPALDOS.md)).
+7. Entrar con el Administrador, crear los usuarios en **Usuarios** (el enlace de acceso se llena solo con la dirección publicada) y compartirles el acceso.

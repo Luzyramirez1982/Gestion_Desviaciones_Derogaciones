@@ -28,6 +28,10 @@ La revisión del proyecto encontró fallas que ponían en riesgo justo eso (ver 
 | Código | Se separa el `index.html` gigante en módulos con **Vite**, conservando la interfaz y las reglas actuales. No se reescribe en otro framework. |
 | Datos que ya existen | Se **migran** (la clienta ya hizo pruebas en su Supabase). Las tablas viejas se conservan como `*_v1`. |
 | Seguridad | Los permisos los exige la **base de datos** (no solo la pantalla): por rol, por área y por etapa. |
+| Excel | `write-excel-file` 4.1.1 (genera `.xlsx` de verdad, 0 vulnerabilidades en `npm audit`). Se descartó `xlsx` 0.18.5 por vulnerabilidades conocidas. |
+| Tiempo real | La tabla `registros` entra a la publicación `supabase_realtime` (migración 0006); la app refresca sola, al volver a la pestaña y al volver la conexión. |
+| Enlace de acceso | Se llena solo con la dirección publicada; el Administrador puede guardar otro enlace `https`. |
+| Seguridad del navegador | CSP estricta en `app/public/_headers`; solo se permite `*.supabase.co` para datos. |
 | Ramas | Todo el trabajo va en `feat/v2`. `main` es lo que se publica; no se toca hasta el cambio final. |
 
 ## 3. Cómo está armado
@@ -46,13 +50,15 @@ Dónde está cada cosa en el repositorio:
 | Carpeta o archivo | Qué contiene |
 |---|---|
 | `index.html`, `config.js`, `supabase_schema.sql` | La aplicación **actual** (versión 1). No se modifica hasta el cambio final. |
-| `supabase/migrations/` | La base de datos nueva, en 6 pasos numerados (0000 a 0005). |
+| `supabase/migrations/` | La base de datos nueva, en 7 pasos numerados (0000 a 0006). |
 | `src/dominio/` | Las reglas del procedimiento (etapas, firmas, 8D, vigencias, quién ve qué). |
 | `src/util/` | Fechas con hora de Colombia y protección de enlaces. |
 | `src/migracion/` | Convierte los datos de la versión 1 al modelo nuevo. |
 | `src/respaldo/`, `scripts/`, `docs/respaldo-diario.yml` | Cifrado y copia de respaldos, y la plantilla del flujo diario de GitHub. |
 | `docs/` | Guías (por ahora, respaldos y restauración). |
-| `tests/` | Pruebas automáticas (154). |
+| `app/` | La aplicación nueva (Vite): pantallas, estilos y cabeceras de seguridad. |
+| `src/datos/` | Capa de datos con adaptador Supabase y adaptador de demostración. |
+| `tests/` | Pruebas automáticas (más de 260: base de datos, reglas, adaptadores e interfaz). |
 
 ## 4. Fallas que se están corrigiendo
 
@@ -60,12 +66,12 @@ Dónde está cada cosa en el repositorio:
 |---|---|---|
 | Cualquier persona con la clave pública podía registrarse y leer, editar o borrar todo. | Permisos por rol y área en la base de datos; registro abierto apagado. | Base de datos `[x]` · apagar registro en Supabase `[ ]` 🔑 |
 | Dos personas creando solicitudes a la vez recibían el mismo consecutivo y una pisaba a la otra. | Consecutivo asignado por la base de datos. | `[x]` |
-| Ediciones simultáneas se pisaban sin aviso. | Control de versión: avisa en vez de sobrescribir. | Base de datos `[x]` · aviso en pantalla `[ ]` |
-| Errores al guardar no se mostraban. | Indicador "Guardando / Guardado / Error", reintentos. | `[ ]` |
-| Adjuntos y firmas dentro del registro llenaban los 500 MB y volvían lenta la app. | Archivos aparte, comprimidos, con límites. | Base de datos `[x]` · pantalla `[ ]` |
-| Fechas con hora de Londres (desde las 7 p. m. mostraba el día siguiente). | Fechas con hora de Colombia. | Reglas `[x]` · uso en la pantalla `[ ]` |
-| Enlaces con código malicioso posible (XSS). | Enlaces validados y textos escapados. | Funciones `[x]` · uso en la pantalla `[ ]` |
-| Datos de ejemplo con correos reales subían a producción. | Datos de ejemplo solo en modo demostración. | `[ ]` |
+| Ediciones simultáneas se pisaban sin aviso. | Control de versión: avisa en vez de sobrescribir. | Base de datos `[x]` · aviso en pantalla `[~]` (probado con la base simulada; falta con dos personas reales) |
+| Errores al guardar no se mostraban. | Indicador "Guardando / Guardado / Error", reintentos. | `[~]` (hecho; falta probarlo contra Supabase real) |
+| Adjuntos y firmas dentro del registro llenaban los 500 MB y volvían lenta la app. | Archivos aparte, comprimidos, con límites. | Base de datos `[x]` · pantalla `[~]` (hecho; falta probarlo contra Storage real) |
+| Fechas con hora de Londres (desde las 7 p. m. mostraba el día siguiente). | Fechas con hora de Colombia. | Reglas `[x]` · uso en la pantalla `[x]` |
+| Enlaces con código malicioso posible (XSS). | Enlaces validados y textos escapados. | Funciones `[x]` · uso en la pantalla `[x]` (todo texto con `esc()`, todo enlace con `urlSegura()`, con prueba) |
+| Datos de ejemplo con correos reales subían a producción. | Datos de ejemplo solo en modo demostración (datos inventados, sin correos reales). | `[x]` |
 | Las reglas (quién firma, 8D completo) solo las revisaba la pantalla. | Las revisa la base de datos. | `[x]` |
 
 ---
@@ -89,26 +95,26 @@ Dónde está cada cosa en el repositorio:
 - [x] `0005_migracion.sql`: función para continuar el consecutivo tras migrar (solo la clave del servidor la puede usar).
 - [x] Pruebas de todo lo anterior sobre un PostgreSQL de prueba (incluye partir de una base con la versión 1).
 - [ ] Ejecutar las migraciones en el Supabase de **pruebas** y repetir las pruebas allí (hasta ahora solo se probó en un PostgreSQL simulado). 🔑
-- [ ] Activar actualización en vivo (Realtime) en la tabla `registros` para que varias personas vean los cambios sin recargar.
+- [~] Activar actualización en vivo (Realtime) en la tabla `registros` para que varias personas vean los cambios sin recargar. Hecho: `0006_tiempo_real.sql` (idempotente, probada en PGlite) y la suscripción en la app. Falta ejecutarla en el Supabase de pruebas y confirmar que llegan los avisos. 🔑
 - [~] **Función del servidor para usuarios** (`supabase/functions/admin-usuarios`): crear cuenta con contraseña temporal, restablecer, desactivar y activar. Solo la puede llamar un Administrador. La clave `service_role` queda como secreto, nunca en la aplicación. Ya está escrita y su lógica probada (`logica.js`); falta **desplegarla y probarla en Supabase** (`supabase functions deploy admin-usuarios`). 🔑
-- [ ] Script para crear el **primer Administrador** (reemplaza la "activación" desde la pantalla).
+- [x] Script para crear el **primer Administrador** (reemplaza la "activación" desde la pantalla). Hecho: `scripts/crear-primer-admin.mjs` (crea la cuenta y el perfil con contraseña temporal que se muestra una sola vez; crea las áreas y tipos iniciales; la parte de lógica tiene pruebas). Falta correrlo contra un Supabase real. 🔑
 - [ ] En Supabase: apagar *Allow new users to sign up*, exigir contraseñas de 8+ caracteres con letras y números, configurar *Site URL* y *Redirect URLs*. 🔑
 - [ ] Activar verificación en dos pasos (TOTP, gratis) para las cuentas de Administrador. 🔑
 
 ### Fase 2 — Aplicación nueva con Vite (misma interfaz, mismas reglas)
 - [x] `src/dominio/`: constantes del procedimiento, 8D, firmas, vigencias, visibilidad. Con pruebas.
 - [x] `src/util/`: fechas de Colombia y enlaces seguros. Con pruebas.
-- [ ] Montar Vite (`index.html` pasa a ser solo la entrada) con versiones fijas de supabase-js, jsPDF y xlsx.
-- [ ] Capa de datos: cliente de Supabase y funciones que llaman a las del servidor (reemplazan `dbLoadAll` y `dbSave*`).
-- [ ] Ingreso, cambio y recuperación de contraseña (reutilizar la lógica actual de `index.html`).
-- [ ] Vistas: panel, lista (con paginación y filtros en la base), nuevo registro, detalle, usuarios, tipos, registros eliminados, instructivo.
-- [ ] Guardado confiable: indicador de estado, reintentos, aviso de conflicto de versión, aviso al cerrar con cambios sin guardar.
-- [ ] Adjuntos y firmas: subir a Storage, compresión de fotos en el navegador (máx. 1600 px), descarga con enlace temporal.
-- [ ] PDF de trazabilidad y Excel histórico con los archivos desde Storage.
-- [ ] Panel **"Uso del almacenamiento"** para el Administrador (la función ya existe en la base de datos), con avisos al 70 % y 90 %.
-- [ ] Campo **"Enlace de acceso a la aplicación"**: que se llene solo con la dirección publicada (es lo que pidió la clienta).
-- [ ] Modo demostración (datos de ejemplo) separado de producción.
-- [ ] Pruebas de recorrido completo en el navegador (Playwright).
+- [x] Montar Vite (`index.html` pasa a ser solo la entrada) con versiones fijas de supabase-js, jsPDF y xlsx. Dependencias con versión exacta (supabase-js 2.118.0, jsPDF 4.2.1, jspdf-autotable 5.0.9, write-excel-file 4.1.1; no se usó `xlsx` 0.18.5 por sus vulnerabilidades).
+- [~] Capa de datos: cliente de Supabase y funciones que llaman a las del servidor (reemplazan `dbLoadAll` y `dbSave*`). Hecho: interfaz única (`src/datos/repositorio.js`) con adaptador de demostración y adaptador Supabase (solo usa las funciones de la base), probado contra las funciones reales en PGlite. Falta probarlo contra un Supabase real. 🔑
+- [~] Ingreso, cambio y recuperación de contraseña (reutilizar la lógica actual de `index.html`). Hecho: ingreso, olvido, cambio y cambio obligatorio del primer ingreso (sin activar Administrador desde la pantalla). Falta probar el correo de recuperación en Supabase real. 🔑
+- [~] Vistas: panel, lista (con paginación y filtros en la base), nuevo registro, detalle, usuarios, tipos, registros eliminados, instructivo. Hecho: panel, lista (paginación y filtros), nuevo registro, detalle, usuarios (con tarjeta para compartir acceso), áreas, tipos, eliminados y instructivo. Falta recorrerlas contra un Supabase real. 🔑
+- [~] Guardado confiable: indicador de estado, reintentos, aviso de conflicto de versión, aviso al cerrar con cambios sin guardar. Hecho: indicador Guardando/Guardado/Error con «Reintentar», reintentos con espera si se cae la conexión, aviso de conflicto de versión con «Recargar registro» y aviso al cerrar con cambios sin guardar. Falta ver el conflicto entre dos personas reales. 🔑
+- [~] Adjuntos y firmas: subir a Storage, compresión de fotos en el navegador (máx. 1600 px), descarga con enlace temporal. Hecho: subida a Storage, fotos comprimidas (máx. 1600 px, WebP o JPEG), enlaces firmados temporales, límites de 5 MB y 10 por cargue. Falta probarlo contra Storage real. 🔑
+- [~] PDF de trazabilidad y Excel histórico con los archivos desde Storage. Hecho: PDF (jsPDF + autotable) y Excel (hojas Registros, Bitácora, Acciones 8D y Eliminados con `write-excel-file`), probados con las librerías reales y en un navegador real. Falta probar con firmas de Storage real. 🔑
+- [~] Panel **"Uso del almacenamiento"** para el Administrador (la función ya existe en la base de datos), con avisos al 70 % y 90 %. Hecho con avisos al 70 % y 90 %. Falta ver la cifra real de `uso_almacenamiento`. 🔑
+- [x] Campo **"Enlace de acceso a la aplicación"**: que se llene solo con la dirección publicada (es lo que pidió la clienta). Se llena solo con la dirección publicada (nunca con localhost ni un archivo local); el Administrador puede guardar otro enlace https.
+- [x] Modo demostración (datos de ejemplo) separado de producción. Sin `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY` la app arranca con datos inventados y aviso amarillo.
+- [~] Pruebas de recorrido completo en el navegador (Playwright). Hechas con jsdom y el modo demostración (crear, evaluar, devolver, reenviar, rechazar, cerrar, permisos por rol, usuarios, eliminar y restaurar, en vivo). No se agregó Playwright a las pruebas; el recorrido se comprobó a mano con el Chromium del entorno (incluida la descarga de PDF y Excel con la CSP puesta).
 
 ### Fase 3 — Migración de los datos de la versión 1
 - [x] `src/migracion/v1a2.js`: convierte registros (incluso de modelos muy antiguos), personas, áreas, tipos, firmas, adjuntos y huellas de eliminados. Avisa de lo que no se puede migrar.
@@ -129,10 +135,10 @@ Dónde está cada cosa en el repositorio:
 
 ### Fase 5 — Publicación y entrega
 - [ ] Cloudflare Pages conectado al repositorio: `main` publica; las demás ramas generan vistas previas contra pruebas. 🔑
-- [ ] Cabeceras de seguridad (CSP y otras) en Cloudflare.
+- [~] Cabeceras de seguridad (CSP y otras) en Cloudflare. Hecho: `app/public/_headers` (CSP estricta) y `docs/CABECERAS.md`. Falta comprobarlas en Cloudflare con la dirección real. 🔑
 - [ ] Crear el primer Administrador y cargar el enlace en Usuarios → Enlace de acceso. 🔑
 - [ ] Recorrido final desde celular y computador: primer ingreso con contraseña temporal, recuperación de contraseña, firmar, cerrar, PDF y Excel.
-- [ ] Manual corto del Administrador (usuarios, espacio usado, respaldos, restaurar) y actualizar `README.md`.
+- [x] Manual corto del Administrador (usuarios, espacio usado, respaldos, restaurar) y actualizar `README.md`. `docs/MANUAL_ADMINISTRADOR.md` y README actualizados.
 - [ ] Fusionar `feat/v2` en `main` y retirar el `index.html` antiguo.
 
 ### Fase 6 — Mejoras opcionales

@@ -29,7 +29,7 @@ Aplicación de MATEC para gestionar desviaciones y derogaciones, con ciclo de 3 
 - Las reglas existen en dos lugares (pantalla en `src/dominio/` y base de datos en `supabase/migrations/`). Si se cambia una, se cambia la otra y la prueba de comparación (`tests/flujo.test.js`) debe seguir en verde.
 
 ## Base de datos (`supabase/migrations/`)
-- Los archivos van numerados y se ejecutan **en orden**: `0000` → `0004`.
+- Los archivos van numerados y se ejecutan **en orden**: `0000` → `0006`.
 - **Mientras no estén ejecutados en un Supabase real**, se pueden editar. **Desde el día que se ejecuten en pruebas o producción, no se editan**: todo cambio va en un archivo nuevo (`0005_...`).
 - Cada archivo debe poder ejecutarse **más de una vez sin errores** y **sin borrar datos** (`create ... if not exists`, `create or replace`, `drop policy if exists`).
 - **La aplicación no escribe directo en las tablas de registros.** Lo hace por funciones (`crear_registro`, `firmar_etapa`...) que revisan quién es la persona y si puede hacerlo. No dar permisos de `insert`, `update` o `delete` sobre esas tablas.
