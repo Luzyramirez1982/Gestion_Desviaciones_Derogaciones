@@ -1,7 +1,7 @@
 // Datos de ejemplo INVENTADOS para el modo demostración. Nada de esto existe en producción:
 // la app solo los usa cuando no hay una base de datos conectada.
 import { DEFAULT_AREAS, AREA_SST } from "../dominio/constantes.js";
-import { SST_PELIGROS } from "../dominio/gtc45.js";
+import { TIPOS_POR_DEFECTO } from "../dominio/catalogo.js";
 import { emptyD8 } from "../dominio/d8.js";
 import { todayISO } from "../util/fechas.js";
 
@@ -15,18 +15,7 @@ export const PERSONAS_DEMO = [
   {id: "u-aprob", nombre: "Alberto Aprobador", correo: "aprobador@ejemplo.test", rol: "Aprobador autorizado", area: ""},
 ];
 
-const tipo = (area, nombres) => nombres.map((nombre, i) => ({id: `t-${area.slice(0, 3)}-${i}`, area, nombre, desc: ""}));
-
-export const TIPOS_DEMO = [
-  ...tipo("Ingeniería Automatización y Control", ["Deriva / falla de calibración", "Error de PLC / lógica de control", "Pérdida de comunicación de red", "Retardo / falla en actuador o sensor"]),
-  ...tipo("Ingeniería de Software", ["Bug de software", "Error de configuración / parametrización", "Falla de integración entre sistemas", "Pérdida o corrupción de datos"]),
-  ...tipo("Ingeniería mecánica", ["Incompatibilidad de materiales", "Error en plano / tolerancia", "Falta de robustez", "Requisito normativo no considerado"]),
-  ...tipo("Calidad Producto", ["Fuera de especificación (OOS)", "Defecto estético / presentación", "Falla funcional", "Contaminación / impurezas"]),
-  ...tipo("Dirección de Operaciones", ["Cambio de método o secuencia de trabajo", "Incumplimiento de procedimiento operativo", "Recurso, equipo o personal no disponible", "Intervención de equipo fuera de ciclo"]),
-  ...tipo("Producción", ["Desviación de parámetro (torque, presión, consumible)", "Error de operación / incumplimiento de POE", "Falla mecánica / parada no programada", "Problema con materia prima"]),
-  ...SST_PELIGROS.map((p, i) => ({id: `t-sst-${i}`, area: AREA_SST, nombre: p.nombre, desc: p.desc})),
-  ...tipo("Logística y Almacén", ["Almacenamiento fuera de condición", "Error de despacho / embalaje", "Material no conforme recibido", "Manipulación de cargas / equipos de izaje"]),
-];
+export const TIPOS_DEMO = TIPOS_POR_DEFECTO;
 
 export const AREAS_DEMO = DEFAULT_AREAS.map((nombre, orden) => ({nombre, orden}));
 
