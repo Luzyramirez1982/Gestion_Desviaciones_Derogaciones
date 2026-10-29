@@ -16,20 +16,10 @@
 //   personas:    actualizarPerfil(id, {nombre, rol, area}), crearUsuario({nombre, correo, rol, area}),
 //                restablecerClave(id), cambiarActivo(id, activo)
 //   en vivo:     suscribir(alCambiar) -> función para cancelar
-import { createClient } from "@supabase/supabase-js";
 import { crearAdaptadorDemo } from "./demo.js";
-import { crearAdaptadorSupabase } from "./supabase.js";
 
-// Si faltan la URL o la clave pública, la app arranca en modo demostración (nunca contra producción).
-export function configuracionDe(env = {}){
-  const url = String(env.VITE_SUPABASE_URL || "").trim();
-  const clave = String(env.VITE_SUPABASE_KEY || "").trim();
-  return url && clave ? { url, clave } : null;
-}
-
-export function crearRepositorio(env = {}, ubicacion = ""){
-  const cfg = configuracionDe(env);
-  if(!cfg) return { ...crearAdaptadorDemo(), demo: true, alEventoSesion: () => () => {} };
-  const sb = createClient(cfg.url, cfg.clave, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-  return { ...crearAdaptadorSupabase(sb, { urlBase: ubicacion }), demo: false };
+// Todavía no hay una base de datos real conectada (ver PLAN.md): la aplicación funciona en modo demostración,
+// con datos de ejemplo en memoria. Cuando se elija la base de datos, aquí se agrega su adaptador.
+export function crearRepositorio(){
+  return { ...crearAdaptadorDemo(), demo: true, alEventoSesion: () => () => {} };
 }

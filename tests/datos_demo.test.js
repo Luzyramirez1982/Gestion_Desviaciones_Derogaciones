@@ -1,7 +1,7 @@
 // El adaptador de demostración debe cumplir las mismas reglas básicas que la base de datos.
 import { describe, it, expect, beforeEach } from "vitest";
 import { crearAdaptadorDemo } from "../src/datos/demo.js";
-import { crearRepositorio, configuracionDe } from "../src/datos/repositorio.js";
+import { crearRepositorio } from "../src/datos/repositorio.js";
 import { CLAVE_DEMO } from "../src/datos/ejemplo.js";
 
 const FIRMA = "data:image/png;base64,AAAA";
@@ -11,10 +11,8 @@ const form = (o = {}) => ({ tipoGestion: "Desviación", area: "Calidad Producto"
 beforeEach(() => { repo = crearAdaptadorDemo(); });
 
 describe("repositorio", () => {
-  it("sin URL ni clave arranca en modo demostración", () => {
-    expect(configuracionDe({})).toBeNull();
-    expect(crearRepositorio({}).demo).toBe(true);
-    expect(configuracionDe({ VITE_SUPABASE_URL: "https://x.supabase.co", VITE_SUPABASE_KEY: "k" })).toEqual({ url: "https://x.supabase.co", clave: "k" });
+  it("mientras no haya base de datos conectada arranca en modo demostración", () => {
+    expect(crearRepositorio().demo).toBe(true);
   });
 });
 

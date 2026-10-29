@@ -1,0 +1,20 @@
+# Cabeceras de seguridad para Cloudflare Pages (este archivo se publica junto con la aplicación).
+# Cómo ajustarlas está explicado en docs/CABECERAS.md.
+#
+# Qué permite la política de contenido (CSP), en palabras simples:
+#  * Código y estilos: solo los de la propia aplicación (nada de scripts de otros sitios).
+#  * Conexiones: solo la propia aplicación. Cuando se conecte la base de datos hay que agregar su dirección
+#    en connect-src (y en img-src si las imágenes se sirven desde ahí). Ver docs/CABECERAS.md.
+#  * Imágenes: las propias y las de la pantalla (data:, blob:).
+#  * Nadie puede poner esta aplicación dentro de otra página (frame-ancestors 'none').
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Los archivos con nombre único (que genera Vite) se pueden guardar mucho tiempo.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

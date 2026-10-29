@@ -1,10 +1,10 @@
 // Adaptador de DEMOSTRACIÓN: guarda todo en memoria y aplica las mismas reglas básicas que la base de datos.
-// Sirve para ver y probar la aplicación sin Supabase. Al recargar la página se pierde todo.
+// Sirve para ver y probar la aplicación sin base de datos real. Al recargar la página se pierde todo.
 import { canSignSlot, requisitosFirma, validarVigencia, visibleRecords, isClosed, esDueno, slotForStage } from "../dominio/registro.js";
 import { FIRMA_SLOTS, STAGES, MAX_FILE_MB } from "../dominio/constantes.js";
 import { todayISO } from "../util/fechas.js";
-import { nombreSeguro } from "../migracion/v1a2.js";
-import { registroAData } from "./convertir.js";
+import { nombreSeguro } from "../util/nombreArchivo.js";
+import { datosDeRegistro } from "../dominio/datosDeRegistro.js";
 import { PERSONAS_DEMO, CLAVE_DEMO, AREAS_DEMO, TIPOS_DEMO, registrosDemo } from "./ejemplo.js";
 
 const copia = (x) => structuredClone(x);
@@ -96,7 +96,7 @@ export function crearAdaptadorDemo(){
         if(err) throw falla(err);
       }
       const id = borrador ? "BOR-" + String(++borradores).padStart(4, "0") : "MTC-" + String(++consecutivo).padStart(3, "0");
-      const r = {...copia(registroAData(data)), id, stage: borrador ? 0 : 1, borrador, devuelta: false, cerrado: false, resultado: "",
+      const r = {...copia(datosDeRegistro(data)), id, stage: borrador ? 0 : 1, borrador, devuelta: false, cerrado: false, resultado: "",
         reportadoPorId: u.id, reportadoPor: u.nombre, version: 1, firmas: {}, adjuntos: [], bitacora: [],
         creadoEn: new Date().toISOString(), actualizadoEn: new Date().toISOString()};
       registros.set(id, r);
@@ -111,7 +111,7 @@ export function crearAdaptadorDemo(){
       if(isClosed(r)) throw falla("El registro ya está cerrado y no se puede editar.");
       if(u.rol === "Responsable del proceso" && !esDueno(u, r) && u.area !== r.area) throw falla("No puede editar este registro.");
       if(r.version !== version) throw falla("Otra persona cambió este registro mientras usted lo editaba. Vuelva a abrirlo.", "conflicto_version");
-      const nuevo = copia(registroAData(data));
+      const nuevo = copia(datosDeRegistro(data));
       if(!(["Aprobador autorizado", "Administrador"].includes(u.rol) && r.stage === 1)) conservar(r, nuevo, r.borrador ? CONSERVAR_EVAL_BORRADOR : CONSERVAR_EVAL);
       if(!(r.stage === 2 && (u.rol === "Administrador" || r.reportadoPorId === u.id))) conservar(r, nuevo, CONSERVAR_CIERRE);
       if(!r.borrador){ nuevo.tipoGestion = r.tipoGestion; nuevo.area = r.area; }
@@ -129,7 +129,7 @@ export function crearAdaptadorDemo(){
       if(!firma) throw falla("Dibuje su firma en el recuadro antes de enviar la solicitud.");
       const err = validarVigencia(data);
       if(err) throw falla(err);
-      const nuevo = copia(registroAData(data));
+      const nuevo = copia(datosDeRegistro(data));
       conservar(r, nuevo, CONSERVAR_EVAL_BORRADOR); conservar(r, nuevo, CONSERVAR_CIERRE);
       const reenvio = r.devuelta;
       if(id.startsWith("BOR-")){

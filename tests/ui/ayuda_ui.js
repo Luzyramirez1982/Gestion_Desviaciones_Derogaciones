@@ -1,6 +1,6 @@
 // Ayudas para las pruebas de recorrido: montan la aplicación completa en jsdom con el adaptador de demostración.
 import { crearAdaptadorDemo } from "../../src/datos/demo.js";
-import { arrancar } from "../../app/app.js";
+import { arrancar } from "../../src/nucleo/app.js";
 import { CLAVE_DEMO } from "../../src/datos/ejemplo.js";
 
 // jsdom no trae canvas: se simula lo mínimo para que el recuadro de firma "dibuje".

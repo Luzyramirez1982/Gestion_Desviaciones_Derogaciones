@@ -1,8 +1,7 @@
 import { defineConfig } from "vite";
 
-// La app nueva vive en app/. El resultado queda en dist/ (lo que publica Cloudflare Pages).
+// index.html está en la raíz y el código en src/. El resultado queda en dist/ (lo que publica Cloudflare Pages).
+// Los archivos de public/ (como las cabeceras de seguridad) se copian tal cual.
 export default defineConfig({
-  root: "app",
-  envDir: "..",
-  build: { outDir: "../dist", emptyOutDir: true },
+  build: { outDir: "dist", emptyOutDir: true },
 });
