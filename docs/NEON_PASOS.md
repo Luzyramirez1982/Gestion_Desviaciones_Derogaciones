@@ -39,11 +39,11 @@ neon data-api refresh-schema --project-id <id> --branch production --database ne
 
 ## 5. Crear a la Administradora
 ```powershell
-$env:CLAVE_ADMIN = "UnaClave2026"      # 8+ caracteres con letras y números
 node scripts/crear-primer-admin.mjs --correo persona@empresa.com --nombre "Nombre Apellido"
 ```
-Crea su cuenta de ingreso, la anota como Administradora y le da el rol de administración de Neon Auth (para crear las demás cuentas desde la aplicación). Solo funciona mientras no haya otro Administrador.
+El script crea su cuenta de ingreso, la anota como Administradora y le da el rol de administración de Neon Auth (para crear las demás cuentas desde la aplicación). **Inventa una contraseña temporal y la muestra una sola vez**: entréguesela por un medio privado. En su primer ingreso la aplicación le **exige cambiarla**, así no hace falta que ella esté presente para crearla. Solo funciona mientras no haya otro Administrador.
 
+Si prefieren elegir ustedes la contraseña: `$env:CLAVE_ADMIN = "UnaClave2026"` antes del comando (8+ caracteres con letras y números).
 ## 6. Probar en su computador
 `npm run dev`, abra <http://localhost:5173> e ingrese. No debe verse el aviso amarillo de *Modo demostración*; arriba debe decir **Base de datos conectada**.
 

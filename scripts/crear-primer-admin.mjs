@@ -3,24 +3,27 @@
 // (3) le da el rol de administración de Neon Auth, para que pueda crear las demás cuentas desde la aplicación.
 //
 // Antes: haber corrido aplicar-migraciones y tener VITE_NEON_URL y DATABASE_URL en el .env.
-// Uso (PowerShell), con la contraseña en una variable para que no quede en el historial de comandos:
-//   $env:CLAVE_ADMIN = "UnaClave2026"
+// Uso (PowerShell):
 //   node scripts/crear-primer-admin.mjs --correo persona@empresa.com --nombre "Nombre Apellido"
+// Sin más datos, el script inventa una contraseña TEMPORAL y la muestra una sola vez: se la entregan a la persona
+// por un medio privado y la aplicación le exige cambiarla en su primer ingreso. Si quieren elegirla ustedes,
+// pueden ponerla en una variable (así no queda en el historial de comandos): $env:CLAVE_ADMIN = "UnaClave2026"
 import { createClient } from "@neondatabase/neon-js";
 import { validarClave } from "../src/auth/clave.js";
+import { claveTemporal } from "../src/datos/neon.js";
 import { conectar } from "./conexion.mjs";
 
 const arg = (n) => { const i = process.argv.indexOf("--" + n); return i > 0 ? process.argv[i + 1] : ""; };
 const correo = arg("correo").trim().toLowerCase();
 const nombre = arg("nombre").trim();
-const clave = process.env.CLAVE_ADMIN || "";
+const claveElegida = process.env.CLAVE_ADMIN || "";
+const clave = claveElegida || claveTemporal();
 const urlNeon = process.env.VITE_NEON_URL;
 // Neon exige el origen de la página que pide la cuenta: sirve la dirección de desarrollo, que viene permitida.
 const origen = process.env.ORIGEN_APP || "http://localhost:5173";
 
 const falla = (msg) => { console.error(msg); process.exit(1); };
-if(!correo || !nombre) falla('Uso: node scripts/crear-primer-admin.mjs --correo persona@empresa.com --nombre "Nombre Apellido"  (y la contraseña en $env:CLAVE_ADMIN)');
-if(!clave) falla("Falta la contraseña: escríbala en la variable CLAVE_ADMIN (ver el comienzo de este archivo).");
+if(!correo || !nombre) falla('Uso: node scripts/crear-primer-admin.mjs --correo persona@empresa.com --nombre "Nombre Apellido"  ');
 if(validarClave(clave, clave)) falla(validarClave(clave, clave));
 if(!urlNeon) falla("Falta VITE_NEON_URL (la dirección pública de Neon, sin claves) en el .env.");
 
@@ -41,8 +44,11 @@ try {
   }
 
   await db.query(
-    "insert into perfiles (id, nombre, correo, rol, area, debe_cambiar_clave) values ($1, $2, $3, 'Administrador', '', false)",
+    "insert into perfiles (id, nombre, correo, rol, area, debe_cambiar_clave) values ($1, $2, $3, 'Administrador', '', true)",
     [id, nombre, correo]);
   await db.query('update neon_auth."user" set role = $1 where id = $2', ["admin", id]);
-  console.log(`Listo: ${nombre} (${correo}) ya es Administradora y puede ingresar a la aplicación.`);
+  console.log(`Listo: ${nombre} (${correo}) ya es Administradora.`);
+  if(r.error) console.log("Su cuenta ya existía: conserva su contraseña actual.");
+  else if(claveElegida) console.log("Entra con la contraseña que usted eligió y la aplicación le pedirá cambiarla en el primer ingreso.");
+  else console.log(`Contraseña TEMPORAL (se muestra una sola vez; entréguela por un medio privado): ${clave}\n  La aplicación le pedirá cambiarla en su primer ingreso.`);
 } finally { await db.end(); }
