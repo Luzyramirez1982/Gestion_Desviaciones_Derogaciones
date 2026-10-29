@@ -26,7 +26,7 @@ La revisión del proyecto encontró fallas que ponían en riesgo justo eso (ver 
 | Costos | Todo gratis y **sin tarjeta**. Si algo exige tarjeta, no se usa. |
 | Archivos (adjuntos y firmas) | Fuera de la base de datos, en un bucket privado. Se empieza en Supabase Storage (1 GB) con imágenes comprimidas. Cuando la clienta diga qué correo usa la empresa, se agrega Google Drive u OneDrive (más espacio, también gratis). |
 | Código | Se separa el `index.html` gigante en módulos con **Vite**, conservando la interfaz y las reglas actuales. No se reescribe en otro framework. |
-| Datos que ya existen | Se **migran** (la clienta ya hizo pruebas en su Supabase). Las tablas viejas se conservan como `*_v1`. |
+| Datos que ya existen | **Se empieza desde cero (decisión de la clienta, 29/10/2026):** no se migran registros ni usuarios de la versión 1. Solo existirá su usuario como Administradora. Las herramientas de migración (`src/migracion/`, `scripts/migrar-v1-a-v2.mjs`) se conservan por si hicieran falta, pero **no se usan**. |
 | Seguridad | Los permisos los exige la **base de datos** (no solo la pantalla): por rol, por área y por etapa. |
 | Excel | `write-excel-file` 4.1.1 (genera `.xlsx` de verdad, 0 vulnerabilidades en `npm audit`). Se descartó `xlsx` 0.18.5 por vulnerabilidades conocidas. |
 | Tiempo real | La tabla `registros` entra a la publicación `supabase_realtime` (migración 0006); la app refresca sola, al volver a la pestaña y al volver la conexión. |
@@ -117,6 +117,8 @@ Dónde está cada cosa en el repositorio:
 - [~] Pruebas de recorrido completo en el navegador (Playwright). Hechas con jsdom y el modo demostración (crear, evaluar, devolver, reenviar, rechazar, cerrar, permisos por rol, usuarios, eliminar y restaurar, en vivo). No se agregó Playwright a las pruebas; el recorrido se comprobó a mano con el Chromium del entorno (incluida la descarga de PDF y Excel con la CSP puesta).
 
 ### Fase 3 — Migración de los datos de la versión 1
+
+> **Cambio del 29/10/2026:** la clienta pidió iniciar desde cero con solo su usuario como Administradora, así que esta fase **ya no se ejecuta**. Lo que sí queda por hacer para ese arranque limpio está en la lista "Arranque desde cero" de abajo.
 - [x] `src/migracion/v1a2.js`: convierte registros (incluso de modelos muy antiguos), personas, áreas, tipos, firmas, adjuntos y huellas de eliminados. Avisa de lo que no se puede migrar.
 - [x] Pruebas: la conversión, guardarla en la base nueva y restaurar un registro migrado.
 - [x] `scripts/migrar-v1-a-v2.mjs` con tres pasos: **exportar** la versión anterior, **simular** (informe sin escribir nada) y **aplicar** (sube archivos y carga tablas). Se puede repetir sin duplicar, se niega a pisar una base con registros y pide el identificador del proyecto para no migrar en el equivocado. Probado contra la base de pruebas; falta correrlo contra un Supabase real. 🔑
@@ -147,6 +149,13 @@ Dónde está cada cosa en el repositorio:
 - [ ] Validar con SST la lista de clasificación GTC 45 (pendiente desde la versión 1).
 
 ---
+
+### Arranque desde cero (pedido de la clienta)
+- [ ] Confirmar con ella: **nombre completo y correo** de su usuario Administrador.
+- [ ] Decidir qué pasa con lo que ya probó en su Supabase: (a) proyecto nuevo y vacío, o (b) ejecutar el paso 0000, que aparta las tablas viejas como `*_v1` (cerradas), y borrarlas cuando ella confirme. 🔑
+- [ ] Dejar **una sola cuenta** en Supabase → Authentication → Users (la suya); borrar las cuentas de prueba. 🔑
+- [ ] Crear su usuario con `scripts/crear-primer-admin.mjs`. 🔑
+- [ ] Definir el **catálogo inicial**: sin áreas ni tipos de desviación el formulario no se puede usar. Propuesta: cargar las 8 áreas y sus tipos por defecto (ella los puede editar). Hay que confirmarlo con ella.
 
 ## 6. Lo que necesitamos de la clienta
 

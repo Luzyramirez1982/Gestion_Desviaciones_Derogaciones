@@ -313,3 +313,5 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 **Cómo se probó:** más de 260 pruebas automáticas sin internet (base de datos simulada, adaptadores, reglas e interfaz completa en jsdom con recorridos de crear, evaluar, devolver, rechazar, cerrar y permisos por rol). Además se recorrió la aplicación construida en un Chromium real, con la política de seguridad puesta: sin errores, y se descargaron el PDF y el Excel. No se agregó Playwright a las pruebas del repositorio.
 
 **Lo que falta (necesita las cuentas de la clienta):** probar todo contra un Supabase real, desplegar la función `admin-usuarios`, copiar el flujo de respaldo a `.github/workflows/`, crear el primer Administrador, y publicar en Cloudflare Pages. Ver PLAN.md.
+
+**Decisión de la clienta (29/10/2026):** la nueva versión inicia desde cero, solo con su usuario como Administradora. No se migran datos de la versión 1; las herramientas de migración quedan guardadas pero sin usar. Pendiente: confirmar su nombre y correo, qué hacer con las tablas viejas de su Supabase y el catálogo inicial de áreas y tipos.
