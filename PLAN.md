@@ -137,7 +137,7 @@ Dónde está cada cosa en el repositorio:
 - [ ] Cloudflare Pages conectado al repositorio: `main` publica; las demás ramas generan vistas previas contra pruebas. 🔑
 - [~] Cabeceras de seguridad (CSP y otras) en Cloudflare. Hecho: `app/public/_headers` (CSP estricta) y `docs/CABECERAS.md`. Falta comprobarlas en Cloudflare con la dirección real. 🔑
 - [ ] Crear el primer Administrador y cargar el enlace en Usuarios → Enlace de acceso. 🔑
-- [ ] Recorrido final desde celular y computador: primer ingreso con contraseña temporal, recuperación de contraseña, firmar, cerrar, PDF y Excel.
+- [~] Recorrido final desde celular y computador: primer ingreso con contraseña temporal, recuperación de contraseña, firmar, cerrar, PDF y Excel. Probado en un navegador real con el modo demostración (ingreso, firmar, cerrar, PDF, Excel, vista de celular); falta repetirlo contra el Supabase real. 🔑
 - [x] Manual corto del Administrador (usuarios, espacio usado, respaldos, restaurar) y actualizar `README.md`. `docs/MANUAL_ADMINISTRADOR.md` y README actualizados.
 - [ ] Fusionar `feat/v2` en `main` y retirar el `index.html` antiguo.
 
