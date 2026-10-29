@@ -275,3 +275,11 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - Mejoras de seguridad que no estaban en el plan original: tope de tamaño para lo que se guarda, máximo de 5 MB y 50 archivos por registro, rutas de archivos validadas, no se puede quitar ni desactivar al último Administrador, y el correo de una persona no se puede cambiar desde la aplicación.
 - Las pruebas pasaron de 51 a 87. Una de ellas encontró un error real en el SQL (un texto suelto que PostgreSQL leía como lista) y ya está corregido.
 - Se comprobó que las reglas del 8D y de las fechas en SQL dicen exactamente lo mismo que las de la pantalla.
+
+**Más avance del mismo día:**
+- Se cerraron dos huecos de seguridad antes de que existieran: nadie puede anotar en su registro el archivo de otro, ni usar la imagen de firma de otra persona. Cada archivo vive en la carpeta de su registro y cada firma en la de quien firma.
+- Los archivos se guardan en un bucket privado (`0004_almacenamiento.sql`): máximo 5 MB, solo documentos e imágenes, y no se pueden reemplazar ni borrar desde la aplicación.
+- Nuevo paso `0000`: si el Supabase ya tiene las tablas de la versión anterior, las aparta como `*_v1` (con todos sus datos) y las cierra. Sin él, las tablas nuevas no se habrían creado.
+- Módulo para convertir los datos de la versión anterior al modelo nuevo (`src/migracion/`): registros de cualquier modelo antiguo, personas, áreas, tipos, firmas, adjuntos y registros eliminados. Se probó guardando el resultado en la base nueva y restaurando un registro migrado.
+- 124 pruebas automáticas.
+- Se crearon `PLAN.md` (qué falta y cómo va) y `CLAUDE.md` (reglas del equipo).

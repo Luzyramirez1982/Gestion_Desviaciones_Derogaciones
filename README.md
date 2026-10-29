@@ -42,3 +42,5 @@ Se está preparando una versión más segura y que no pierde datos. Mientras tan
 - `supabase/migrations/` — base de datos nueva (tablas, permisos y funciones). Se ejecuta primero en un proyecto de pruebas.
 - `src/` — reglas del procedimiento ya separadas del `index.html`.
 - `tests/` — pruebas automáticas. Para correrlas: `npm install` y luego `npm test`.
+- [PLAN.md](PLAN.md) — qué falta por hacer y cómo va cada fase (**empezar por aquí si se une alguien al proyecto**).
+- [CLAUDE.md](CLAUDE.md) — reglas de trabajo del equipo (git, comentarios, pruebas, seguridad).

@@ -18,7 +18,8 @@ export const derogacion = (o = {}) => solicitud({
 // La imagen de la firma de cada persona va en su propia carpeta.
 export const firmaDe = (uid, archivo = "firma.png") => `firmas/${uid}/${archivo}`;
 
-export async function iniciarBD(){
+// opciones.antes: SQL que se ejecuta antes de las migraciones (por ejemplo, la base de la versión anterior).
+export async function iniciarBD(opciones = {}){
   const db = new PGlite();
   await db.exec(`
     create role anon nologin;
@@ -44,6 +45,7 @@ export async function iniciarBD(){
     grant usage on schema storage to anon, authenticated;
     grant select, insert, update, delete on storage.objects to authenticated;
   `);
+  if(opciones.antes) await db.exec(opciones.antes);
   const carpeta = new URL("../supabase/migrations/", import.meta.url);
   for(const archivo of readdirSync(carpeta).filter(f => f.endsWith(".sql")).sort()){
     await db.exec(readFileSync(new URL(archivo, carpeta), "utf8"));
