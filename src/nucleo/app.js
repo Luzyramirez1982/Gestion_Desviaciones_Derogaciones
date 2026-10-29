@@ -13,7 +13,7 @@ import * as vUsuarios from "../vistas/usuarios.js";
 import * as vTipos from "../vistas/tipos.js";
 import * as vEliminados from "../vistas/eliminados.js";
 import * as vAlmacenamiento from "../vistas/almacenamiento.js";
-import * as vAyuda from "../vistas/ayuda.js";
+import * as vAyuda from "../vistas/ayuda/index.js";
 import { conectarEnVivo } from "./envivo.js";
 
 // Cada opción del menú dice qué rol la ve.

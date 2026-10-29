@@ -14,7 +14,7 @@ import { confirmar } from "../componentes/dialogos.js";
 import { d8HTML, enlazarD8 } from "../componentes/editor8d.js";
 import { montarFirma } from "../componentes/firma.js";
 import { prepararArchivos } from "../componentes/adjuntos.js";
-import { abrirInstructivo8D } from "./ayuda.js";
+import { abrirInstructivo8D } from "./ayuda/ventana8d.js";
 
 // Antes de mostrar el formulario se carga el borrador (si se abrió uno) o se deja en blanco.
 export async function preparar(ctx){
