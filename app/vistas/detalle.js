@@ -49,7 +49,7 @@ export async function recargarAbierto(ctx){
   repintar(ctx);
 }
 
-function repintar(ctx){
+export function repintar(ctx){
   const capa = ctx.raiz.querySelector("#capaDetalle");
   if(!capa) return ctx.render();
   const arriba = capa.querySelector(".panel-body")?.scrollTop || 0;

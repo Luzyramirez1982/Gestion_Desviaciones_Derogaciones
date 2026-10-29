@@ -13,6 +13,7 @@ import * as vTipos from "./vistas/tipos.js";
 import * as vEliminados from "./vistas/eliminados.js";
 import * as vAlmacenamiento from "./vistas/almacenamiento.js";
 import * as vAyuda from "./vistas/ayuda.js";
+import { conectarEnVivo } from "./envivo.js";
 
 // Cada opción del menú dice qué rol la ve.
 const MENU = [
@@ -34,6 +35,7 @@ export async function arrancar(raiz, repo, { hashInicial = "" } = {}){
     vista: "panel", abierto: null, filtros: {busqueda: "", area: "Todas", tipo: "Todos", etapa: "Todas", pagina: 1},
     pendientes: new Set(),            // guardadores con cambios sin guardar (para avisar al cerrar la pestaña)
   };
+  conectarEnVivo(ctx);
   ctx.esAdmin = () => !!ctx.yo && ctx.yo.rol === "Administrador";
   ctx.puedeCrear = () => !!ctx.yo && ["Responsable del proceso", "Administrador"].includes(ctx.yo.rol);
   ctx.nombresAreas = () => ctx.base.areas.map(a => a.nombre);
