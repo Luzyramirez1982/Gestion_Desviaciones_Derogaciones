@@ -50,7 +50,9 @@ Dónde está cada cosa en el repositorio:
 | `src/dominio/` | Las reglas del procedimiento (etapas, firmas, 8D, vigencias, quién ve qué). |
 | `src/util/` | Fechas con hora de Colombia y protección de enlaces. |
 | `src/migracion/` | Convierte los datos de la versión 1 al modelo nuevo. |
-| `tests/` | Pruebas automáticas (132). |
+| `src/respaldo/`, `scripts/`, `docs/respaldo-diario.yml` | Cifrado y copia de respaldos, y la plantilla del flujo diario de GitHub. |
+| `docs/` | Guías (por ahora, respaldos y restauración). |
+| `tests/` | Pruebas automáticas (141). |
 
 ## 4. Fallas que se están corrigiendo
 
@@ -116,10 +118,12 @@ Dónde está cada cosa en el repositorio:
 - [ ] Hacerlo en el proyecto real, conservando las tablas `*_v1` hasta que la clienta confirme que todo está bien. 🔑
 
 ### Fase 4 — Respaldos y continuidad (gratis)
-- [ ] GitHub Actions diario: copia de la base de datos **cifrada** y de los archivos hacia un **segundo repositorio privado**, guardando 90 días o más.
-- [ ] La misma tarea evita que Supabase se pause por inactividad.
-- [ ] Aviso si el respaldo falla.
-- [ ] Procedimiento de restauración escrito y **probado** en pruebas.
+- [x] Cifrado de los respaldos (AES-256, detecta archivos alterados o contraseña equivocada) y copia incremental de archivos, con pruebas (`src/respaldo/`, `scripts/respaldo.mjs`).
+- [~] GitHub Actions diario (plantilla en `docs/respaldo-diario.yml`, hay que copiarla a `.github/workflows/respaldo.yml`): copia de la base de datos **cifrada** y de los archivos hacia un **segundo repositorio privado**, guardando 90 días. Está escrito; falta copiarlo a `.github/workflows/`, crear el repositorio de respaldos, cargar los secretos y lanzarlo una vez a mano. 🔑
+- [~] La misma tarea evita que Supabase se pause por inactividad (se activa al correr el flujo anterior). 🔑
+- [x] Aviso si el respaldo falla (GitHub avisa por correo; ver `docs/RESPALDOS.md`).
+- [x] Procedimiento de restauración escrito (`docs/RESPALDOS.md`).
+- [ ] **Ensayar** la restauración completa en el proyecto de pruebas. 🔑
 - [ ] Revisar el correo de recuperación de contraseña: el correo integrado de Supabase gratis es muy limitado (confirmar en el proyecto real). Plan: que el Administrador restablezca contraseñas desde la aplicación y, si hace falta, configurar un servicio de correo gratuito. 🔑
 
 ### Fase 5 — Publicación y entrega
@@ -155,5 +159,5 @@ Dónde está cada cosa en el repositorio:
 
 ```bash
 npm install     # una sola vez
-npm test        # corre las 132 pruebas (tardan unos 5 segundos, no necesitan internet)
+npm test        # corre las 141 pruebas (tardan unos 5 segundos, no necesitan internet)
 ```

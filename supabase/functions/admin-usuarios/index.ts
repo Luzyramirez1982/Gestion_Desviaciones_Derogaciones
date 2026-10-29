@@ -7,7 +7,7 @@
 // Despliegue: supabase functions deploy admin-usuarios   (Supabase pone SUPABASE_URL,
 // SUPABASE_ANON_KEY y SUPABASE_SERVICE_ROLE_KEY solos).
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.118.0";
 import { generarClaveTemporal, permitido, validarSolicitud } from "./logica.js";
 
 const cabeceras = {
