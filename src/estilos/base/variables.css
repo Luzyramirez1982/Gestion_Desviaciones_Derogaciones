@@ -1,0 +1,6 @@
+/* Colores y valores que se usan en toda la aplicación. Cambiar un color aquí lo cambia en todas partes. */
+:root{
+  --navy:#142E47; --navy-dark:#0d1f30; --blue:#2E74B5;
+  --bg:#F5F7FA; --card:#FFFFFF; --border:#E2E8F0; --text:#1E293B; --muted:#64748B;
+  --green:#15803d; --green-bg:#dcfce7; --amber:#92400e; --amber-bg:#fef3c7; --red:#b91c1c; --red-bg:#fee2e2;
+}

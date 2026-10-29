@@ -1,0 +1,4 @@
+/* Lista de archivos adjuntos. */
+.adj-list{display:flex;flex-direction:column;gap:6px;margin:8px 0;}
+.adj-item{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12.5px;background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:7px 10px;}
+.adj-item a{color:var(--blue);text-decoration:none;font-weight:600;}

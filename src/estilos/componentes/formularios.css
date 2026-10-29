@@ -1,0 +1,17 @@
+/* Campos, etiquetas, grupos y líneas de opciones de los formularios. */
+form .field{margin-bottom:14px;}
+form label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;}
+form .hint{font-size:11px;color:#94a3b8;margin-top:3px;}
+form input[type=text], form input[type=email], form input[type=date], form input[type=time], form input[type=password], form input[type=url],
+form input[type=datetime-local], form select, form textarea, form input[type=file]{
+  width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:#fff;color:#1e293b;
+}
+form textarea{resize:vertical;}
+fieldset{border:1px solid var(--border);border-radius:10px;padding:16px;margin:0 0 16px;}
+fieldset legend{font-size:12.5px;font-weight:700;color:var(--navy);padding:0 6px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.checkline{display:flex;align-items:center;gap:8px;font-size:13px;color:#475569;}
+.radio-line{display:flex;gap:18px;flex-wrap:wrap;margin:2px 0 4px;}
+.radio-line input{width:auto;}
+.hint{font-size:11px;color:#94a3b8;}

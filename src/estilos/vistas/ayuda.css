@@ -1,0 +1,21 @@
+/* Instructivo y ejemplos. */
+.help h2{color:var(--navy);font-size:16px;margin:26px 0 10px;}
+.help h2:first-child{margin-top:0;}
+.help p{font-size:13.5px;line-height:1.65;color:#334155;}
+.help ol,.help ul{font-size:13.5px;line-height:1.75;color:#334155;padding-left:20px;}
+.callout{border-left:3px solid var(--blue);background:#eff6ff;border-radius:0 8px 8px 0;padding:10px 14px;font-size:13px;color:#1e3a5f;margin:12px 0;}
+.callout.warn{border-color:#f59e0b;background:#fffbeb;color:#78350f;}
+.flow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.flow-step{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;line-height:1.5;color:#334155;background:#f8fafc;}
+.flow-num{font-size:11px;font-weight:700;color:var(--navy);margin-bottom:4px;text-transform:uppercase;letter-spacing:.03em;}
+@media (max-width:760px){ .flow-grid{grid-template-columns:1fr;} }
+.paso8d{border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin:10px 0;background:#fff;}
+.paso8d h3{margin:0 0 6px !important;color:var(--navy) !important;}
+.paso8d p{margin:4px 0 !important;}
+.ej{background:#f0fdf4;border-left:3px solid #16a34a;border-radius:0 8px 8px 0;padding:8px 12px;font-size:13px;color:#14532d;margin:6px 0;}
+.help h3{font-size:14px;color:#1e293b;margin:18px 0 6px;}
+.help .steps li{margin-bottom:4px;}
+.benefit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:10px 0;}
+.benefit{border:1px solid var(--border);border-radius:10px;padding:12px;background:#fbfcfe;}
+.benefit b{display:block;color:var(--navy);font-size:13px;margin-bottom:3px;}
+.benefit span{font-size:12.5px;color:#475569;line-height:1.5;}

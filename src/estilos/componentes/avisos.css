@@ -1,0 +1,4 @@
+/* Avisos emergentes que aparecen abajo a la derecha. */
+#avisos{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:60;max-width:min(380px,calc(100vw - 32px));}
+.aviso{padding:10px 14px;border-radius:9px;font-size:13px;box-shadow:0 6px 18px rgba(15,23,42,.18);background:#142E47;color:#fff;}
+.aviso-error{background:#b91c1c;} .aviso-ok{background:#15803d;}

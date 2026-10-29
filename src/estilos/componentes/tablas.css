@@ -1,0 +1,4 @@
+/* Tablas sencillas. */
+table.simple{width:100%;border-collapse:collapse;font-size:13px;}
+table.simple th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.02em;color:#94a3b8;padding:8px 10px;border-bottom:1px solid var(--border);}
+table.simple td{padding:10px;border-bottom:1px solid #f1f5f9;vertical-align:top;}

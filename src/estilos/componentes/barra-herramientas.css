@@ -1,0 +1,6 @@
+/* Barra de búsqueda y filtros sobre las listas. */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.toolbar input[type=text], .toolbar select{border:1px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#94a3b8;}
+.search-wrap input{width:100%;padding-left:30px;}

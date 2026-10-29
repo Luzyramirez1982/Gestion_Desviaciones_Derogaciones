@@ -1,0 +1,10 @@
+/* Botones. */
+a.btn{text-decoration:none;}
+.btn{border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:hover{background:var(--navy-dark);}
+.btn-outline{background:#fff;border:1px solid var(--border);color:#334155;}
+.btn-outline:hover{background:#f8fafc;}
+.btn-danger-outline{background:#fff;border:1px solid #fecaca;color:#b91c1c;}
+.btn:disabled{opacity:.35;cursor:not-allowed;}
+.btn-sm{padding:5px 9px;font-size:12px;}

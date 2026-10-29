@@ -1,0 +1,9 @@
+/* Panel que se abre a la derecha con el detalle de un registro. */
+.panel-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:40;display:flex;justify-content:flex-end;}
+.panel{width:100%;max-width:680px;background:#fff;height:100%;overflow-y:auto;box-shadow:-8px 0 30px rgba(0,0,0,.15);}
+.panel-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2;}
+.panel-body{padding:18px 20px 40px;}
+.panel-close{border:none;background:#f1f5f9;border-radius:8px;padding:7px;color:#64748b;}
+.panel-body .field label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;}
+.panel-body .field textarea,.panel-body .field select{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:#fff;color:#1e293b;font-size:13px;}
+.panel-body .field textarea:disabled,.panel-body .field select:disabled{background:#f8fafc;color:#64748b;}

@@ -1,0 +1,11 @@
+/* Lista de registros con sus filas y la paginación. */
+.list{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.row{padding:13px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;}
+.row:last-child{border-bottom:none;}
+.row:hover{background:#f8fafc;}
+.row-top{display:flex;justify-content:space-between;gap:10px;}
+.row-title{font-weight:600;font-size:13.5px;color:#1e293b;}
+.row-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.row-badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;}
+.empty{padding:26px;text-align:center;color:#94a3b8;font-size:13px;}
+.paginas{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px;font-size:12.5px;color:var(--muted);}

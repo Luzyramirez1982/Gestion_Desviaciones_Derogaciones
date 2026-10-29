@@ -1,0 +1,4 @@
+/* Rejillas para acomodar tarjetas y columnas, y cómo se apilan en pantallas pequeñas. */
+@media (max-width:700px){ .two-col{grid-template-columns:1fr !important;} .row2,.row3{grid-template-columns:1fr !important;} }
+.grid{display:grid;gap:12px;}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(190px,1fr));}

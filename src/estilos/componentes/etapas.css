@@ -1,0 +1,5 @@
+/* Indicador de las etapas del ciclo (Solicitud, Evaluación y Cierre). */
+.stage-track{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px;}
+.stage-chip{font-size:10.5px;font-weight:600;padding:5px 8px;border-radius:6px;background:#f1f5f9;color:#cbd5e1;}
+.stage-chip.active{color:inherit;}
+.stage-chip.done{color:#15803d;background:#f0fdf4;}

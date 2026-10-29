@@ -1,0 +1,6 @@
+/* Menú que reemplaza al lateral en pantallas pequeñas. */
+.mobile-nav{display:none;gap:6px;padding:10px 14px 0;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--border);}
+.mobile-nav button{border:none;background:#f1f5f9;color:#475569;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
+.mobile-nav button.active{background:var(--navy);color:#fff;}
+
+@media (max-width:860px){ .sidebar{display:none;} .mobile-nav{display:flex;} }
