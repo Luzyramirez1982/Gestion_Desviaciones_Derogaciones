@@ -35,28 +35,34 @@ jobs:
         run: |
           sudo apt-get install -y postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y postgresql-client-17
+          sudo apt-get install -y postgresql-client-18
 
       - name: Copia de la base de datos
         run: |
-          pg_dump "$NEON_DB_URL" --no-owner --no-privileges --schema=public --schema=neon_auth -f base.sql
-          test -s base.sql
-          # Una copia que no tenga las tablas principales no sirve: mejor fallar y que GitHub avise.
-          grep -q "CREATE TABLE public.registros" base.sql
-          grep -q "CREATE TABLE public.archivos" base.sql
-
+          # Dos archivos: "public" (tablas, datos, archivos, reglas y PERMISOS: sin los permisos la app negaría todo al restaurar)
+          # y las cuentas de ingreso de Neon (solo datos: el esquema lo crea Neon en cada proyecto).
+          pg_dump "$NEON_DB_URL" --no-owner --schema=public -f public.sql
+          pg_dump "$NEON_DB_URL" --no-owner --no-privileges --data-only --schema=neon_auth -f cuentas.sql
+          test -s public.sql && test -s cuentas.sql
+          # Una copia incompleta no sirve: mejor fallar y que GitHub avise por correo.
+          grep -q "CREATE TABLE public.registros" public.sql
+          grep -q "CREATE TABLE public.archivos" public.sql
+          grep -q "CREATE POLICY" public.sql
+          grep -q "GRANT SELECT ON TABLE public.registros TO authenticated" public.sql
+          grep -q "COPY neon_auth" cuentas.sql
+          tar czf base.tar.gz public.sql cuentas.sql
+          rm public.sql cuentas.sql
       - name: Cifrar (AES-256) y comprimir
         run: |
           FECHA=$(TZ=America/Bogota date +%F)
-          gzip -9 base.sql
-          openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:BACKUP_PASSPHRASE -in base.sql.gz -out "base-$FECHA.sql.gz.cif"
-          rm base.sql.gz
+          openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:BACKUP_PASSPHRASE -in base.tar.gz -out "base-$FECHA.tar.gz.cif"
+          rm base.tar.gz
           echo "FECHA=$FECHA" >> "$GITHUB_ENV"
 
       - name: Guardar 90 días
         uses: actions/upload-artifact@v4
         with:
           name: base-${{ env.FECHA }}
-          path: base-${{ env.FECHA }}.sql.gz.cif
+          path: base-${{ env.FECHA }}.tar.gz.cif
           retention-days: 90
           if-no-files-found: error
