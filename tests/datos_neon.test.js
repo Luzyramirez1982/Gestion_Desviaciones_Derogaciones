@@ -1,22 +1,31 @@
 // El adaptador Neon de la aplicación, probado contra las funciones reales de la base (PGlite).
 // Lo que hace el servicio de ingreso de Neon se imita en tests/cliente_pglite.js.
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { crearClientePglite } from "./cliente_pglite.js";
 import { crearAdaptadorNeon, errorDe, claveTemporal } from "../src/datos/neon.js";
 import { filaARegistro, registroAData } from "../src/datos/convertir.js";
 import { validarClave } from "../src/auth/clave.js";
 import { traducirErrorAuth } from "../src/auth/errores.js";
 import { solicitud } from "./ayuda_bd.js";
+import { crearAlmacenFuncion } from "../src/datos/almacen.js";
+import { tokenDeSesion } from "../src/datos/tokenNeon.js";
+import { crearEntornoArchivos, URL_FUNCION } from "./entorno_archivos.js";
 
 const FIRMA = "data:image/png;base64,iVBORw0KGgo=";
 let c, repo;
+// El adaptador usa la cadena completa de archivos: aplicación -> función -> base de datos -> bucket.
+const adaptador = (cliente = c.cliente) => crearAdaptadorNeon(cliente, crearAlmacenFuncion(URL_FUNCION, () => tokenDeSesion(c.cliente)), { esperaMs: 0 });
+let entorno;
+afterAll(() => entorno && entorno.quitar());
 const entrar = (correo, clave = "x") => repo.iniciarSesion(correo, clave);
 const datos = (o = {}) => ({ ...solicitud({ area: "Calidad Producto" }), ...o });
 
 beforeAll(async () => {
   c = await crearClientePglite();
   await c.db.exec("insert into areas (nombre) values ('Calidad Producto'), ('Producción')");
-  repo = crearAdaptadorNeon(c.cliente);
+  entorno = crearEntornoArchivos(c);   // la función «archivos» de verdad, con bucket simulado
+  entorno.instalar();
+  repo = adaptador();
 });
 
 describe("conversión de filas", () => {
@@ -65,6 +74,7 @@ describe("flujo completo por funciones de la base", () => {
     expect(rec).toMatchObject({ id: "MTC-001", stage: 1, borrador: false, reportadoPor: "Juan" });
     expect(rec.firmas.sol.ruta).toMatch(/^firmas\/00000000-0000-0000-0000-000000000002\/.+\.png$/);
     expect(await c.q("select ruta from archivos where ruta = $1", [rec.firmas.sol.ruta])).toHaveLength(1);
+    expect(entorno.bucket.has(rec.firmas.sol.ruta)).toBe(true);   // la imagen de la firma está en el bucket
     expect(rec.bitacora[0].comentario).toBe("Solicitud creada y firmada.");
   });
   it("un borrador se guarda y se envía", async () => {
@@ -158,7 +168,7 @@ describe("adjuntos, administración y huella", () => {
     const r = await repo.restaurarRegistro(huellas[0].id);
     expect(r.id).toBe("MTC-001");
     const uso = await repo.usoAlmacenamiento();
-    expect(uso.archivos_limite_bytes).toBe(512 * 1048576);
+    expect(uso.archivos_limite_bytes).toBe(5 * 1024 * 1048576);
     expect(uso.archivos_bytes).toBeGreaterThan(0);
   });
   it("áreas, tipos y ajustes los cambia el Administrador", async () => {
@@ -220,7 +230,7 @@ describe("personas y contraseñas", () => {
     expect((await entrar("laura@x.co", "MiClave2026")).nombre).toBe("Laura Gómez");
   });
   it("si se recargó la página no se puede cambiar la contraseña sin volver a ingresar", async () => {
-    const otro = crearAdaptadorNeon(c.cliente);        // adaptador nuevo: no recuerda la contraseña usada
+    const otro = adaptador();        // adaptador nuevo: no recuerda la contraseña usada
     await expect(otro.cambiarClave("OtraClave2026")).rejects.toThrow("ingrese de nuevo");
     expect(await otro.sesionActual()).toBeNull();
   });
@@ -260,7 +270,7 @@ describe("listas vacías por error de arranque de Neon", () => {
   }
   it("cargarBase reintenta y trae las áreas y los tipos aunque la primera respuesta llegue vacía", async () => {
     await entrar("admin@x.co");
-    const flojo = crearAdaptadorNeon(conPrimeraVacia(c.cliente));
+    const flojo = adaptador(conPrimeraVacia(c.cliente));
     const base = await flojo.cargarBase();
     expect(base.areas.length).toBeGreaterThan(0);
     expect(base.tipos.length).toBeGreaterThanOrEqual(1);
@@ -273,5 +283,66 @@ describe("listas vacías por error de arranque de Neon", () => {
     const base = await repo.cargarBase();
     expect(base.tipos).toEqual([]);
     expect(Date.now() - t0).toBeLessThan(3000);
+  });
+});
+
+describe("archivos de punta a punta (aplicación → función → base → bucket)", () => {
+  let n;
+  it("un adjunto de exactamente 5 MB se sube, se anota y se abre igual; uno de 5 MB + 1 byte se rechaza", async () => {
+    await entrar("calidad@x.co");
+    n = await repo.crearRegistro({ data: datos(), firma: FIRMA });
+    const justo = new File([new Uint8Array(5 * 1048576).fill(3)], "Maximo.pdf", { type: "application/pdf" });
+    const a = await repo.subirAdjunto(n.id, justo);
+    expect(entorno.bucket.get(a.ruta).bytes).toHaveLength(5 * 1048576);
+    const blob = await (await fetch(await repo.urlArchivo(a.ruta))).blob();
+    expect(blob.size).toBe(5 * 1048576);
+    const pasado = new File([new Uint8Array(5 * 1048576 + 1)], "Pasado.pdf", { type: "application/pdf" });
+    await expect(repo.subirAdjunto(n.id, pasado)).rejects.toThrow("5 MB");
+  });
+  it("un tipo de archivo peligroso lo rechaza la base y no queda en el bucket", async () => {
+    const antes = entorno.bucket.size;
+    const malo = new File([new Uint8Array(20)], "virus.exe", { type: "application/x-msdownload" });
+    await expect(repo.subirAdjunto(n.id, malo)).rejects.toThrow("no está permitido");
+    expect(entorno.bucket.size).toBe(antes);
+  });
+  it("otra área no puede abrir el adjunto ni subir uno a esa solicitud", async () => {
+    const ruta = [...entorno.bucket.keys()].find(k => k.startsWith(`registros/${n.id}/`));
+    await entrar("produccion@x.co");
+    await expect(repo.urlArchivo(ruta)).rejects.toThrow("No se encontró el archivo");
+    const f = new File([new Uint8Array(10)], "colado.pdf", { type: "application/pdf" });
+    await expect(repo.subirAdjunto(n.id, f)).rejects.toThrow("No puede adjuntar");
+  });
+  it("sin sesión, la función rechaza y el adaptador avisa que la sesión venció", async () => {
+    await repo.cerrarSesion();
+    const f = new File([new Uint8Array(10)], "x.pdf", { type: "application/pdf" });
+    await expect(repo.subirAdjunto(n.id, f)).rejects.toThrow("sesión venció");
+  });
+});
+
+describe("permisos que la base niega por error al despertar", () => {
+  // Cliente que, las primeras `n` veces que se llama a una función de la base, responde «no tiene permiso».
+  function conNegacionesIniciales(cliente, n, mensaje){
+    let quedan = n, llamadas = 0;
+    return { cliente: { ...cliente, async rpc(nombre, args){ llamadas++; if(quedan-- > 0) return { data: null, error: { message: mensaje } }; return cliente.rpc(nombre, args); } },
+      llamadas: () => llamadas };
+  }
+  it("crear una persona se reintenta y sale bien si la base solo se equivocó al despertar", async () => {
+    await entrar("admin@x.co");
+    const { cliente } = conNegacionesIniciales(c.cliente, 2, "Solo el Administrador puede dar de alta personas.");
+    const r = await adaptador(cliente).crearUsuario({ nombre: "Tras Despertar", correo: "despertar@x.co", rol: "Aprobador autorizado", area: "" });
+    expect(r.correo).toBe("despertar@x.co");
+    expect((await repo.cargarBase()).perfiles.some(p => p.correo === "despertar@x.co")).toBe(true);
+  });
+  it("un permiso realmente negado sigue negado: se pregunta 3 veces y nada se ejecuta", async () => {
+    await entrar("calidad@x.co");
+    const f = conNegacionesIniciales(c.cliente, 99, "No puede adjuntar archivos a este registro.");
+    await expect(adaptador(f.cliente).eliminarRegistro("MTC-001", "motivo largo")).rejects.toThrow("No puede adjuntar");
+    expect(f.llamadas()).toBe(3);
+  });
+  it("los errores que no son de permiso no se reintentan", async () => {
+    await entrar("calidad@x.co");
+    const f = conNegacionesIniciales(c.cliente, 99, "Debe indicar el motivo.");
+    await expect(adaptador(f.cliente).eliminarRegistro("MTC-001", "x")).rejects.toThrow("motivo");
+    expect(f.llamadas()).toBe(1);
   });
 });

@@ -86,6 +86,7 @@ export async function crearClientePglite(){
       },
     },
     async signOut(){ sesion = null; return sinError; },
+    async token(){ return sesion ? { data: { token: "t-" + sesion.user.id }, error: null } : { data: null, error: { message: "not authenticated" } }; },
     async changePassword({ newPassword, currentPassword }){
       const c = sesion && cuentaPorId(sesion.user.id);
       if(!c) return falla("not authenticated");
@@ -118,21 +119,24 @@ export async function crearClientePglite(){
     },
   };
 
+  // Llama a una función de la base como si fuera esa persona (lo que hace la Data API con el token que recibe).
+  async function llamarRpc(uid, nombre, args = {}){
+    try {
+      const claves = Object.keys(args);
+      const params = claves.map(k => (typeof args[k] === "object" && args[k] !== null ? JSON.stringify(args[k]) : args[k]));
+      const lista = claves.map((k, i) => `${k} => $${i + 1}`).join(", ");
+      const r = await como(uid, () => db.query(`select * from ${nombre}(${lista})`, params));
+      const fila = r.rows[0];
+      if(!fila) return { data: null, error: null };
+      const ks = Object.keys(fila);
+      return { data: ks.length === 1 && ks[0] === nombre ? fila[nombre] : fila, error: null };
+    } catch(e){ return { data: null, error: { message: e.message, hint: e.hint } }; }
+  }
+
   const cliente = {
     from: tabla,
-    async rpc(nombre, args = {}){
-      try {
-        const claves = Object.keys(args);
-        const params = claves.map(k => (typeof args[k] === "object" && args[k] !== null ? JSON.stringify(args[k]) : args[k]));
-        const lista = claves.map((k, i) => `${k} => $${i + 1}`).join(", ");
-        const r = await ejecutar(`select * from ${nombre}(${lista})`, params);
-        const fila = r.rows[0];
-        if(!fila) return { data: null, error: null };
-        const ks = Object.keys(fila);
-        return { data: ks.length === 1 && ks[0] === nombre ? fila[nombre] : fila, error: null };
-      } catch(e){ return { data: null, error: { message: e.message, hint: e.hint } }; }
-    },
+    rpc: (nombre, args) => llamarRpc(sesion && sesion.user.id, nombre, args),
     auth,
   };
-  return { cliente, ...bd, cuentas, llamadas };
+  return { cliente, ...bd, cuentas, llamadas, llamarRpc };
 }

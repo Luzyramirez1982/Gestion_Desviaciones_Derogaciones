@@ -21,7 +21,7 @@ describe("una cuenta de ingreso sin perfil en la aplicación", () => {
   });
   it("no puede crear solicitudes ni subir archivos", async () => {
     await expect(como(EXTRANO, () => crear(solicitud()))).rejects.toThrow();
-    await expect(como(EXTRANO, () => q("select subir_archivo('firmas/x/y.png', 'image/png', 'AAAA')"))).rejects.toThrow(/No tiene permiso/);
+    await expect(como(EXTRANO, () => q("select puede_subir_archivo('firmas/x/y.png', 'image/png', 100)"))).rejects.toThrow(/No tiene permiso/);
   });
   it("tampoco puede darse de alta a sí misma", async () => {
     await expect(alta(EXTRANO, EXTRANO, "Intruso", "i@x.co", "Administrador", "")).rejects.toThrow(/Solo el Administrador/);

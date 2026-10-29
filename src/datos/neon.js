@@ -8,7 +8,13 @@ import { nombreSeguro } from "../util/nombreArchivo.js";
 import { filaARegistro, filaAAdjunto, filaAPerfil, filaATipo, tipoAFila, filaAHuella, registroAData } from "./convertir.js";
 
 const PAGINA = 1000;   // la API entrega como máximo 1000 filas por consulta
+// Cuando Neon (plan gratis) se duerme por falta de uso, las primeras consultas al despertar a veces no reconocen la
+// sesión: una lista llega vacía o la base niega un permiso que sí se tiene. Por eso se reintenta antes de dar la respuesta.
 const ESPERA_REINTENTO_MS = 400;
+const REINTENTOS = 2;
+// Mensajes de la base que significan «no tiene permiso» (a veces falsos justo al despertar).
+const ES_NEGACION_DE_PERMISO = /^(Solo el |No tiene permiso|No puede )|permission denied|row-level security/i;
+const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
 // Convierte un error de la API en un Error con mensaje claro. El conflicto de versión lleva código aparte.
 export function errorDe(error, porDefecto = "No se pudo completar la operación. Intente de nuevo."){
@@ -31,26 +37,14 @@ export function errorDe(error, porDefecto = "No se pudo completar la operación.
   return e;
 }
 
-// "data:image/png;base64,AAAA" -> { tipo: "image/png", base64: "AAAA" }
-export function partesDeDataUrl(dataUrl){
+// "data:image/png;base64,AAAA" -> Blob de la imagen (así se sube la firma dibujada en pantalla)
+export function dataUrlABlob(dataUrl){
   const m = /^data:([^;]+);base64,(.*)$/.exec(dataUrl || "");
   if(!m) throw new Error("La imagen de la firma no es válida. Dibújela de nuevo.");
-  return { tipo: m[1], base64: m[2] };
-}
-
-// Pasa un archivo del navegador a base64, por trozos para no gastar memoria de más.
-export async function archivoABase64(archivo){
-  const bytes = new Uint8Array(await archivo.arrayBuffer());
-  let texto = "";
-  for(let i = 0; i < bytes.length; i += 0x8000) texto += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
-  return btoa(texto);
-}
-
-function base64ABlob(base64, tipo){
-  const bin = atob(base64);
+  const bin = atob(m[2]);
   const bytes = new Uint8Array(bin.length);
   for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return new Blob([bytes], { type: tipo });
+  return new Blob([bytes], { type: m[1] });
 }
 
 // Contraseña temporal: letras y números al azar (cumple la regla de la aplicación).
@@ -60,13 +54,24 @@ export function claveTemporal(){
   return "T" + Array.from(azar, b => alfabeto[b % alfabeto.length]).join("") + "7";
 }
 
-export function crearAdaptadorNeon(cliente){
+// `almacen` es quien sube y baja los archivos: { subir(ruta, tipo, blob), bajar(ruta) -> Blob } (ver almacen.js).
+// `esperaMs` es la pausa entre reintentos (las pruebas la ponen en 0).
+export function crearAdaptadorNeon(cliente, almacen, { esperaMs = ESPERA_REINTENTO_MS } = {}){
   let perfilActual = null;
   let claveEnUso = "";   // la contraseña con la que se ingresó en esta sesión; Neon la pide para cambiarla
 
   const auth = cliente.auth;
   const ok = ({ data, error }, porDefecto) => { if(error) throw errorDe(error, porDefecto); return data; };
-  const rpc = async (nombre, args = {}) => ok(await cliente.rpc(nombre, args));
+  // Llama a una función de la base. Si responde «no tiene permiso», vuelve a preguntar un par de veces antes de darlo
+  // por cierto (ver arriba); un permiso realmente negado cuesta unos instantes más y nada se ejecutó.
+  const rpc = async (nombre, args = {}) => {
+    for(let intento = 0; ; intento++){
+      const { data, error } = await cliente.rpc(nombre, args);
+      if(!error) return data;
+      if(!ES_NEGACION_DE_PERMISO.test(String(error.message || "")) || intento === REINTENTOS) throw errorDe(error);
+      await esperar(esperaMs);
+    }
+  };
 
   // En las primeras consultas tras un rato sin uso, Neon a veces responde "bien" pero con la lista vacía.
   // Si llega vacía se vuelve a pedir un par de veces antes de darla por buena; una lista realmente vacía
@@ -75,15 +80,16 @@ export function crearAdaptadorNeon(cliente){
     for(let intento = 0; ; intento++){
       const datos = ok(await armar());
       const vacio = Array.isArray(datos) ? datos.length === 0 : datos == null;
-      if(!vacio || intento === 2) return datos;
-      await new Promise(r => setTimeout(r, ESPERA_REINTENTO_MS));
+      if(!vacio || intento === REINTENTOS) return datos;
+      await esperar(esperaMs);
     }
   }
 
-  async function leerTodo(armar){
+  // Lee la lista de solicitudes por páginas (cada solicitud trae sus firmas, todo en la misma consulta).
+  async function listarPaginas(){
     const filas = [];
     for(let desde = 0; ; desde += PAGINA){
-      const pedir = () => armar().range(desde, desde + PAGINA - 1);
+      const pedir = () => cliente.rpc("listar_registros", { p_desde: desde, p_cantidad: PAGINA });
       const lote = desde === 0 ? await leerSeguro(pedir) : ok(await pedir());
       filas.push(...lote);
       if(lote.length < PAGINA) return filas;
@@ -106,27 +112,20 @@ export function crearAdaptadorNeon(cliente){
     return user.id;
   }
 
-  // Los archivos y las firmas se guardan con la función subir_archivo, que revisa quién puede subirlos.
-  async function guardarArchivo(ruta, tipo, base64, mensajeError){
-    try { await rpc("subir_archivo", { p_ruta: ruta, p_tipo: tipo, p_base64: base64 }); }
-    catch(e){ e.message = e.message || mensajeError; throw e; }
-  }
+  // Los archivos y las firmas van al bucket por la función de servidor «archivos», que le pregunta a la base
+  // si la persona tiene permiso (ver functions/archivos/).
   async function subirFirma(dataUrl){
-    const { tipo, base64 } = partesDeDataUrl(dataUrl);
+    const blob = dataUrlABlob(dataUrl);
     const ruta = `firmas/${await usuarioId()}/${crypto.randomUUID()}.png`;
-    await guardarArchivo(ruta, tipo, base64, "No se pudo guardar la firma. Intente de nuevo.");
+    await almacen.subir(ruta, blob.type, blob);
     return ruta;
   }
 
   async function detalle(id){
-    const [f, firmas, adjuntos, bitacora] = await Promise.all([
-      leerSeguro(() => cliente.from("registros").select("*").eq("id", id).maybeSingle()),
-      cliente.from("firmas").select("*").eq("registro_id", id),
-      cliente.from("adjuntos").select("*").eq("registro_id", id).order("creado_en", { ascending: true }),
-      cliente.from("bitacora").select("*").eq("registro_id", id).order("id", { ascending: true }),
-    ]);
-    if(!f) throw new Error("No se encontró el registro.");
-    return filaARegistro(f, { firmas: ok(firmas), adjuntos: ok(adjuntos), bitacora: ok(bitacora) });
+    // Todo en una sola consulta: la solicitud llega completa (con firmas, adjuntos y bitácora) o no llega.
+    const completo = await leerSeguro(() => cliente.rpc("registro_completo", { p_id: id }));
+    if(!completo) throw new Error("No se encontró el registro.");
+    return filaARegistro(completo.registro, { firmas: completo.firmas, adjuntos: completo.adjuntos, bitacora: completo.bitacora });
   }
   // Después de cada función que devuelve la fila del registro, se vuelve a leer completo.
   const recargar = (fila) => detalle(fila.id);
@@ -197,13 +196,7 @@ export function crearAdaptadorNeon(cliente){
       return { perfiles: perfiles.map(filaAPerfil), areas, tipos: tipos.map(filaATipo), configuracion };
     },
     async listarRegistros(){
-      const [filas, firmas] = await Promise.all([
-        leerTodo(() => cliente.from("registros").select("*").order("actualizado_en", { ascending: false })),
-        leerTodo(() => cliente.from("firmas").select("*").order("registro_id")),
-      ]);
-      const porRegistro = new Map();
-      firmas.forEach(f => { if(!porRegistro.has(f.registro_id)) porRegistro.set(f.registro_id, []); porRegistro.get(f.registro_id).push(f); });
-      return filas.map(f => filaARegistro(f, { firmas: porRegistro.get(f.id) || [] }));
+      return (await listarPaginas()).map(({ registro, firmas }) => filaARegistro(registro, { firmas }));
     },
     cargarRegistro: detalle,
     async listarEliminados(){
@@ -240,15 +233,13 @@ export function crearAdaptadorNeon(cliente){
     async subirAdjunto(id, archivo){
       if(!archivo.size || archivo.size > MAX_FILE_MB * 1048576) throw new Error(`Cada archivo puede pesar hasta ${MAX_FILE_MB} MB.`);
       const ruta = `registros/${id}/${Date.now()}-${nombreSeguro(archivo.name)}`;
-      await guardarArchivo(ruta, archivo.type || "application/octet-stream", await archivoABase64(archivo), "No se pudo subir el archivo. Intente de nuevo.");
+      await almacen.subir(ruta, archivo.type || "application/octet-stream", archivo);
       const fila = await rpc("registrar_adjunto", { p_id: id, p_nombre: archivo.name, p_tipo: archivo.type || "", p_tamano: archivo.size, p_ruta: ruta });
       return filaAAdjunto(fila);
     },
     // Devuelve un enlace temporal que solo existe en el navegador de quien lo pide (nada se publica).
     async urlArchivo(ruta){
-      const fila = ok(await cliente.from("archivos").select("contenido,tipo").eq("ruta", ruta).maybeSingle(), "No se pudo abrir el archivo.");
-      if(!fila) throw new Error("No se pudo abrir el archivo.");
-      return URL.createObjectURL(base64ABlob(fila.contenido, fila.tipo));
+      return URL.createObjectURL(await almacen.bajar(ruta));
     },
 
     async eliminarRegistro(id, motivo){ await rpc("eliminar_registro", { p_id: id, p_motivo: motivo }); },

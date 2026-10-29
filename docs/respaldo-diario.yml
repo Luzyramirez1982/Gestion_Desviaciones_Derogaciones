@@ -1,8 +1,8 @@
-# PLANTILLA del respaldo diario de la base de datos (Neon).
-# Para activarla hay que copiar este archivo a .github/workflows/respaldo.yml (ver docs/RESPALDOS.md).
-# Qué hace: cada noche saca una copia completa de la base (datos, archivos, firmas y cuentas de ingreso),
-# la cifra con una contraseña que solo conoce el equipo y la guarda 90 días en GitHub (pestaña Actions).
-# Así, si Neon falla o se pierde algo, la copia sirve para recuperar todo en Neon o en cualquier otro PostgreSQL.
+# PLANTILLA del respaldo diario (Neon): la base de datos y los archivos del bucket.
+# El archivo que GitHub ejecuta es .github/workflows/respaldo.yml (copia de este; mantener los dos iguales).
+# Qué hace: cada noche (1) saca una copia completa de la base (datos, reglas, permisos y cuentas de ingreso) y
+# (2) copia los archivos nuevos del bucket. Cifra todo con una contraseña que solo conoce el equipo y lo guarda 90 días
+# en GitHub (pestaña Actions). Si Neon falla o se pierde algo, con esas copias se recupera todo.
 # El repositorio DEBE ser privado. Configuración (una sola vez) y cómo restaurar: ver docs/RESPALDOS.md
 name: Respaldo diario
 
@@ -10,6 +10,11 @@ on:
   schedule:
     - cron: "17 7 * * *"   # 2:17 a. m. en Colombia
   workflow_dispatch:        # también se puede lanzar a mano desde la pestaña Actions
+    inputs:
+      todo:
+        description: "Copiar TODOS los archivos del bucket (la primera vez o para una copia completa)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -21,25 +26,40 @@ concurrency:
 jobs:
   respaldo:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
       NEON_DB_URL: ${{ secrets.NEON_DB_URL }}
+      AWS_ENDPOINT_URL_S3: ${{ secrets.AWS_ENDPOINT_URL_S3 }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
     steps:
       - name: Revisar que los secretos estén puestos
         run: |
-          test -n "$BACKUP_PASSPHRASE" || { echo "Falta el secreto BACKUP_PASSPHRASE"; exit 1; }
-          test -n "$NEON_DB_URL" || { echo "Falta el secreto NEON_DB_URL"; exit 1; }
+          faltan=""
+          for n in BACKUP_PASSPHRASE NEON_DB_URL AWS_ENDPOINT_URL_S3 AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION S3_BUCKET; do
+            [ -n "${!n}" ] || faltan="$faltan $n"
+          done
+          [ -z "$faltan" ] || { echo "Faltan estos secretos en GitHub:$faltan"; exit 1; }
 
-      - name: Instalar las herramientas de PostgreSQL
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar las herramientas
         run: |
+          npm ci --ignore-scripts
           sudo apt-get install -y postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt-get install -y postgresql-client-18
 
       - name: Copia de la base de datos
         run: |
-          # Dos archivos: "public" (tablas, datos, archivos, reglas y PERMISOS: sin los permisos la app negaría todo al restaurar)
+          # Dos archivos: "public" (tablas, datos, reglas y PERMISOS: sin los permisos la app negaría todo al restaurar)
           # y las cuentas de ingreso de Neon (solo datos: el esquema lo crea Neon en cada proyecto).
           pg_dump "$NEON_DB_URL" --no-owner --schema=public -f public.sql
           pg_dump "$NEON_DB_URL" --no-owner --no-privileges --data-only --schema=neon_auth -f cuentas.sql
@@ -52,17 +72,37 @@ jobs:
           grep -q "COPY neon_auth" cuentas.sql
           tar czf base.tar.gz public.sql cuentas.sql
           rm public.sql cuentas.sql
-      - name: Cifrar (AES-256) y comprimir
+
+      - name: Copia de los archivos del bucket
+        run: |
+          # Los archivos viven en el bucket, no en la base: se copian aparte. Cada noche los de las últimas 36 horas
+          # (se solapan para que un día fallido no deje huecos); con «todo» marcado, todos.
+          if [ "${{ inputs.todo }}" = "true" ]; then opcion="--todo"; else opcion="--horas 36"; fi
+          node scripts/respaldo-archivos.mjs copia-archivos $opcion
+          tar czf archivos.tar.gz -C copia-archivos .
+          rm -rf copia-archivos
+
+      - name: Cifrar (AES-256)
         run: |
           FECHA=$(TZ=America/Bogota date +%F)
-          openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:BACKUP_PASSPHRASE -in base.tar.gz -out "base-$FECHA.tar.gz.cif"
-          rm base.tar.gz
+          for parte in base archivos; do
+            openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:BACKUP_PASSPHRASE -in "$parte.tar.gz" -out "$parte-$FECHA.tar.gz.cif"
+            rm "$parte.tar.gz"
+          done
           echo "FECHA=$FECHA" >> "$GITHUB_ENV"
 
-      - name: Guardar 90 días
+      - name: Guardar la copia de la base 90 días
         uses: actions/upload-artifact@v4
         with:
           name: base-${{ env.FECHA }}
           path: base-${{ env.FECHA }}.tar.gz.cif
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Guardar la copia de los archivos 90 días
+        uses: actions/upload-artifact@v4
+        with:
+          name: archivos-${{ env.FECHA }}
+          path: archivos-${{ env.FECHA }}.tar.gz.cif
           retention-days: 90
           if-no-files-found: error

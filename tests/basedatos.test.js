@@ -164,7 +164,7 @@ describe("uso del espacio", () => {
   it("lo ve el Administrador, con los límites del plan gratuito", async () => {
     const [{ uso_almacenamiento: u }] = await como(ADMIN, () => q("select uso_almacenamiento()"));
     expect(u.base_datos_limite_bytes).toBe(1024 * 1024 * 1024);
-    expect(u.archivos_limite_bytes).toBe(512 * 1024 * 1024);
+    expect(u.archivos_limite_bytes).toBe(5 * 1024 * 1024 * 1024);
     expect(u.registros).toBeGreaterThan(0);
   });
   it("los demás no", async () => {

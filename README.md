@@ -34,7 +34,8 @@ src/
   util/               Ayudas pequeñas (fechas de Colombia, textos seguros, imágenes...)
   auth/               Reglas de contraseña
 db/migraciones/       Base de datos (SQL): tablas, permisos por rol/área/etapa, funciones del flujo, archivos y usuarios
-scripts/              Aplicar migraciones, cargar el catálogo y crear a la primera Administradora
+functions/archivos/   Función de servidor que sube y entrega los archivos del bucket (guarda las claves; pregunta a la base si hay permiso)
+scripts/              Aplicar migraciones, cargar el catálogo, crear a la primera Administradora y copiar/restaurar los archivos
 tests/                Pruebas automáticas (las de base de datos corren en un PostgreSQL de prueba)
 docs/                 Guías (poner en Neon, respaldos, manual del Administrador, cabeceras de seguridad)
 ```

@@ -62,7 +62,7 @@ export async function iniciarBD(opciones = {}){
 
   // Deja un archivo ya guardado (como si se hubiera subido), para probar reglas que no son de la subida.
   const archivoGuardado = (ruta, tamano) => db.query(
-    "insert into archivos (ruta, tipo, tamano, contenido) values ($1, 'application/pdf', $2, 'AAAA') on conflict do nothing", [ruta, tamano]);
+    "insert into archivos (ruta, tipo, tamano) values ($1, 'application/pdf', $2) on conflict do nothing", [ruta, tamano]);
 
   return { db, como, q, crear, archivoGuardado };
 }

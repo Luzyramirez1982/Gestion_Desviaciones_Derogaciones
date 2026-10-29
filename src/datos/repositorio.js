@@ -18,15 +18,24 @@
 //   en vivo:     suscribir(alCambiar) -> función para cancelar (opcional)
 import { crearAdaptadorDemo } from "./demo.js";
 import { crearAdaptadorNeon } from "./neon.js";
+import { crearAlmacenFuncion } from "./almacen.js";
+import { tokenDeSesion } from "./tokenNeon.js";
 
-// Si existe VITE_NEON_URL (ver .env.example) la aplicación usa la base de datos real en Neon.
+// Si existe VITE_NEON_URL (ver .env.example) la aplicación usa la base de datos real en Neon, y los archivos
+// van al bucket por la función de servidor cuya dirección es VITE_ARCHIVOS_URL.
 // Sin ella funciona en modo demostración, con datos de ejemplo en memoria.
 // El SDK de Neon se carga solo cuando hay base real: así el modo demostración y las pruebas no lo necesitan.
-export async function crearRepositorio(urlNeon = import.meta.env && import.meta.env.VITE_NEON_URL){
+export async function crearRepositorio(urlNeon = import.meta.env && import.meta.env.VITE_NEON_URL, urlArchivos = import.meta.env && import.meta.env.VITE_ARCHIVOS_URL){
   if(urlNeon){
     const { createClient } = await import("@neondatabase/neon-js");
     const cliente = createClient(urlNeon);
-    return { ...crearAdaptadorNeon(cliente), demo: false };
+    return { ...crearAdaptadorNeon(cliente, almacenPara(cliente, urlArchivos)), demo: false };
   }
   return { ...crearAdaptadorDemo(), demo: true, alEventoSesion: () => () => {} };
+}
+
+function almacenPara(cliente, urlArchivos){
+  if(urlArchivos) return crearAlmacenFuncion(urlArchivos, () => tokenDeSesion(cliente));
+  const noDisponible = async () => { throw new Error("Los archivos todavía no están conectados. Avise al equipo que mantiene la aplicación."); };
+  return { subir: noDisponible, bajar: noDisponible };
 }
