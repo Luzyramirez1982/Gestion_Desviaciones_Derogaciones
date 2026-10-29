@@ -115,6 +115,15 @@ begin
   end if;
 end $$;
 
+-- ¿La ruta de la imagen de una firma es válida? Debe ser firmas/<mi identificador>/<archivo>.
+-- Así nadie puede usar la imagen de firma de otra persona, ni apuntar al adjunto de otro registro.
+create or replace function ruta_firma_valida(p text) returns boolean
+language sql stable as $$
+  select coalesce(p, '') ~ '^firmas/[A-Za-z0-9_-]+/[A-Za-z0-9._-]+$'
+     and coalesce(p, '') not like '%..%'
+     and split_part(coalesce(p, ''), '/', 2) = coalesce(auth.uid()::text, '')
+$$;
+
 -- Devuelve el contenido nuevo, pero con los valores anteriores en las claves indicadas.
 -- Sirve para que una persona no pueda cambiar campos que no le corresponden.
 create or replace function conservar_campos(p_viejo jsonb, p_nuevo jsonb, p_claves text[]) returns jsonb
@@ -209,7 +218,7 @@ begin
   end if;
   if not texto_lleno(p_data ->> 'area') then raise exception 'Indique el área a la que va dirigida la solicitud.'; end if;
   if not p_borrador then
-    if not texto_lleno(p_firma_ruta) then raise exception 'Dibuje su firma en el recuadro antes de enviar la solicitud.'; end if;
+    if not ruta_firma_valida(p_firma_ruta) then raise exception 'Dibuje su firma en el recuadro antes de enviar la solicitud.'; end if;
     v_error := validar_vigencia(p_data);
     if v_error <> '' then raise exception '%', v_error; end if;
   end if;
@@ -353,7 +362,8 @@ end $$;
 -- ---------------------------------------------------------------
 -- Las ayudas internas no las puede llamar nadie desde la aplicación.
 revoke all on function siguiente_consecutivo(), cargar_registro(text), anotar(text, text), conservar_campos(jsonb, jsonb, text[]),
-  requisitos_firma(registros, text), d8_faltantes(jsonb), validar_vigencia(jsonb), validar_tamano(jsonb), texto_lleno(text)
+  requisitos_firma(registros, text), d8_faltantes(jsonb), validar_vigencia(jsonb), validar_tamano(jsonb), texto_lleno(text),
+  ruta_firma_valida(text)
   from public, anon, authenticated;
 
 -- Las funciones de uso normal: solo personas con sesión.

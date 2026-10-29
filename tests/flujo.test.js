@@ -1,7 +1,7 @@
 // Pruebas del flujo del procedimiento dentro de la base de datos: firmar, avanzar de etapa,
 // devolver, rechazar, retroceder, restaurar, adjuntos y áreas.
 import { describe, it, expect, beforeAll } from "vitest";
-import { iniciarBD, ADMIN, RESP_CALIDAD, RESP_PRODUCCION, APROBADOR, FIRMA, solicitud, derogacion } from "./ayuda_bd.js";
+import { iniciarBD, ADMIN, RESP_CALIDAD, RESP_PRODUCCION, APROBADOR, firmaDe, solicitud, derogacion } from "./ayuda_bd.js";
 import { d8Faltantes, emptyD8 } from "../src/dominio/d8.js";
 import { validarVigencia } from "../src/dominio/registro.js";
 
@@ -11,7 +11,7 @@ beforeAll(async () => { ({ db, como, q, crear } = await iniciarBD()); });
 const uno = (texto, params) => q(texto, params).then(r => r[0]);
 const rpc = (quien, fn, ...args) =>
   como(quien, () => uno(`select * from ${fn}(${args.map((_, i) => "$" + (i + 1)).join(", ")})`, args));
-const firmar = (quien, id, espacio, comentario = "") => rpc(quien, "firmar_etapa", id, espacio, FIRMA, comentario);
+const firmar = (quien, id, espacio, comentario = "") => rpc(quien, "firmar_etapa", id, espacio, firmaDe(quien), comentario);
 const guardar = (quien, reg, cambios) =>
   como(quien, () => uno("select * from guardar_registro($1, $2, $3::jsonb)", [reg.id, reg.version, JSON.stringify({ ...reg.data, ...cambios })]));
 const leer = (id) => uno("select * from registros where id = $1", [id]);
@@ -152,7 +152,7 @@ describe("enviar un borrador y reenviar tras una devolución", () => {
   it("un borrador recibe su consecutivo al enviarse y queda firmado", async () => {
     const b = await como(RESP_CALIDAD, () => crear(solicitud(), true));
     expect(b.id).toMatch(/^BOR-/);
-    const r = await rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version, JSON.stringify({ ...b.data, descripcion: "Final" }), FIRMA);
+    const r = await rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version, JSON.stringify({ ...b.data, descripcion: "Final" }), firmaDe(RESP_CALIDAD));
     expect(r.id).toMatch(/^MTC-\d{3}$/);
     expect(r.etapa).toBe(1);
     expect(r.borrador).toBe(false);
@@ -163,13 +163,13 @@ describe("enviar un borrador y reenviar tras una devolución", () => {
   });
   it("solo quien lo escribió lo puede enviar, y con la versión al día", async () => {
     const b = await como(RESP_CALIDAD, () => crear(solicitud(), true));
-    await expect(rpc(RESP_PRODUCCION, "enviar_registro", b.id, b.version, JSON.stringify(b.data), FIRMA)).rejects.toThrow(/No se encontró/);
-    await expect(rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version + 5, JSON.stringify(b.data), FIRMA)).rejects.toThrow(/conflicto_version/);
+    await expect(rpc(RESP_PRODUCCION, "enviar_registro", b.id, b.version, JSON.stringify(b.data), firmaDe(RESP_CALIDAD))).rejects.toThrow(/No se encontró/);
+    await expect(rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version + 5, JSON.stringify(b.data), firmaDe(RESP_CALIDAD))).rejects.toThrow(/conflicto_version/);
     await expect(rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version, JSON.stringify(b.data), "")).rejects.toThrow(/Dibuje su firma/);
   });
   it("no se envía con fechas inválidas", async () => {
     const b = await como(RESP_CALIDAD, () => crear(derogacion({ vigenciaFin: "" }), true));
-    await expect(rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version, JSON.stringify(b.data), FIRMA)).rejects.toThrow(/rango de fechas/);
+    await expect(rpc(RESP_CALIDAD, "enviar_registro", b.id, b.version, JSON.stringify(b.data), firmaDe(RESP_CALIDAD))).rejects.toThrow(/rango de fechas/);
   });
   it("devolver exige motivo y rol; anula firmas; se reenvía con la misma numeración", async () => {
     const r0 = await hastaCierre();     // llevada a Cierre; necesitamos una en Evaluación
@@ -189,7 +189,7 @@ describe("enviar un borrador y reenviar tras una devolución", () => {
     for(const quien of [RESP_CALIDAD, APROBADOR, ADMIN]) expect(await como(quien, () => q("select id from registros where id = $1", [r.id]))).toHaveLength(1);
     expect(await como(RESP_PRODUCCION, () => q("select id from registros where id = $1", [r.id]))).toHaveLength(0);
 
-    const re = await rpc(RESP_CALIDAD, "enviar_registro", dev.id, dev.version, JSON.stringify({ ...dev.data, descripcion: "Con riesgo" }), FIRMA);
+    const re = await rpc(RESP_CALIDAD, "enviar_registro", dev.id, dev.version, JSON.stringify({ ...dev.data, descripcion: "Con riesgo" }), firmaDe(RESP_CALIDAD));
     expect(re.id).toBe(r.id);
     expect(re.etapa).toBe(1);
     expect(re.devuelta).toBe(false);

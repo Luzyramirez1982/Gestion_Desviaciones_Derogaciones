@@ -127,6 +127,8 @@ create table if not exists adjuntos (
   creado_en timestamptz not null default now()
 );
 create index if not exists adjuntos_registro_idx on adjuntos(registro_id);
+-- Un mismo archivo no puede estar anotado en dos registros (así nadie "toma prestado" el archivo de otro).
+create unique index if not exists adjuntos_ruta_unica on adjuntos(ruta);
 
 -- Huella de los registros eliminados: quién, cuándo, por qué y una copia completa.
 create table if not exists auditoria_eliminados (

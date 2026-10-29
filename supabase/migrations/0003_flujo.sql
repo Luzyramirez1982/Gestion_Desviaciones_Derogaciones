@@ -53,7 +53,7 @@ begin
     raise exception 'Indique si es una Desviación o una Derogación.';
   end if;
   if not texto_lleno(p_data ->> 'area') then raise exception 'Indique el área a la que va dirigida la solicitud.'; end if;
-  if not texto_lleno(p_firma_ruta) then raise exception 'Dibuje su firma en el recuadro antes de enviar la solicitud.'; end if;
+  if not ruta_firma_valida(p_firma_ruta) then raise exception 'Dibuje su firma en el recuadro antes de enviar la solicitud.'; end if;
   v_error := validar_vigencia(p_data);
   if v_error <> '' then raise exception '%', v_error; end if;
 
@@ -108,7 +108,7 @@ begin
   v_reg := cargar_registro(p_id);
   select * into v_perfil from perfiles where id = auth.uid() and activo;
   if p_espacio not in ('aprob', 'cierre', 'admin') then raise exception 'Ese espacio de firma no se firma aquí.'; end if;
-  if not texto_lleno(p_ruta_firma) then raise exception 'Dibuje su firma en el recuadro antes de firmar.'; end if;
+  if not ruta_firma_valida(p_ruta_firma) then raise exception 'Dibuje su firma en el recuadro antes de firmar.'; end if;
 
   if p_espacio = 'admin' then
     if v_perfil.rol <> 'Administrador' then raise exception 'Solo el Administrador da el visto bueno.'; end if;
@@ -295,6 +295,8 @@ end $$;
 -- Archivos adjuntos
 -- ---------------------------------------------------------------
 -- El archivo ya está subido a Storage; aquí solo se anota su nombre y su ruta.
+-- El archivo debe estar en la carpeta de su propio registro: registros/<consecutivo>/<archivo>.
+-- (El nombre que ve la gente va en p_nombre; el nombre del archivo en Storage usa solo letras y números.)
 -- Máximo 5 MB por archivo y 50 por registro, para cuidar el espacio gratuito.
 create or replace function registrar_adjunto(p_id text, p_nombre text, p_tipo text, p_tamano bigint, p_ruta text)
 returns adjuntos
@@ -307,7 +309,10 @@ begin
   if v_reg.cerrado or v_reg.resultado = 'Rechazada' then raise exception 'El registro está cerrado y no admite más archivos.'; end if;
   if not texto_lleno(p_nombre) then raise exception 'El archivo no tiene nombre.'; end if;
   if p_tamano is null or p_tamano <= 0 or p_tamano > 5 * 1048576 then raise exception 'Cada archivo puede pesar hasta 5 MB.'; end if;
-  if p_ruta !~ '^registros/[A-Za-z0-9_-]+/[A-Za-z0-9._() -]+$' or p_ruta like '%..%' then raise exception 'La ruta del archivo no es válida.'; end if;
+  if coalesce(p_ruta, '') !~ ('^registros/' || v_reg.id || '/[A-Za-z0-9._() -]+$') or p_ruta like '%..%' then
+    raise exception 'La ruta del archivo no es válida.';
+  end if;
+  if exists (select 1 from adjuntos where ruta = p_ruta) then raise exception 'Ese archivo ya está registrado.'; end if;
   if (select count(*) from adjuntos where registro_id = p_id) >= 50 then raise exception 'Este registro ya tiene el máximo de 50 archivos.'; end if;
 
   insert into adjuntos (registro_id, nombre, tipo, tamano, ruta, subido_por)

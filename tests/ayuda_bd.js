@@ -15,7 +15,8 @@ export const derogacion = (o = {}) => solicitud({
   tipoGestion: "Derogación", alcanceDerogacion: "Temporal", vigenciaInicio: "2026-11-01", vigenciaFin: "2026-11-30", ...o,
 });
 
-export const FIRMA = "firmas/prueba/firma.png";
+// La imagen de la firma de cada persona va en su propia carpeta.
+export const firmaDe = (uid, archivo = "firma.png") => `firmas/${uid}/${archivo}`;
 
 export async function iniciarBD(){
   const db = new PGlite();
@@ -30,6 +31,18 @@ export async function iniciarBD(){
     alter default privileges in schema public grant all on tables to anon, authenticated;
     alter default privileges in schema public grant all on sequences to anon, authenticated;
     alter default privileges in schema public grant execute on functions to anon, authenticated;
+
+    -- Lo mínimo del esquema "storage" de Supabase, para probar los permisos de archivos.
+    create schema storage;
+    create table storage.buckets (id text primary key, name text, public boolean default false,
+      file_size_limit bigint, allowed_mime_types text[]);
+    create table storage.objects (id uuid primary key default gen_random_uuid(), bucket_id text references storage.buckets(id),
+      name text, owner uuid default auth.uid(), metadata jsonb);
+    alter table storage.objects enable row level security;
+    create function storage.foldername(name text) returns text[] language sql immutable as
+      $$ select _parts[1:array_length(_parts, 1) - 1] from string_to_array(name, '/') _parts $$;
+    grant usage on schema storage to anon, authenticated;
+    grant select, insert, update, delete on storage.objects to authenticated;
   `);
   const carpeta = new URL("../supabase/migrations/", import.meta.url);
   for(const archivo of readdirSync(carpeta).filter(f => f.endsWith(".sql")).sort()){
@@ -54,8 +67,11 @@ export async function iniciarBD(){
     try { return await fn(); } finally { await db.exec("reset role"); }
   }
   const q = (texto, params) => db.query(texto, params).then(r => r.rows);
-  const crear = (data, borrador = false) =>
-    q("select * from crear_registro($1::jsonb, $2, $3)", [JSON.stringify(data), borrador, borrador ? "" : FIRMA]).then(r => r[0]);
+  // Crea una solicitud como la persona en sesión; si se envía, firma con la imagen de su carpeta.
+  const crear = async (data, borrador = false) => {
+    const [{ uid }] = await q("select auth.uid()::text as uid");
+    return q("select * from crear_registro($1::jsonb, $2, $3)", [JSON.stringify(data), borrador, borrador ? "" : firmaDe(uid)]).then(r => r[0]);
+  };
 
   return { db, como, q, crear };
 }
