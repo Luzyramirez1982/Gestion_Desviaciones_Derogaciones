@@ -12,7 +12,8 @@ Aplicación de MATEC para gestionar desviaciones y derogaciones, con ciclo de 3 
 3. Mensajes de commit **en español, cortos y claros**: una línea de título y, si hace falta, una lista de lo que cambió.
 4. **Antes de subir (`git push`)**: correr `npm test` (todo en verde), revisar con `git status` y `git diff` que solo vaya lo que se quiere, y comprobar que no haya claves ni datos reales.
 5. Nunca `git push --force`, nunca borrar ramas ajenas, nunca saltarse las pruebas para subir algo.
-6. No subir: `.env`, claves `service_role`, exportaciones de la base de datos real, archivos de la clienta ni copias de respaldo.
+6. **Flujos de GitHub Actions:** el token con el que se sube desde el computador no tiene el permiso *workflow*, así que GitHub rechaza cualquier archivo dentro de `.github/workflows/`. Los flujos se guardan como plantilla en `docs/` y quien tenga permiso los copia a esa carpeta (ver `docs/RESPALDOS.md`).
+7. No subir: `.env`, claves `service_role`, exportaciones de la base de datos real, archivos de la clienta ni copias de respaldo.
 
 ## Cómo escribir el código
 - **Comentarios en español sencillo**, cortos y fáciles de leer, como los escribiría una persona del equipo explicándole a alguien que no es técnico. Explican **por qué** se hace algo, no repiten lo que ya dice el código. Sin jerga innecesaria, sin frases de relleno.
