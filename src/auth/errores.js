@@ -2,6 +2,7 @@
 export function traducirErrorAuth(err){
   const m = String((err && err.message) || err || "");
   if(/invalid login credentials|invalid email or password/i.test(m)) return "Correo o contraseña incorrectos.";
+  if(/banned/i.test(m)) return "Esta cuenta está desactivada. Hable con el Administrador.";
   if(/email not confirmed/i.test(m)) return "Debe confirmar su correo antes de ingresar. Hable con el Administrador.";
   if(/already registered|already exists|user_already_exists/i.test(m)) return "Ya existe una cuenta de acceso con ese correo.";
   if(/password should be at least|weak password|password_too_short|too short/i.test(m)) return "La contraseña es muy débil: use al menos 8 caracteres con letras y números.";

@@ -1,70 +1,81 @@
 # Poner la aplicación en Neon (paso a paso)
 
-Guía para quien tiene la cuenta de Neon. **Nunca pegue contraseñas ni direcciones de conexión en chats, issues ni commits.** Lo único que va en el navegador es la dirección pública `VITE_NEON_URL`.
+Guía para quien tiene la cuenta de Neon. **Nunca pegue contraseñas ni direcciones de conexión en chats, issues ni commits.** Lo único público es `VITE_NEON_URL`.
 
-> Lo que está probado y lo que no: las reglas de la base (permisos, firmas, archivos, usuarios) y el adaptador están probados con un PostgreSQL de prueba. **Nada se probó todavía contra un Neon real.** Al final hay una lista de comprobaciones para hacer en cada paso.
+> Estado: esta guía **ya se siguió y se probó contra un Neon real** (29/10/2026): migraciones, ingreso, creación de personas, cambio de contraseña, solicitudes con firma, adjuntos de hasta 5 MB y permisos entre áreas. Los resultados están al final.
 
-## 1. Crear el proyecto en Neon
-1. console.neon.tech > *New project*. Nombre sugerido: `desviaciones-matec`. Elija la región más cercana (US East suele ir bien desde Colombia). Postgres 17.
-2. Plan **Free** (sin tarjeta).
+## 1. Cuenta y proyecto
+1. Cuenta en neon.com (plan **Free**, sin tarjeta) y un proyecto en una región de EE. UU. (la región no se puede cambiar después).
+2. En su computador: `npm i -g neon` y luego `neon login` (se abre el navegador para aprobar).
 
-## 2. Activar la Data API con ingreso de Neon
-1. En el proyecto: *Postgres database > Data API > Enable*.
-2. Marque **Use Neon Auth** (así el ingreso y la API quedan unidos).
-3. **Deje SIN marcar** «Grant public schema access»: los permisos los define `db/migraciones/` tabla por tabla.
-4. Anote la **dirección base** de la Data API (la que empieza con `https://ep-...neon.tech/neondb`, sin usuario ni contraseña). Esa es `VITE_NEON_URL`.
-
-## 3. Crear las tablas y reglas
-En su computador, dentro de la carpeta del proyecto:
+## 2. Servicios del proyecto
+Con el CLI (o desde la consola web, con las mismas opciones):
 
 ```bash
-npm install
+# Data API unida al ingreso de Neon, SIN permisos por defecto (los define db/migraciones/)
+neon data-api create --project-id <id> --branch production --database neondb --auth-provider neon_auth
 ```
 
-Saque la **dirección de conexión** (*Connect > Connection string*, rol dueño, empieza con `postgresql://`) y úsela solo en esta consola:
+El proyecto también debe tener **Auth** activado (Better Auth). Los roles que crea Neon se llaman `anonymous` y `authenticated` (no `anon`).
 
-```powershell
-$env:DATABASE_URL = "postgresql://..."
-node scripts/aplicar-migraciones.mjs
-node scripts/cargar-catalogo.mjs
-```
+## 3. Variables
+En un archivo `.env` en la carpeta del proyecto (git lo ignora):
 
-La primera línea debe mostrar `+ 0001_...` hasta `+ 0005_...`. Después, en Neon: *Data API > Refresh schema cache*.
-
-## 4. Crear la cuenta de la Administradora
-1. Neon > *Auth > Users* > crear usuario con su correo y una contraseña. Use el menú del usuario > **Make admin** (le da permiso de crear las demás cuentas desde la aplicación).
-2. En la consola de antes:
-   ```powershell
-   node scripts/crear-primer-admin.mjs --correo persona@empresa.com --nombre "Nombre Apellido"
-   ```
-
-## 5. Probar en su computador
-1. Copie `.env.example` como `.env` y escriba `VITE_NEON_URL=` con la dirección del paso 2.4.
-2. `npm run dev`, abra el enlace, **ingrese como la Administradora**. No debe aparecer el aviso amarillo de *Modo demostración*.
-3. Si el ingreso funciona pero algo falla después, abra F12 > Consola y copie el mensaje.
-
-## 6. Publicar en Cloudflare Pages
-1. Conecte el repositorio. Comando: `npm run build`, carpeta: `dist`.
-2. En *Settings > Variables*, agregue `VITE_NEON_URL` (la dirección pública).
-3. En Neon > *Auth > Configuration > Trusted domains* agregue `https://<su-nombre>.pages.dev`.
-4. En Neon > *Auth > Settings*: desactive **Allow Localhost** una vez en producción, y configure un correo de envío (SMTP) si quiere que funcione «¿Olvidó su contraseña?» (el correo compartido de Neon tiene límite).
-5. Entre a *Usuarios* en la aplicación y escriba el enlace publicado en *Enlace de acceso*.
-
-## 7. Respaldos
-Siga [RESPALDOS.md](RESPALDOS.md). Hágalo **antes** de entregar.
-
-## 8. Comprobaciones (anote el resultado de cada una)
-| # | Comprobación | Qué esperamos |
+| Variable | Qué es | ¿Pública? |
 |---|---|---|
-| 1 | `aplicar-migraciones` corre completo | cinco `+`, sin errores |
-| 2 | Ingreso de la Administradora | entra y ve el menú de Administrador |
-| 3 | Crear un usuario desde *Usuarios* | aparece la contraseña temporal; la persona entra y debe cambiarla |
-| 4 | Cambiar la contraseña temporal | funciona sin recargar la página |
-| 5 | Crear una solicitud con firma y un adjunto de 5 MB | se guarda y el adjunto se abre |
-| 6 | Entrar con el Responsable de otra área | no ve la solicitud |
-| 7 | «¿Olvidó su contraseña?» | llega el correo (si no, el Administrador restablece) |
-| 8 | Dejar la aplicación 10 minutos sin uso y volver a entrar | la primera carga tarda un poco más, pero entra y no se pierde nada |
-| 9 | Descargar PDF y Excel | se descargan completos |
-| 10 | Revisar en Neon > *Monitoring* las horas de cómputo y el espacio usados | para estimar si el plan gratis alcanza |
+| `DATABASE_URL` | Conexión directa a Postgres (la usan solo los scripts de administración) | **No** |
+| `VITE_NEON_URL` | Dirección base de Neon: `https://ep-...c-14.us-east-1.aws.neon.tech/neondb` (la de Auth sin `.neonauth` ni `/auth`) | Sí |
 
-Estos puntos **no están probados contra Neon** y son los que más pueden fallar: el tamaño máximo de una petición de la Data API con un archivo de 5 MB (se envía en base64), el nombre exacto de los métodos del SDK para crear usuarios, cambiar contraseñas y recuperarlas (`admin.createUser`, `admin.setUserPassword`, `changePassword`, `requestPasswordReset`), y que `auth.user_id()` devuelva el mismo identificador que usa el ingreso. Todos están en `src/datos/neon.js` y se corrigen allí sin tocar las pantallas.
+Las demás variables que deja `neon deploy` (`AWS_*`, `NEON_AUTH_BASE_URL`, `DATABASE_URL_POOLED`) **no van al navegador**.
+
+## 4. Crear las tablas y reglas
+```powershell
+npm install
+node scripts/aplicar-migraciones.mjs     # debe mostrar + 0001 ... + 0005
+node scripts/cargar-catalogo.mjs         # 8 áreas y 35 tipos
+neon data-api refresh-schema --project-id <id> --branch production --database neondb
+```
+(El script lee `DATABASE_URL` de la consola; en PowerShell: cargue el `.env` o escriba `$env:DATABASE_URL = "..."`.)
+
+## 5. Crear a la Administradora
+```powershell
+$env:CLAVE_ADMIN = "UnaClave2026"      # 8+ caracteres con letras y números
+node scripts/crear-primer-admin.mjs --correo persona@empresa.com --nombre "Nombre Apellido"
+```
+Crea su cuenta de ingreso, la anota como Administradora y le da el rol de administración de Neon Auth (para crear las demás cuentas desde la aplicación). Solo funciona mientras no haya otro Administrador.
+
+## 6. Probar en su computador
+`npm run dev`, abra <http://localhost:5173> e ingrese. No debe verse el aviso amarillo de *Modo demostración*; arriba debe decir **Base de datos conectada**.
+
+## 7. Publicar en Cloudflare Pages
+1. Conecte el repositorio. Comando `npm run build`, carpeta `dist`.
+2. Variable `VITE_NEON_URL` en *Settings > Variables*.
+3. Dominio de confianza en Neon: `neon neon-auth domain add https://<nombre>.pages.dev --project-id <id> --branch production`.
+4. Cuando la app esté publicada, apague `localhost`: `neon neon-auth domain allow-localhost disable ...`.
+5. Escriba el enlace publicado en *Usuarios > Enlace de acceso*.
+
+## 8. Seguridad del registro
+Por ahora **cualquiera puede crear una cuenta de ingreso** en Neon, pero sin alta en la aplicación esa cuenta **no ve ni hace nada** (comprobado). Para cerrarlo del todo: `neon neon-auth config email-password update --disable-sign-up true ...`. **No se verificó** que la creación de cuentas por la Administradora siga funcionando con el registro apagado: pruébelo creando una persona de prueba; si falla, vuelva a poner `--disable-sign-up false`.
+
+## 9. Respaldos
+Siga [RESPALDOS.md](RESPALDOS.md) antes de entregar.
+
+## Resultados de las pruebas contra Neon real
+| Comprobación | Resultado |
+|---|---|
+| Migraciones 0001–0005 y catálogo | Aplicadas sin errores |
+| Ingreso de la Administradora en el navegador | Funciona («Base de datos conectada») |
+| Crear personas (cuenta de ingreso + alta en la app) | Funciona |
+| Persona nueva: entrar con la temporal y cambiarla | Funciona |
+| Solicitud firmada (la firma se valida en la base) | Funciona (MTC-001, etapa 1) |
+| Adjunto de 200 KB y de 5 MB, abrirlos de vuelta | Funciona; 5 MB subir + leer ≈ 6,6 s |
+| Otro Responsable de otra área: lista, abrir, leer archivo, subir, ver uso del espacio | Todo bloqueado |
+| Responsable crea cuentas | Bloqueado |
+| Administradora: restablecer contraseña, desactivar (bloquea el ingreso), activar | Funciona |
+| No desactivar al último Administrador | Bloqueado |
+| Recuperar contraseña por correo | **No disponible**: la Administradora restablece (ver abajo) |
+
+**Hallazgos de la prueba real:**
+- Las primeras consultas tras un rato sin uso a veces llegan **vacías** (respuesta 200 sin filas). El adaptador reintenta antes de darlas por buenas. No se averiguó la causa raíz; conviene vigilarlo con el uso real.
+- La recuperación de contraseña por correo necesita una pantalla de «nueva contraseña» y un correo de envío propio; mientras tanto la Administradora restablece contraseñas.
+- Los archivos están en la tabla `archivos` de la base (1 GB compartido). Mover a Object Storage está pendiente (ver PLAN.md).

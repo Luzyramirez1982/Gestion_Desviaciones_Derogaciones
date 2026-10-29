@@ -33,5 +33,5 @@ begin
   return v_perfil;
 end $$;
 
-revoke all on function crear_perfil(text, text, text, text, text) from public, anon;
+revoke all on function crear_perfil(text, text, text, text, text) from public, anonymous;
 grant execute on function crear_perfil(text, text, text, text, text) to authenticated;

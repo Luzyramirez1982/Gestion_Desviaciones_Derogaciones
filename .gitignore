@@ -10,3 +10,8 @@ informe-migracion.json
 
 # Configuración de la versión 1 (con claves); no se versiona
 config.js
+
+# Herramientas del asistente (configuración local; no se versiona)
+.claude/
+.mcp.json
+skills-lock.json

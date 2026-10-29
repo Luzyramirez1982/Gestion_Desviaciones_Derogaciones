@@ -367,10 +367,10 @@ end $$;
 revoke all on function siguiente_consecutivo(), cargar_registro(text), anotar(text, text), conservar_campos(jsonb, jsonb, text[]),
   requisitos_firma(registros, text), d8_faltantes(jsonb), validar_vigencia(jsonb), validar_tamano(jsonb), texto_lleno(text),
   ruta_firma_valida(text)
-  from public, anon, authenticated;
+  from public, anonymous, authenticated;
 
 -- Las funciones de uso normal: solo personas con sesión.
 revoke all on function crear_registro(jsonb, boolean, text), guardar_registro(text, int, jsonb),
-  eliminar_registro(text, text), marcar_clave_cambiada(), uso_almacenamiento() from public, anon;
+  eliminar_registro(text, text), marcar_clave_cambiada(), uso_almacenamiento() from public, anonymous;
 grant execute on function crear_registro(jsonb, boolean, text), guardar_registro(text, int, jsonb),
   eliminar_registro(text, text), marcar_clave_cambiada(), uso_almacenamiento() to authenticated;

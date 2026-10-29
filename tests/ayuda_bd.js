@@ -22,16 +22,16 @@ export const firmaDe = (uid, archivo = "firma.png") => `firmas/${uid}/${archivo}
 export async function iniciarBD(opciones = {}){
   const db = new PGlite();
   await db.exec(`
-    create role anon nologin;
+    create role anonymous nologin;
     create role authenticated nologin;
     create schema auth;
     -- Igual que en Neon: auth.user_id() devuelve el identificador de la cuenta que hizo la petición.
     create function auth.user_id() returns text language sql stable as
       $$ select nullif(current_setting('request.jwt.claim.sub', true), '') $$;
-    grant usage on schema auth, public to anon, authenticated;
-    alter default privileges in schema public grant all on tables to anon, authenticated;
-    alter default privileges in schema public grant all on sequences to anon, authenticated;
-    alter default privileges in schema public grant execute on functions to anon, authenticated;
+    grant usage on schema auth, public to anonymous, authenticated;
+    alter default privileges in schema public grant all on tables to anonymous, authenticated;
+    alter default privileges in schema public grant all on sequences to anonymous, authenticated;
+    alter default privileges in schema public grant execute on functions to anonymous, authenticated;
   `);
   if(opciones.antes) await db.exec(opciones.antes);
   const carpeta = new URL("../db/migraciones/", import.meta.url);
@@ -50,7 +50,7 @@ export async function iniciarBD(opciones = {}){
   async function como(id, fn){
     await db.exec("reset role");
     await db.query("select set_config('request.jwt.claim.sub', $1, false)", [id || ""]);
-    await db.exec(id ? "set role authenticated" : "set role anon");
+    await db.exec(id ? "set role authenticated" : "set role anonymous");
     try { return await fn(); } finally { await db.exec("reset role"); }
   }
   const q = (texto, params) => db.query(texto, params).then(r => r.rows);

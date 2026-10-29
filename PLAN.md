@@ -3,7 +3,7 @@
 Guía para quien se una al proyecto: qué se quiere lograr, qué se decidió, qué está hecho y qué falta.
 **Cuando termines algo, marca la casilla y cambia la fecha.** Detalle de cada sesión: [HISTORIAL.md](HISTORIAL.md). Reglas de trabajo: [CLAUDE.md](CLAUDE.md).
 
-_Última actualización: 29/10/2026 (noche)_
+_Última actualización: 29/10/2026 (noche, probado contra Neon real)_
 
 Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a una cuenta de la clienta
 
@@ -49,9 +49,13 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 - [x] Archivos privados (tabla `archivos`, se abren con un enlace que solo existe en el navegador).
 - [x] Respaldo diario cifrado: plantilla y guía de restauración escritas.
 - [x] Cabeceras de seguridad con `*.neon.tech` en `connect-src`.
-- [ ] **Probar todo contra un Neon real** (lista de comprobaciones en `docs/NEON_PASOS.md`). 🔑
-- [ ] Crear el proyecto de Neon, activar la Data API y correr los scripts. 🔑
-- [ ] Crear a la Administradora (la clienta) y confirmar el catálogo inicial de áreas y tipos. 🔑
+- [x] **Probado contra un Neon real** (resultados en `docs/NEON_PASOS.md`).
+- [x] Proyecto de Neon, Data API, migraciones y catálogo aplicados (8 áreas, 35 tipos).
+- [ ] Crear a la Administradora real con `scripts/crear-primer-admin.mjs` y confirmar con ella el catálogo inicial. 🔑
+- [ ] **Archivos en Object Storage** (bucket `uploads`, 5 GB aparte): hace falta un intermediario (Neon Function o función de Cloudflare) que firme las subidas y descargas después de preguntarle a la base si la persona tiene permiso; las claves del bucket no pueden ir al navegador. Hoy los archivos van en la tabla `archivos` y funcionan.
+- [ ] Probar si crear cuentas sigue funcionando con el registro abierto apagado (`--disable-sign-up true`) y apagarlo.
+- [ ] Pantalla de «nueva contraseña» y correo de envío propio para «¿Olvidó su contraseña?» (hoy la Administradora restablece).
+- [ ] Vigilar las listas vacías de las primeras consultas tras un rato sin uso (el adaptador ya reintenta; falta la causa raíz).
 - [ ] Copiar el flujo de respaldo a `.github/workflows/`, cargar los secretos y ensayar una restauración. 🔑
 - [ ] Correo de «¿Olvidó su contraseña?»: configurar SMTP propio en Neon (el compartido tiene límite) o dejar que el Administrador restablezca.
 - [ ] Actualización en vivo: por ahora no hay (se refresca al volver a la pestaña) para no gastar horas de cómputo gratuitas. Revisar con el consumo real.

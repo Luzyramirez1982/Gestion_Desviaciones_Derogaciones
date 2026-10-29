@@ -347,3 +347,14 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - **Pruebas:** 195 pruebas de base de datos, adaptador y reglas pasan en un PostgreSQL de prueba (PGlite). Las 5 pruebas de pantalla (jsdom) **no pudieron correr en el equipo donde se hizo esto** porque jsdom 30 pide Node 22.22 o más nuevo y el equipo tiene 22.13; hay que correrlas en otro equipo. La compilación funciona.
 - **Sin probar contra un Neon real:** ver la lista de comprobaciones de `docs/NEON_PASOS.md` (tamaño de peticiones con archivos, métodos del SDK para crear usuarios y cambiar contraseñas, recuperación por correo).
 - **Pendiente:** 11 avisos de `npm audit` que trae el SDK de Neon (dependencias que la aplicación no usa en pantalla).
+
+## Sesión 11 — 29/10/2026 · Puesta en marcha y pruebas contra Neon real
+- **Neon real:** se activó la Data API con el ingreso de Neon (sin permisos por defecto), se aplicaron las 5 migraciones y se cargó el catálogo (8 áreas, 35 tipos).
+- **Error encontrado y corregido:** los roles de Neon se llaman `anonymous` y `authenticated` (no `anon`, que es de Supabase). Las migraciones, las pruebas y el script de migraciones usaban `anon`.
+- **Prueba integral en un navegador real** (cuentas inventadas, ya borradas): ingreso, crear personas, cambiar la contraseña temporal, solicitud firmada, adjuntos de 200 KB y 5 MB, permisos entre áreas, restablecer, desactivar y activar. Resultados en `docs/NEON_PASOS.md`.
+- **Fallas que mostró la prueba real y se arreglaron:** (1) llamadas mal hechas al SDK de Neon (`.call`) hacían que desactivar no bloqueara el ingreso y que recuperar la contraseña fallara; (2) a veces las primeras consultas llegaban vacías: el adaptador reintenta; (3) aviso de cuenta bloqueada en inglés, ahora en español.
+- **Recuperar contraseña:** queda a cargo de la Administradora (restablecer) hasta tener la pantalla de enlace y un correo propio.
+- **`crear-primer-admin`:** ahora crea la cuenta de ingreso, el alta como Administradora y el rol de administración de Neon Auth en un solo comando.
+- **`.env` con claves** estaba guardado como `.evn` y sin ignorar por git; se renombró. `.claude/`, `.mcp.json` y `skills-lock.json` quedaron ignorados.
+- **Pruebas:** 235 pasan (incluidas las de pantalla, con Node 22.23) y la compilación funciona.
+- **Pendiente principal:** mover los archivos a Object Storage (necesita una función intermedia que firme las subidas) y crear a la Administradora real.

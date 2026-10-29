@@ -5,6 +5,7 @@ import { crearClientePglite } from "./cliente_pglite.js";
 import { crearAdaptadorNeon, errorDe, claveTemporal } from "../src/datos/neon.js";
 import { filaARegistro, registroAData } from "../src/datos/convertir.js";
 import { validarClave } from "../src/auth/clave.js";
+import { traducirErrorAuth } from "../src/auth/errores.js";
 import { solicitud } from "./ayuda_bd.js";
 
 const FIRMA = "data:image/png;base64,iVBORw0KGgo=";
@@ -180,6 +181,11 @@ describe("adjuntos, administración y huella", () => {
 
 describe("personas y contraseñas", () => {
   let nueva;
+  it("traduce los avisos de Neon (cuenta bloqueada, contraseña actual incorrecta)", () => {
+    expect(traducirErrorAuth({ message: "You have been banned from this application. Please contact support" })).toMatch(/desactivada/);
+    expect(traducirErrorAuth({ message: "Invalid password" })).toMatch(/contraseña actual/);
+    expect(traducirErrorAuth({ message: "Invalid email or password" })).toBe("Correo o contraseña incorrectos.");
+  });
   it("la contraseña temporal cumple las reglas de la aplicación", () => {
     for(let i = 0; i < 50; i++){
       const clave = claveTemporal();
@@ -234,8 +240,38 @@ describe("personas y contraseñas", () => {
     const admin = (await repo.cargarBase()).perfiles.find(p => p.rol === "Administrador");
     await expect(repo.cambiarActivo(admin.id, false)).rejects.toThrow("al menos un Administrador");
   });
-  it("recuperar la contraseña pide el enlace al servicio de ingreso", async () => {
-    await repo.recuperarClave("laura@x.co");
-    expect(c.llamadas).toContainEqual(["recuperar", "laura@x.co"]);
+  it("recuperar la contraseña por correo pide hablar con el Administrador (aún no hay pantalla de enlace)", async () => {
+    await expect(repo.recuperarClave("laura@x.co")).rejects.toThrow("Administrador");
+    expect(c.llamadas.some(l => l[0] === "recuperar")).toBe(false);
+  });
+});
+
+describe("listas vacías por error de arranque de Neon", () => {
+  // Cliente que, la primera vez que se le pide una tabla, responde "bien" pero sin filas (lo que se vio en Neon real).
+  function conPrimeraVacia(cliente){
+    const vistas = new Set();
+    return { ...cliente, from(tabla){
+      const b = cliente.from(tabla);
+      if(vistas.has(tabla)) return b;
+      vistas.add(tabla);
+      return new Proxy(b, { get(t, k){ if(k === "then") return (ok, mal) => Promise.resolve({ data: t.__maybe ? null : [], error: null }).then(ok, mal);
+        const v = t[k]; return typeof v === "function" ? (...a) => { if(k === "maybeSingle") t.__maybe = true; const r = v.apply(t, a); return r === t ? new Proxy(t, this) : r; } : v; } });
+    } };
+  }
+  it("cargarBase reintenta y trae las áreas y los tipos aunque la primera respuesta llegue vacía", async () => {
+    await entrar("admin@x.co");
+    const flojo = crearAdaptadorNeon(conPrimeraVacia(c.cliente));
+    const base = await flojo.cargarBase();
+    expect(base.areas.length).toBeGreaterThan(0);
+    expect(base.tipos.length).toBeGreaterThanOrEqual(1);
+    expect(base.perfiles.length).toBeGreaterThan(0);
+  });
+  it("una lista realmente vacía sigue devolviéndose vacía (no se queda esperando)", async () => {
+    await entrar("admin@x.co");
+    await c.q("delete from tipos");
+    const t0 = Date.now();
+    const base = await repo.cargarBase();
+    expect(base.tipos).toEqual([]);
+    expect(Date.now() - t0).toBeLessThan(3000);
   });
 });

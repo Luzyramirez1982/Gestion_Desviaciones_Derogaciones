@@ -381,13 +381,13 @@ end $$;
 -- ---------------------------------------------------------------
 -- Quién puede llamar cada función
 -- ---------------------------------------------------------------
-revoke all on function vigencia_texto(text, jsonb) from public, anon, authenticated;
+revoke all on function vigencia_texto(text, jsonb) from public, anonymous, authenticated;
 
 revoke all on function enviar_registro(text, int, jsonb, text), firmar_etapa(text, text, text, text),
   quitar_firma_admin(text), devolver_registro(text, text), rechazar_registro(text, text),
   retroceder_etapa(text, text), convertir_a_derogacion(text), ajustar_alcance_derogacion(text, text, text, text),
   registrar_adjunto(text, text, text, bigint, text), restaurar_registro(uuid), renombrar_area(text, text)
-  from public, anon;
+  from public, anonymous;
 grant execute on function enviar_registro(text, int, jsonb, text), firmar_etapa(text, text, text, text),
   quitar_firma_admin(text), devolver_registro(text, text), rechazar_registro(text, text),
   retroceder_etapa(text, text), convertir_a_derogacion(text), ajustar_alcance_derogacion(text, text, text, text),

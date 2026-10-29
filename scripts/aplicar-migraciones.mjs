@@ -6,9 +6,9 @@ import { conectar } from "./conexion.mjs";
 const carpeta = new URL("../db/migraciones/", import.meta.url);
 const db = await conectar();
 try {
-  const { rows } = await db.query("select to_regprocedure('auth.user_id()') as f, (select count(*) from pg_roles where rolname in ('anon','authenticated')) as roles");
+  const { rows } = await db.query("select to_regprocedure('auth.user_id()') as f, (select count(*) from pg_roles where rolname in ('anonymous','authenticated')) as roles");
   if(!rows[0].f || Number(rows[0].roles) < 2){
-    console.error("Esta base todavía no tiene la Data API activada (faltan auth.user_id() o los roles anon/authenticated).");
+    console.error("Esta base todavía no tiene la Data API activada (faltan auth.user_id() o los roles anonymous/authenticated).");
     console.error("En Neon: Postgres database > Data API > Enable Data API (con «Use Neon Auth» marcado). Luego repita este paso.");
     process.exit(1);
   }

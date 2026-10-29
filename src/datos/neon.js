@@ -8,6 +8,7 @@ import { nombreSeguro } from "../util/nombreArchivo.js";
 import { filaARegistro, filaAAdjunto, filaAPerfil, filaATipo, tipoAFila, filaAHuella, registroAData } from "./convertir.js";
 
 const PAGINA = 1000;   // la API entrega como máximo 1000 filas por consulta
+const ESPERA_REINTENTO_MS = 400;
 
 // Convierte un error de la API en un Error con mensaje claro. El conflicto de versión lleva código aparte.
 export function errorDe(error, porDefecto = "No se pudo completar la operación. Intente de nuevo."){
@@ -21,7 +22,7 @@ export function errorDe(error, porDefecto = "No se pudo completar la operación.
   } else if(/failed to fetch|networkerror|load failed/i.test(msg)){
     e.codigo = "sin_conexion";
     e.message = "No hay conexión con el servidor. Revise su internet y vuelva a intentarlo.";
-  } else if(/jwt expired|invalid jwt|jwt.*(invalid|expired)|not authenticated/i.test(msg)){
+  } else if(/jwt expired|invalid jwt|jwt.*(invalid|expired)|not authenticated|authrequired|authentication required/i.test(msg)){
     e.codigo = "sesion_vencida";
     e.message = "Su sesión venció. Ingrese de nuevo.";
   } else if(/duplicate key/i.test(msg)){
@@ -59,7 +60,7 @@ export function claveTemporal(){
   return "T" + Array.from(azar, b => alfabeto[b % alfabeto.length]).join("") + "7";
 }
 
-export function crearAdaptadorNeon(cliente, { urlBase = "" } = {}){
+export function crearAdaptadorNeon(cliente){
   let perfilActual = null;
   let claveEnUso = "";   // la contraseña con la que se ingresó en esta sesión; Neon la pide para cambiarla
 
@@ -67,10 +68,23 @@ export function crearAdaptadorNeon(cliente, { urlBase = "" } = {}){
   const ok = ({ data, error }, porDefecto) => { if(error) throw errorDe(error, porDefecto); return data; };
   const rpc = async (nombre, args = {}) => ok(await cliente.rpc(nombre, args));
 
+  // En las primeras consultas tras un rato sin uso, Neon a veces responde "bien" pero con la lista vacía.
+  // Si llega vacía se vuelve a pedir un par de veces antes de darla por buena; una lista realmente vacía
+  // solo cuesta un instante más.
+  async function leerSeguro(armar){
+    for(let intento = 0; ; intento++){
+      const datos = ok(await armar());
+      const vacio = Array.isArray(datos) ? datos.length === 0 : datos == null;
+      if(!vacio || intento === 2) return datos;
+      await new Promise(r => setTimeout(r, ESPERA_REINTENTO_MS));
+    }
+  }
+
   async function leerTodo(armar){
     const filas = [];
     for(let desde = 0; ; desde += PAGINA){
-      const lote = ok(await armar().range(desde, desde + PAGINA - 1));
+      const pedir = () => armar().range(desde, desde + PAGINA - 1);
+      const lote = desde === 0 ? await leerSeguro(pedir) : ok(await pedir());
       filas.push(...lote);
       if(lote.length < PAGINA) return filas;
     }
@@ -105,13 +119,12 @@ export function crearAdaptadorNeon(cliente, { urlBase = "" } = {}){
   }
 
   async function detalle(id){
-    const [fila, firmas, adjuntos, bitacora] = await Promise.all([
-      cliente.from("registros").select("*").eq("id", id).maybeSingle(),
+    const [f, firmas, adjuntos, bitacora] = await Promise.all([
+      leerSeguro(() => cliente.from("registros").select("*").eq("id", id).maybeSingle()),
       cliente.from("firmas").select("*").eq("registro_id", id),
       cliente.from("adjuntos").select("*").eq("registro_id", id).order("creado_en", { ascending: true }),
       cliente.from("bitacora").select("*").eq("registro_id", id).order("id", { ascending: true }),
     ]);
-    const f = ok(fila);
     if(!f) throw new Error("No se encontró el registro.");
     return filaARegistro(f, { firmas: ok(firmas), adjuntos: ok(adjuntos), bitacora: ok(bitacora) });
   }
@@ -151,14 +164,11 @@ export function crearAdaptadorNeon(cliente, { urlBase = "" } = {}){
       perfilActual = perfil;
       return perfil;
     },
-    // Neon envía el enlace por correo. Si el envío no está listo todavía, el Administrador puede restablecerla.
-    async recuperarClave(correo){
-      const pedir = auth.requestPasswordReset || auth.forgetPassword;
-      if(!pedir) throw new Error("La recuperación por correo todavía no está disponible. Pida al Administrador que restablezca su contraseña.");
-      const { error } = await pedir.call(auth, { email: String(correo).trim(), redirectTo: urlBase || undefined });
-      if(error) throw new Error(traducirErrorAuth(error));
-    },
-    async cambiarClave(nueva){
+    // El enlace de recuperación por correo de Neon necesita una pantalla de «nueva contraseña» que todavía no existe
+    // y un correo de envío propio (el compartido tiene límite). Mientras tanto, el Administrador restablece la contraseña.
+    async recuperarClave(){
+      throw new Error("Pida al Administrador que restablezca su contraseña: le dará una temporal para entrar y cambiarla.");
+    },    async cambiarClave(nueva){
       // Neon pide la contraseña actual. Si se recargó la página no la tenemos: se pide volver a ingresar.
       if(!claveEnUso){
         await auth.signOut();
@@ -177,14 +187,14 @@ export function crearAdaptadorNeon(cliente, { urlBase = "" } = {}){
 
     async cargarBase(){
       const [perfiles, areas, tipos, conf] = await Promise.all([
-        cliente.from("perfiles").select("*").order("nombre"),
-        cliente.from("areas").select("*").order("orden").order("nombre"),
-        cliente.from("tipos").select("*").order("nombre"),
+        leerSeguro(() => cliente.from("perfiles").select("*").order("nombre")),
+        leerSeguro(() => cliente.from("areas").select("*").order("orden").order("nombre")),
+        leerSeguro(() => cliente.from("tipos").select("*").order("nombre")),
         cliente.from("configuracion").select("*"),
       ]);
       const configuracion = {};
       ok(conf).forEach(c => { configuracion[c.clave] = c.valor; });
-      return { perfiles: ok(perfiles).map(filaAPerfil), areas: ok(areas), tipos: ok(tipos).map(filaATipo), configuracion };
+      return { perfiles: perfiles.map(filaAPerfil), areas, tipos: tipos.map(filaATipo), configuracion };
     },
     async listarRegistros(){
       const [filas, firmas] = await Promise.all([
@@ -289,8 +299,8 @@ export function crearAdaptadorNeon(cliente, { urlBase = "" } = {}){
       // Primero la base (que protege al último Administrador); después se bloquea o libera el ingreso.
       const fila = ok(await cliente.from("perfiles").update({ activo }).eq("id", id).select().maybeSingle());
       if(!fila) throw new Error("No se pudo guardar el cambio. Revise que la persona exista y que tenga permiso.");
-      const accion = activo ? auth.admin.unbanUser : auth.admin.banUser;
-      if(accion) await accion.call(auth.admin, { userId: id }).catch(() => {});
+      // El bloqueo en Neon es un refuerzo: aunque falle, la base ya no deja pasar a una persona desactivada.
+      try { await (activo ? auth.admin.unbanUser({ userId: id }) : auth.admin.banUser({ userId: id })); } catch { /* sin refuerzo */ }
     },
 
     // Por ahora no hay aviso en vivo: la lista se refresca al volver a la pestaña (ver src/nucleo/envivo.js).

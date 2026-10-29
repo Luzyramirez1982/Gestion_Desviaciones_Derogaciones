@@ -223,8 +223,8 @@ alter table adjuntos enable row level security;
 alter table auditoria_eliminados enable row level security;
 
 -- Se quitan los permisos que la API da por defecto y se dan solo los necesarios.
-revoke all on perfiles, areas, tipos, configuracion, registros, bitacora, firmas, adjuntos, auditoria_eliminados from anon, authenticated;
-revoke all on sequence registros_consecutivo from anon, authenticated;
+revoke all on perfiles, areas, tipos, configuracion, registros, bitacora, firmas, adjuntos, auditoria_eliminados from anonymous, authenticated;
+revoke all on sequence registros_consecutivo from anonymous, authenticated;
 
 -- Lectura: solo quien tiene perfil activo en la aplicación ve las listas de apoyo. Esto importa porque en\n-- Neon cualquiera podría crear una cuenta de ingreso; sin perfil, esa cuenta no ve nada.
 grant select on perfiles, areas, tipos, configuracion to authenticated;

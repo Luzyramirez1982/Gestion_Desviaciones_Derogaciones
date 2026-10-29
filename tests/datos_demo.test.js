@@ -12,7 +12,7 @@ beforeEach(() => { repo = crearAdaptadorDemo(); });
 
 describe("repositorio", () => {
   it("mientras no haya base de datos conectada arranca en modo demostración", async () => {
-    expect((await crearRepositorio()).demo).toBe(true);
+    expect((await crearRepositorio("")).demo).toBe(true);   // sin dirección de Neon, aunque el .env tenga una
   });
 });
 

@@ -32,7 +32,7 @@ create table if not exists archivos (
 );
 
 alter table archivos enable row level security;
-revoke all on archivos from anon, authenticated;
+revoke all on archivos from anonymous, authenticated;
 grant select on archivos to authenticated;
 
 drop policy if exists archivos_leer on archivos;
@@ -88,5 +88,5 @@ begin
   values (p_ruta, p_tipo, v_bytes, p_base64, v_perfil.nombre);
 end $$;
 
-revoke all on function subir_archivo(text, text, text) from public, anon;
+revoke all on function subir_archivo(text, text, text) from public, anonymous;
 grant execute on function subir_archivo(text, text, text) to authenticated;

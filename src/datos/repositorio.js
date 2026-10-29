@@ -26,7 +26,7 @@ export async function crearRepositorio(urlNeon = import.meta.env && import.meta.
   if(urlNeon){
     const { createClient } = await import("@neondatabase/neon-js");
     const cliente = createClient(urlNeon);
-    return { ...crearAdaptadorNeon(cliente, { urlBase: location.origin }), demo: false };
+    return { ...crearAdaptadorNeon(cliente), demo: false };
   }
   return { ...crearAdaptadorDemo(), demo: true, alEventoSesion: () => () => {} };
 }
