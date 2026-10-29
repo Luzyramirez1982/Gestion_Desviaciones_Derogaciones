@@ -69,9 +69,23 @@ create table if not exists registros (
   vigencia_fin date,
   version int not null default 1,            -- sube con cada cambio; evita que dos personas se pisen
   data jsonb not null default '{}'::jsonb,   -- el contenido del formulario y del 8D
+  fecha_cierre timestamptz,
   creado_en timestamptz not null default now(),
   actualizado_en timestamptz not null default now()
 );
+
+-- Mantiene dentro de "data" una copia de la etapa y el estado, tomada siempre de las columnas.
+-- Así el navegador nunca puede dejar en "data" un valor distinto al real.
+create or replace function registros_sincronizar() returns trigger
+language plpgsql as $$
+begin
+  new.data := new.data || jsonb_build_object('id', new.id, 'stage', new.etapa, 'cerrado', new.cerrado,
+    'resultado', new.resultado, 'borrador', new.borrador, 'devuelta', new.devuelta);
+  return new;
+end $$;
+drop trigger if exists registros_sincronizar_trg on registros;
+create trigger registros_sincronizar_trg before insert or update on registros
+  for each row execute function registros_sincronizar();
 create index if not exists registros_area_idx on registros(area);
 create index if not exists registros_dueno_idx on registros(reportado_por_id);
 create index if not exists registros_estado_idx on registros(etapa, cerrado);
@@ -79,7 +93,7 @@ create index if not exists registros_estado_idx on registros(etapa, cerrado);
 -- Historial de lo que pasó en cada registro. Solo se agrega, nunca se borra ni se cambia.
 create table if not exists bitacora (
   id bigint generated always as identity primary key,
-  registro_id text not null references registros(id) on delete cascade,
+  registro_id text not null references registros(id) on delete cascade on update cascade,
   etapa text not null default '',
   rol text not null default '',
   usuario text not null default '',
@@ -91,7 +105,7 @@ create index if not exists bitacora_registro_idx on bitacora(registro_id);
 
 -- Firmas de cada etapa (la imagen de la firma vive en Storage).
 create table if not exists firmas (
-  registro_id text not null references registros(id) on delete cascade,
+  registro_id text not null references registros(id) on delete cascade on update cascade,
   espacio text not null check (espacio in ('sol','aprob','cierre','admin')),
   usuario_id uuid references perfiles(id),
   nombre text not null default '',
@@ -104,7 +118,7 @@ create table if not exists firmas (
 -- Archivos adjuntos (solo el nombre y la ruta; el archivo vive en Storage).
 create table if not exists adjuntos (
   id uuid primary key default gen_random_uuid(),
-  registro_id text not null references registros(id) on delete cascade,
+  registro_id text not null references registros(id) on delete cascade on update cascade,
   nombre text not null,
   tipo text not null default '',
   tamano bigint not null default 0,
@@ -129,6 +143,35 @@ create table if not exists auditoria_eliminados (
   restaurado_en timestamptz,
   creado_en timestamptz not null default now()
 );
+
+-- Siempre debe quedar al menos un Administrador activo (no se puede quitar, desactivar ni borrar al último).
+create or replace function perfiles_proteger_admin() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if old.rol = 'Administrador' and old.activo
+     and (tg_op = 'DELETE' or new.rol <> 'Administrador' or not new.activo) then
+    if not exists (select 1 from perfiles where rol = 'Administrador' and activo and id <> old.id) then
+      raise exception 'Debe quedar al menos un Administrador activo.';
+    end if;
+  end if;
+  return case when tg_op = 'DELETE' then old else new end;
+end $$;
+drop trigger if exists perfiles_proteger_admin_trg on perfiles;
+create trigger perfiles_proteger_admin_trg before update or delete on perfiles
+  for each row execute function perfiles_proteger_admin();
+
+-- Un área que todavía tiene registros o personas no se puede eliminar.
+create or replace function areas_proteger_borrado() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if exists (select 1 from registros where area = old.nombre) or exists (select 1 from perfiles where area = old.nombre) then
+    raise exception 'No se puede eliminar un área con registros o usuarios asignados.';
+  end if;
+  return old;
+end $$;
+drop trigger if exists areas_proteger_borrado_trg on areas;
+create trigger areas_proteger_borrado_trg before delete on areas
+  for each row execute function areas_proteger_borrado();
 
 -- ---------------------------------------------------------------
 -- Funciones de apoyo: quién soy yo
@@ -201,8 +244,9 @@ create policy tipos_admin on tipos for all to authenticated using (es_admin()) w
 drop policy if exists config_admin on configuracion;
 create policy config_admin on configuracion for all to authenticated using (es_admin()) with check (es_admin());
 
--- Personas: solo el Administrador las cambia (la creación de cuentas la hace una función aparte del servidor).
-grant update on perfiles to authenticated;
+-- Personas: solo el Administrador las cambia, y solo estos datos. El correo y el identificador
+-- no se tocan desde la aplicación (la creación de cuentas la hace una función aparte del servidor).
+grant update (nombre, rol, area, activo, debe_cambiar_clave) on perfiles to authenticated;
 drop policy if exists perfiles_admin on perfiles;
 create policy perfiles_admin on perfiles for update to authenticated using (es_admin()) with check (es_admin());
 

@@ -268,3 +268,10 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 3. **51 pruebas automáticas** (`npm test`): 24 de las reglas y 27 de la base de datos. Las de la base de datos usan un PostgreSQL de prueba que corre en el computador, sin tocar Supabase.
 
 **Todavía no se ha hecho** (se retoma al tener acceso al Supabase de la clienta): exportar los datos actuales, probar en el proyecto de pruebas, migrar los datos, firmar y avanzar de etapa desde la base de datos, adjuntos, respaldos y publicación.
+
+**Avance del mismo día — el flujo del procedimiento ya vive en la base de datos** (`0003_flujo.sql`):
+- Firmar la evaluación y el cierre, devolver para ajustes, rechazar, retroceder una etapa (solo Administrador), enviar borradores y reenviar solicitudes devueltas, convertir una desviación en derogación, ajustar el alcance de una derogación, restaurar registros eliminados, registrar adjuntos y renombrar áreas.
+- Ahora la base de datos exige las reglas que antes solo revisaba la pantalla: cada rol firma solo su etapa, el cierre lo firma quien hizo la solicitud, una derogación no se aprueba con el 8D incompleto y cada rol solo llena sus propios campos.
+- Mejoras de seguridad que no estaban en el plan original: tope de tamaño para lo que se guarda, máximo de 5 MB y 50 archivos por registro, rutas de archivos validadas, no se puede quitar ni desactivar al último Administrador, y el correo de una persona no se puede cambiar desde la aplicación.
+- Las pruebas pasaron de 51 a 87. Una de ellas encontró un error real en el SQL (un texto suelto que PostgreSQL leía como lista) y ya está corregido.
+- Se comprobó que las reglas del 8D y de las fechas en SQL dicen exactamente lo mismo que las de la pantalla.
