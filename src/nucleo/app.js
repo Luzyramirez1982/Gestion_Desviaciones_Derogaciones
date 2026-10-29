@@ -7,7 +7,7 @@ import { aviso } from "../componentes/avisos.js";
 import * as vAuth from "../vistas/auth.js";
 import * as vPanel from "../vistas/panel.js";
 import * as vLista from "../vistas/lista.js";
-import * as vFormulario from "../vistas/formulario.js";
+import * as vFormulario from "../vistas/formulario/index.js";
 import * as vDetalle from "../vistas/detalle.js";
 import * as vUsuarios from "../vistas/usuarios.js";
 import * as vTipos from "../vistas/tipos.js";
