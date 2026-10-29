@@ -2,13 +2,13 @@
 
 Aplicación web para gestionar **desviaciones y derogaciones** de proceso. Cada solicitud pasa por tres etapas (Solicitud → Evaluación y Aprobación → Cierre), con firma en cada una; las derogaciones exigen el reporte 8D completo. Hay tres roles: Administrador, Responsable del proceso y Aprobador autorizado.
 
-**Estado:** la interfaz está completa y funciona en **modo demostración** (datos de ejemplo en memoria; al recargar se pierden). Falta conectar la base de datos real: ver [PLAN.md](PLAN.md).
+**Estado:** la interfaz está completa y la base de datos (Neon) está escrita y probada con una base de prueba. Sin `VITE_NEON_URL` la aplicación funciona en **modo demostración** (datos de ejemplo en memoria). Falta ponerla en un Neon real: ver [docs/NEON_PASOS.md](docs/NEON_PASOS.md) y [PLAN.md](PLAN.md).
 
 ## Cómo correrla
 ```bash
 npm install        # una sola vez
 npm run dev        # abre la aplicación para verla y trabajar en ella
-npm test           # pruebas automáticas (no necesitan internet)
+npm test           # pruebas automáticas (no necesitan internet; las de pantalla piden Node 22.22 o más nuevo)
 npm run build      # genera la carpeta dist/ que se publica
 ```
 En modo demostración se entra con cualquiera de estos correos y la contraseña `Demo2026`:
@@ -29,12 +29,14 @@ src/
   componentes/        Piezas reutilizables (íconos, avisos, firma en canvas, adjuntos, editor 8D)
   nucleo/             Armado de la aplicación: sesión, menú por rol y actualización en vivo
   dominio/            Reglas del procedimiento (etapas, firmas, 8D, vigencias). No es visual.
-  datos/              Cómo se guardan y leen los datos (repositorio y modo demostración)
+  datos/              Cómo se guardan y leen los datos (repositorio, adaptador de Neon y modo demostración)
   exportar/           PDF de trazabilidad y Excel histórico
   util/               Ayudas pequeñas (fechas de Colombia, textos seguros, imágenes...)
   auth/               Reglas de contraseña
-tests/                Pruebas automáticas
-docs/                 Guías (manual del Administrador, cabeceras de seguridad)
+db/migraciones/       Base de datos (SQL): tablas, permisos por rol/área/etapa, funciones del flujo, archivos y usuarios
+scripts/              Aplicar migraciones, cargar el catálogo y crear a la primera Administradora
+tests/                Pruebas automáticas (las de base de datos corren en un PostgreSQL de prueba)
+docs/                 Guías (poner en Neon, respaldos, manual del Administrador, cabeceras de seguridad)
 ```
 
 ## Para quien mejora lo visual
@@ -45,4 +47,4 @@ docs/                 Guías (manual del Administrador, cabeceras de seguridad)
 - Antes de subir cambios: `npm test` y `npm run build` deben pasar. Más reglas del equipo en [CLAUDE.md](CLAUDE.md).
 
 ## Historia
-La versión 1 (un solo `index.html` con Supabase) sigue en la rama `main`. La nueva versión está en `feat/v2`. Lo que se hizo con Supabase quedó guardado en la marca `referencia-supabase` por si alguien necesita consultar sus reglas. Detalle de cada sesión en [HISTORIAL.md](HISTORIAL.md).
+La versión 1 (un solo `index.html`) sigue en la rama `main`. La nueva versión está en `feat/v2`. Las reglas que se escribieron primero para Supabase quedaron guardadas en la marca `referencia-supabase`; la base actual es Neon. Detalle de cada sesión en [HISTORIAL.md](HISTORIAL.md).

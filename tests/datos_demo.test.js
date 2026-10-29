@@ -11,8 +11,8 @@ const form = (o = {}) => ({ tipoGestion: "Desviación", area: "Calidad Producto"
 beforeEach(() => { repo = crearAdaptadorDemo(); });
 
 describe("repositorio", () => {
-  it("mientras no haya base de datos conectada arranca en modo demostración", () => {
-    expect(crearRepositorio().demo).toBe(true);
+  it("mientras no haya base de datos conectada arranca en modo demostración", async () => {
+    expect((await crearRepositorio()).demo).toBe(true);
   });
 });
 

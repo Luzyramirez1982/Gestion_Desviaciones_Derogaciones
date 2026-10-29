@@ -15,11 +15,18 @@
 //                eliminarTipo(id), guardarConfig(clave, valor)
 //   personas:    actualizarPerfil(id, {nombre, rol, area}), crearUsuario({nombre, correo, rol, area}),
 //                restablecerClave(id), cambiarActivo(id, activo)
-//   en vivo:     suscribir(alCambiar) -> función para cancelar
+//   en vivo:     suscribir(alCambiar) -> función para cancelar (opcional)
 import { crearAdaptadorDemo } from "./demo.js";
+import { crearAdaptadorNeon } from "./neon.js";
 
-// Todavía no hay una base de datos real conectada (ver PLAN.md): la aplicación funciona en modo demostración,
-// con datos de ejemplo en memoria. Cuando se elija la base de datos, aquí se agrega su adaptador.
-export function crearRepositorio(){
+// Si existe VITE_NEON_URL (ver .env.example) la aplicación usa la base de datos real en Neon.
+// Sin ella funciona en modo demostración, con datos de ejemplo en memoria.
+// El SDK de Neon se carga solo cuando hay base real: así el modo demostración y las pruebas no lo necesitan.
+export async function crearRepositorio(urlNeon = import.meta.env && import.meta.env.VITE_NEON_URL){
+  if(urlNeon){
+    const { createClient } = await import("@neondatabase/neon-js");
+    const cliente = createClient(urlNeon);
+    return { ...crearAdaptadorNeon(cliente, { urlBase: location.origin }), demo: false };
+  }
   return { ...crearAdaptadorDemo(), demo: true, alEventoSesion: () => () => {} };
 }

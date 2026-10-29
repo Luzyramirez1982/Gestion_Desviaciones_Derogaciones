@@ -18,8 +18,8 @@ describe("cabeceras de seguridad", () => {
     expect(directiva("base-uri")).toEqual(["'self'"]);
     expect(texto).toContain("X-Frame-Options: DENY");
   });
-  it("por ahora solo se conecta a sí misma", () => {
-    expect(directiva("connect-src")).toEqual(["'self'"]);
+  it("solo se conecta a sí misma y a Neon", () => {
+    expect(directiva("connect-src")).toEqual(["'self'", "https://*.neon.tech"]);
     expect(directiva("default-src")).toEqual(["'self'"]);
   });
   it("trae las demás cabeceras", () => {

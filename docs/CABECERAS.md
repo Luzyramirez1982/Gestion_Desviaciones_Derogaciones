@@ -6,23 +6,16 @@ El archivo `public/_headers` se publica junto con la aplicación y le dice al na
 
 | Cabecera | Para qué sirve |
 |---|---|
-| `Content-Security-Policy` | Solo se ejecuta código de la propia aplicación; por ahora solo se conecta a ella (al elegir la base de datos hay que agregar su dirección). |
+| `Content-Security-Policy` | Solo se ejecuta código de la propia aplicación; se conecta a ella y a Neon (https://*.neon.tech). |
 | `X-Content-Type-Options: nosniff` | El navegador no adivina el tipo de archivo. |
 | `Referrer-Policy` | No se manda la dirección completa a otros sitios. |
 | `frame-ancestors 'none'` y `X-Frame-Options: DENY` | Nadie puede mostrar la aplicación dentro de otra página. |
 | `Permissions-Policy` | La aplicación no pide cámara, micrófono ni ubicación. |
 | `Strict-Transport-Security` | Siempre se usa https. |
 
-## Lo que hay que ajustar al conectar la base de datos
+## Neon
 
-Las cabeceras de Cloudflare **no pueden leer variables**, así que la dirección de la base de datos hay que escribirla a mano. Por ahora el archivo solo permite conexiones a la propia aplicación.
-
-Cuando se elija la base de datos, en `public/_headers`:
-
-- `connect-src`: agregue su dirección (por ejemplo `https://datos.empresa.com`, y `wss://datos.empresa.com` si usa actualización en vivo)
-- `img-src`: agregue su dirección si las imágenes se sirven desde ahí
-
-y vuelva a publicar.
+La base de datos y el ingreso viven en `*.neon.tech`, por eso `connect-src` los permite. Si Neon cambiara de dominio, hay que agregar el nuevo en `public/_headers` y volver a publicar. Los archivos se descargan desde la propia aplicación (lob:), así que img-src no necesita cambios.
 
 ## Cómo comprobar que quedó bien
 

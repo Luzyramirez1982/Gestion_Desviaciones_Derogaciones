@@ -18,6 +18,7 @@ Aplicación de MATEC para gestionar desviaciones y derogaciones, con ciclo de 3 
 ## Cómo se organiza el código (una sola responsabilidad)
 Cada carpeta y cada archivo se encargan de **una sola cosa**. Antes de crear algo, buscar si ya existe.
 - `src/dominio/` reglas del procedimiento (etapas, firmas, 8D, vigencias). Funciones puras, **sin pantalla ni base de datos**.
+- `db/migraciones/` la base de datos (SQL de PostgreSQL): se aplica en orden con `scripts/aplicar-migraciones.mjs`. Un cambio de reglas va en un archivo nuevo, no se edita uno ya aplicado.
 - `src/datos/` cómo se leen y guardan los datos. Las pantallas solo hablan con el repositorio (`repositorio.js`); nunca con una base de datos directamente. Cambiar de base de datos = cambiar el adaptador.
 - `src/vistas/` una pantalla por archivo. `src/componentes/` piezas reutilizables. `src/nucleo/` armado de la aplicación (sesión, menú, actualización en vivo).
 - `src/estilos/` **todo lo visual**, un archivo por tema (`base/`, `layout/`, `componentes/`, `vistas/`). Las pantallas no llevan estilos escritos dentro del JavaScript.
@@ -53,7 +54,7 @@ Cada carpeta y cada archivo se encargan de **una sola cosa**. Antes de crear alg
 - Siempre debe quedar al menos un Administrador activo.
 
 ## Costos y servicios
-Todo en planes gratuitos y **sin tarjeta** (Cloudflare Pages, GitHub y la base de datos que se elija). Si una opción pide tarjeta, no se usa.
+Todo en planes gratuitos y **sin tarjeta** (Cloudflare Pages, GitHub y Neon). Si una opción pide tarjeta, no se usa.
 
 ## Comandos
 ```bash

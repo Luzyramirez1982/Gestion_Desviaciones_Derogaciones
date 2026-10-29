@@ -42,7 +42,7 @@ En **Usuarios → Enlace de acceso a la aplicación** queda la dirección que se
 
 ## 6. Cuánto espacio queda
 
-Entre a **Uso del almacenamiento**. Las barras muestran cuánto se usó de los límites gratuitos de la base de datos y de los archivos (los valores exactos dependen de la base de datos que se elija).
+Entre a **Uso del almacenamiento**. Las barras muestran cuánto se usó de los límites gratuitos de la base de datos y de los archivos (en el plan gratuito de Neon, el espacio total es de 1 GB y lo comparten los datos y los archivos).
 
 | Color | Qué significa | Qué hacer |
 |---|---|---|
@@ -63,7 +63,7 @@ Solo el Administrador puede devolver un registro de **Cierre** a **Evaluación y
 
 ## 9. Respaldos
 
-Todos los días se hace una copia **cifrada** de la base de datos y de los archivos en un repositorio privado aparte, y se guardan 90 días. El Administrador no tiene que hacer nada, pero conviene:
+Todas las noches se hace una copia **cifrada** de toda la base de datos (solicitudes, archivos, firmas y personas) en GitHub, y se guarda 90 días. El Administrador no tiene que hacer nada, pero conviene:
 
 - Revisar de vez en cuando en GitHub (pestaña **Actions → Respaldo diario**) que las ejecuciones salgan en verde. Si una falla, GitHub avisa por correo.
 - Guardar en un lugar seguro la **contraseña de los respaldos**: sin ella no se pueden abrir.

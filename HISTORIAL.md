@@ -331,3 +331,19 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - `vistas/detalle.js` (392 líneas) → carpeta `vistas/detalle/` con 6 archivos (ciclo, plantilla, acciones, archivos, montar), sin dependencias circulares entre ellos.
 - Cada división se revisó con ESLint (`no-undef`) sobre todo `src/`: encontró y corrigió 4 errores reales que venían del código generado en la nube (importaciones faltantes y una variable `AREAS` que ya no existía en el modelo nuevo). Desde entonces, 0 errores en cada repaso.
 - 107 pruebas automáticas siguen pasando y la compilación funciona después de cada división.
+
+## Sesión 10 — 29/10/2026 · Base de datos elegida: Neon
+- **Decisión:** la base de datos es **Neon** (Postgres gratis y sin tarjeta, con su ingreso y su Data API). Se queda como principal; no hay una segunda base en paralelo. La seguridad de respaldo es una **copia cifrada cada noche** guardada 90 días en GitHub, que se puede restaurar en otro proyecto de Neon o en otro PostgreSQL.
+- **Base de datos (`db/migraciones/`, 5 pasos):** se portaron las reglas que estaban en la marca `referencia-supabase` (tablas, permisos por rol, área y etapa, consecutivo, control de versión, huella de eliminados, firmas, flujo) a PostgreSQL estándar con `auth.user_id()`. Los identificadores de persona son texto.
+- **Cambios frente a la versión de Supabase:**
+  - Los archivos y las firmas viven en la tabla `archivos` (base64) y se suben con `subir_archivo()`, que revisa quién puede subirlos, el tipo (sin programas ni comprimidos) y 5 MB. Un adjunto solo se anota si el archivo ya está guardado.
+  - Una cuenta de ingreso que no tenga perfil **no ve nada** (en Neon cualquiera podría crear una cuenta de ingreso). Antes las listas de apoyo las veía cualquier sesión.
+  - `crear_perfil()` da de alta a las personas (solo el Administrador); la cuenta de ingreso la crea Neon con su API de administración.
+  - El límite de espacio pasó a 1 GB (plan gratis de Neon) compartido entre datos y archivos.
+- **Aplicación:** nuevo adaptador `src/datos/neon.js` (la interfaz del repositorio no cambió; las pantallas tampoco). Se usa cuando existe `VITE_NEON_URL`; sin ella, modo demostración. El SDK de Neon se carga solo cuando hace falta.
+- **Scripts:** `aplicar-migraciones`, `cargar-catalogo`, `crear-primer-admin`.
+- **Respaldo:** plantilla `docs/respaldo-diario.yml` y guía `docs/RESPALDOS.md` reescritas para Neon. Guía de puesta en marcha: `docs/NEON_PASOS.md`.
+- **Seguridad de la página:** `connect-src` permite `https://*.neon.tech`.
+- **Pruebas:** 195 pruebas de base de datos, adaptador y reglas pasan en un PostgreSQL de prueba (PGlite). Las 5 pruebas de pantalla (jsdom) **no pudieron correr en el equipo donde se hizo esto** porque jsdom 30 pide Node 22.22 o más nuevo y el equipo tiene 22.13; hay que correrlas en otro equipo. La compilación funciona.
+- **Sin probar contra un Neon real:** ver la lista de comprobaciones de `docs/NEON_PASOS.md` (tamaño de peticiones con archivos, métodos del SDK para crear usuarios y cambiar contraseñas, recuperación por correo).
+- **Pendiente:** 11 avisos de `npm audit` que trae el SDK de Neon (dependencias que la aplicación no usa en pantalla).
