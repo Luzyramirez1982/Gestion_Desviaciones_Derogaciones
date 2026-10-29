@@ -9,7 +9,11 @@ import { isClosed, esDueno, canSignSlot, requisitosFirma, vigenciaTexto } from "
 import { correoDeAviso } from "../dominio/mensajes.js";
 import { daysUntil } from "../util/fechas.js";
 import { crearGuardador, textoEstado } from "../util/guardador.js";
-import { icon, areaBadge, tipoGestionBadge, criticidadBadge, adjuntosHTML, fmtFecha, confirmar, pedirTexto } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { areaBadge, tipoGestionBadge, criticidadBadge } from "../componentes/insignias.js";
+import { adjuntosHTML } from "../componentes/listaAdjuntos.js";
+import { fmtFecha } from "../util/formato.js";
+import { confirmar, pedirTexto } from "../componentes/dialogos.js";
 import { d8HTML, enlazarD8 } from "../componentes/editor8d.js";
 import { montarFirma } from "../componentes/firma.js";
 import { prepararArchivos } from "../componentes/adjuntos.js";

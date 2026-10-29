@@ -2,7 +2,8 @@
 // Las pantallas viven en src/vistas/ y solo hablan con el repositorio (src/datos/repositorio.js).
 import { esc } from "../util/html.js";
 import { STAGES } from "../dominio/constantes.js";
-import { icon, aviso } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { aviso } from "../componentes/avisos.js";
 import * as vAuth from "../vistas/auth.js";
 import * as vPanel from "../vistas/panel.js";
 import * as vLista from "../vistas/lista.js";

@@ -2,7 +2,8 @@
 import { esc } from "../util/html.js";
 import { ROLES, MAX_FILE_MB } from "../dominio/constantes.js";
 import { ROLE_DESC } from "../dominio/presentacion.js";
-import { icon, areaBadge } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { areaBadge } from "../componentes/insignias.js";
 export function instructivo8DHTML(){
   const ej = t => `<div class="ej"><b>Ejemplo:</b> ${t}</div>`;
   const paso = (titulo, que, como, ejemplo, evitar) => `

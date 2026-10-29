@@ -4,7 +4,9 @@ import { esc, urlSegura } from "../util/html.js";
 import { ROLES } from "../dominio/constantes.js";
 import { mensajeAcceso } from "../dominio/mensajes.js";
 import { direccionPublicada, enlaceValido } from "../util/enlace.js";
-import { icon, areaBadge, confirmar, pedirTexto, informar } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { areaBadge } from "../componentes/insignias.js";
+import { confirmar, pedirTexto, informar } from "../componentes/dialogos.js";
 
 // El enlace sale del que guardó el Administrador o, si no hay, de la dirección publicada. Nunca de localhost ni de un archivo local.
 export const enlaceAcceso = (ctx) => urlSegura((ctx.base.configuracion.enlace_acceso || {}).url) || direccionPublicada(location.href);

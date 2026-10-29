@@ -1,6 +1,7 @@
 // Tipos de desviación o derogación por área: agregar, editar la descripción y quitar.
 import { esc } from "../util/html.js";
-import { icon, areaBadge } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { areaBadge } from "../componentes/insignias.js";
 
 export function html(ctx){
   const { areas, tipos } = ctx.base;

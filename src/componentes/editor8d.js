@@ -3,7 +3,7 @@
 import { esc } from "../util/html.js";
 import { D8_FIELDS, W2H_FIELDS, WHYS_COUNT, WHYS_REQUIRED, ACT_TABLES } from "../dominio/constantes.js";
 import { emptyD8, emptyActRow } from "../dominio/d8.js";
-import { icon } from "./ui.js";
+import { icon } from "./iconos.js";
 
 function tablaAcciones(tipo, filas, { deshabilitado, personas }){
   const cfg = ACT_TABLES[tipo], dis = deshabilitado ? "disabled" : "";

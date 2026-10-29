@@ -2,7 +2,8 @@
 import { esc } from "../util/html.js";
 import { STAGES, TIPOS_GESTION } from "../dominio/constantes.js";
 import { isClosed } from "../dominio/registro.js";
-import { icon, stageBadge } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { stageBadge } from "../componentes/insignias.js";
 
 const POR_PAGINA = 20;
 

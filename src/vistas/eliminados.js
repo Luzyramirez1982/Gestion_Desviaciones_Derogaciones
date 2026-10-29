@@ -1,6 +1,8 @@
 // Registros eliminados: la huella (quién, cuándo y por qué) y la opción de restaurar. La huella no se borra.
 import { esc } from "../util/html.js";
-import { icon, fmtFecha, confirmar } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
+import { fmtFecha } from "../util/formato.js";
+import { confirmar } from "../componentes/dialogos.js";
 
 export function html(ctx){
   const lista = ctx.eliminados;

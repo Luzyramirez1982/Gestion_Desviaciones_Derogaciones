@@ -4,7 +4,8 @@ import { STAGES, TIPOS_GESTION } from "../dominio/constantes.js";
 import { STAGE_COLORS, TIPO_GESTION_COLORS } from "../dominio/presentacion.js";
 import { isClosed } from "../dominio/registro.js";
 import { daysUntil } from "../util/fechas.js";
-import { kpiCard, barChart, icon } from "../componentes/ui.js";
+import { kpiCard, barChart } from "../componentes/tarjetas.js";
+import { icon } from "../componentes/iconos.js";
 
 // Los borradores sin enviar no cuentan en las cifras.
 export const enviados = (ctx) => ctx.registros.filter(r => !r.borrador);

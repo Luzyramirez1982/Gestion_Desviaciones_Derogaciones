@@ -1,7 +1,7 @@
 // Uso del almacenamiento (solo Administrador): avisa al 70 % y al 90 % de los límites gratuitos.
 import { esc } from "../util/html.js";
 import { nivelUso, bytesLegibles, mensajeUso } from "../util/uso.js";
-import { icon } from "../componentes/ui.js";
+import { icon } from "../componentes/iconos.js";
 
 const COLOR = {normal: "#15803d", aviso: "#d97706", alerta: "#b91c1c"};
 
