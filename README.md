@@ -1,7 +1,6 @@
 # Gestión de Desviaciones y Derogaciones — MATEC
 
-Proyecto creado el 28/09/2026 a partir del artefacto publicado
-"GESTIÓN DE DESVIACIONES MATEC" (https://claude.ai/artifact/2uRRgnkJRp4Te5gb5GLvkR).
+Proyecto creado el 28/09/2026.
 Última actualización: 25/10/2026.
 
 ## Archivos

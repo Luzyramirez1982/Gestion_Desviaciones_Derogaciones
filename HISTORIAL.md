@@ -1,6 +1,6 @@
 # Historial del proyecto — Gestión de Desviaciones y Derogaciones MATEC
 
-Registro de las conversaciones de trabajo con Claude sobre este proyecto.
+Registro de las solicitudes de trabajo sobre este proyecto.
 **Archivo de trabajo principal:** `index.html` (en esta misma carpeta). Todos los cambios se hacen sobre ese archivo.
 
 ---
@@ -12,14 +12,14 @@ Registro de las conversaciones de trabajo con Claude sobre este proyecto.
 
 **Qué se hizo:**
 - Se revisaron los artefactos publicados. Se encontraron dos candidatos:
-  - **GESTIÓN DE DESVIACIONES MATEC** — https://claude.ai/artifact/2uRRgnkJRp4Te5gb5GLvkR (título interno en la app: "Gestión de Desviaciones y Derogaciones"). **← Elegido como base del proyecto.**
-  - Gestión de Desviaciones MATEC — https://claude.ai/artifact/RQxQfJmsX86gk5MRYjvxcu (versión anterior: estados Registrada / Pendiente / Devuelta / Aprobada / Cerrada y 4 roles). No se usó.
-- Se creó la carpeta del proyecto `C:\Cowork\Gestión de desviaciones y derogaciones` con:
+  - **GESTIÓN DE DESVIACIONES MATEC** (título interno en la app: "Gestión de Desviaciones y Derogaciones"). **← Elegido como base del proyecto.**
+  - Gestión de Desviaciones MATEC (versión anterior: estados Registrada / Pendiente / Devuelta / Aprobada / Cerrada y 4 roles). No se usó.
+- Se creó la carpeta del proyecto `C:\Proyectos\Gestión de desviaciones y derogaciones` con:
   - `index.html` — copia fiel del artefacto elegido (aplicativo completo).
   - `config.js` — plantilla de conexión a Supabase (el artefacto la referencia pero no estaba publicada). Sin configurar, la app funciona en **Modo local** con datos de ejemplo que no se guardan al recargar.
   - `supabase_schema.sql` — tablas `registros`, `usuarios`, `tipos_desviacion`.
   - `README.md` — instrucciones de uso y de activación de la base de datos.
-- Se actualizó la nota de contexto del proyecto en Claude (`claude/contexto_proyecto_matec.md`) indicando que esta carpeta es la base de trabajo.
+- Se actualizó la nota de contexto del proyecto indicando que esta carpeta es la base de trabajo.
 
 ### Solicitud 2
 > "Requiero crear un archivo HTML con este artefacto que será mi proyecto para continuar trabajando en él. A partir de aquí vamos a trabajar sobre el archivo que acabaste de crear... recuerda generar un archivo .MD para guardar la historia de esta conversación."
@@ -43,7 +43,7 @@ Registro de las conversaciones de trabajo con Claude sobre este proyecto.
 **Qué se hizo:**
 - `config.js` actualizado con el proyecto Supabase `https://ngwsvtlgripohebhtbxs.supabase.co` y su clave publishable.
 - `supabase_schema.sql` ajustado para poder ejecutarse varias veces sin error (borra y recrea las políticas) y con permisos explícitos para la clave publishable.
-- Las tablas **no se pudieron crear automáticamente**: la clave publishable no tiene permiso para crear tablas (solo leer/escribir datos) y el entorno de Claude no tiene acceso de red a Supabase. La usuaria debe ejecutar `supabase_schema.sql` una vez en el SQL Editor de Supabase.
+- Las tablas **no se pudieron crear automáticamente**: la clave publishable no tiene permiso para crear tablas (solo leer/escribir datos) y el entorno de trabajo no tiene acceso de red a Supabase. La usuaria debe ejecutar `supabase_schema.sql` una vez en el SQL Editor de Supabase.
 - Al abrir `index.html` con la base vacía, la app carga automáticamente los usuarios, tipos y registros de ejemplo; desde ahí todo cambio queda guardado.
 
 ### Solicitud 5
@@ -52,11 +52,11 @@ Registro de las conversaciones de trabajo con Claude sobre este proyecto.
 **Qué se decidió:** no aplicar esas instrucciones. Son para un proyecto Next.js con servidor; el aplicativo es un único `index.html` que carga supabase-js desde CDN y lee la URL y la clave desde `config.js`, que es lo equivalente y ya está hecho. Migrar a Next.js queda como opción futura, solo si se decide.
 
 ### Solicitud 6
-> "Actualiza la información también en esta ruta: C:\COWORK\Gestión de proyectos."
+> "Actualiza la información también en esta ruta: C:\Proyectos\Gestión de proyectos."
 
 **Qué se hizo:**
-- Se copió el proyecto completo (index.html, config.js, supabase_schema.sql, README.md, HISTORIAL.md) a `C:\COWORK\Gestión de proyectos\Gestión de Desviaciones y Derogaciones\`. Se usó una subcarpeta porque `config.js` debe estar junto a `index.html`, y para no reemplazar el `Gestión de Desviaciones MATEC.html` anterior que ya estaba en esa carpeta (es la otra versión del aplicativo, con 4 roles y 5 estados).
-- Se agregó una sección nueva al final de los dos `Historial del proyecto.md` de esa carpeta (el de la raíz y el de `Claude outputs`), explicando el cambio al nuevo proyecto base.
+- Se copió el proyecto completo (index.html, config.js, supabase_schema.sql, README.md, HISTORIAL.md) a `C:\Proyectos\Gestión de proyectos\Gestión de Desviaciones y Derogaciones\`. Se usó una subcarpeta porque `config.js` debe estar junto a `index.html`, y para no reemplazar el `Gestión de Desviaciones MATEC.html` anterior que ya estaba en esa carpeta (es la otra versión del aplicativo, con 4 roles y 5 estados).
+- Se agregó una sección nueva al final de los dos `Historial del proyecto.md` de esa carpeta (el de la raíz y el de `Salidas`), explicando el cambio al nuevo proyecto base.
 
 ### Solicitud 7
 > Redactar el Instructivo paso a paso por rol y describir las bondades del aplicativo, dejando claro el alcance del Aprobador autorizado. Permitir cargar más de un archivo. Rol Solicitante: no habilitar las ventanas de las demás etapas; solo aviso de creación con el consecutivo para seguimiento. Función para editar y eliminar usuarios y asignarles rol y área. Cada rol debe tener al final la opción de firmar su aprobación.
@@ -137,7 +137,7 @@ Registro de las conversaciones de trabajo con Claude sobre este proyecto.
 - Tiene las mismas funciones que el Líder de SST: solo ve los registros relacionados con SST, edita el concepto de SST, puede avanzar la etapa 3 y firmar "Etapa 3 · Evaluación de SST". Basta la firma de uno de los dos; la firma guarda quién firmó y con qué rol, y así aparece en el registro y en el PDF.
 - Instructivo, textos de ayuda, bitácora y README actualizados.
 
-**Archivos actualizados:** `index.html`, `README.md` (reescrito con el estado actual), `HISTORIAL.md`, los dos `Historial del proyecto.md` de `C:\COWORK\Gestión de proyectos` y la nota de contexto del proyecto en Claude.
+**Archivos actualizados:** `index.html`, `README.md` (reescrito con el estado actual), `HISTORIAL.md`, los dos `Historial del proyecto.md` de `C:\Proyectos\Gestión de proyectos` y la nota de contexto del proyecto.
 
 **Verificación:** 75 pruebas funcionales correctas (incluye flujo completo con la firma SST hecha por el Coordinador(a) SST).
 
@@ -188,9 +188,9 @@ Registro de las conversaciones de trabajo con Claude sobre este proyecto.
 **Verificación:** 47 pruebas funcionales correctas (incluye salir y volver al borrador y recargarlo con el botón).
 
 ### Solicitud 16
-> Actualizar todos los cambios realizados a la fecha en la carpeta de Cowork de esta computadora y conectar con Supabase.
+> Actualizar todos los cambios realizados a la fecha en la carpeta del proyecto de esta computadora y conectar con Supabase.
 
-**Qué se hizo:** se actualizó la carpeta `C:\Cowork\Gestión de desviaciones y derogaciones` del equipo laptop-fmhkshl5, que tenía la primera versión (28/09): `index.html` (versión vigente con todos los cambios hasta la Solicitud 15), `config.js` con la conexión a Supabase (proyecto `ngwsvtlgripohebhtbxs`; antes tenía la plantilla sin datos), `supabase_schema.sql` (con la tabla `configuracion`), `README.md`, `HISTORIAL.md` y la copia de `Claude outputs\index.html`. Ambas carpetas quedan iguales.
+**Qué se hizo:** se actualizó la carpeta `C:\Proyectos\Gestión de desviaciones y derogaciones` del equipo laptop-fmhkshl5, que tenía la primera versión (28/09): `index.html` (versión vigente con todos los cambios hasta la Solicitud 15), `config.js` con la conexión a Supabase (proyecto `ngwsvtlgripohebhtbxs`; antes tenía la plantilla sin datos), `supabase_schema.sql` (con la tabla `configuracion`), `README.md`, `HISTORIAL.md` y la copia de `Salidas\index.html`. Ambas carpetas quedan iguales.
 
 ---
 
@@ -244,4 +244,4 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 ### Pendientes / próximos pasos
 - Validar con SST la lista de clasificación GTC 45 contra la norma.
 - Ejecutar el nuevo `supabase_schema.sql`, configurar el proveedor Email de Supabase, publicar la aplicación y activar la cuenta del Administrador (ver README).
-- Sincronizar `C:\COWORK\Gestión de proyectos` (equipo p-lramirez1) con la Solicitud 18 cuando ese equipo esté conectado.
+- Sincronizar `C:\Proyectos\Gestión de proyectos` (equipo p-lramirez1) con la Solicitud 18 cuando ese equipo esté conectado.
