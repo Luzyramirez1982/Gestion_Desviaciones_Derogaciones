@@ -3,7 +3,7 @@
 Guía para quien se una al proyecto: qué se quiere lograr, qué se decidió, qué está hecho y qué falta.
 **Cuando termines algo, marca la casilla y cambia la fecha.** Detalle de cada sesión: [HISTORIAL.md](HISTORIAL.md). Reglas de trabajo: [CLAUDE.md](CLAUDE.md).
 
-_Última actualización: 29/10/2026_
+_Última actualización: 29/10/2026 (tarde)_
 
 Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a una cuenta de la clienta
 
@@ -51,7 +51,7 @@ Tareas una vez elegida:
 
 ## 5. Pendiente: calidad del código y lo visual
 - [x] Un solo árbol `src/` con carpetas por responsabilidad.
-- [~] Dividir los archivos grandes (`vistas/formulario.js`, `vistas/detalle.js`, `vistas/ayuda.js`) en piezas de una sola responsabilidad.
+- [x] Dividir los archivos grandes (`vistas/formulario.js`, `vistas/detalle.js`, `vistas/ayuda.js`, `componentes/ui.js`) en piezas de una sola responsabilidad. Revisado con ESLint (`no-undef`) sobre todo `src/`.
 - [ ] Revisión visual y mejora de la interfaz (socio de diseño).
 
 ## 6. Pendiente: publicación y entrega

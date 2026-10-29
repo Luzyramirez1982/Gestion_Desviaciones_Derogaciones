@@ -323,3 +323,11 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - **Un solo árbol `src/`:** la carpeta `app/` pasó a `src/` (núcleo, componentes, vistas, estilos). `index.html` y `public/` quedan en la raíz.
 - **Estilos separados por tema** (30 archivos en `src/estilos/`) para que un socio mejore lo visual sin tocar lógica.
 - La aplicación funciona en modo demostración hasta conectar la nueva base de datos. 107 pruebas.
+
+**Más del mismo día — código dividido en piezas de una sola responsabilidad:**
+- `componentes/ui.js` (126 líneas) → 7 archivos (íconos, formato, insignias, tarjetas, lista de adjuntos, avisos, diálogos).
+- `vistas/ayuda.js` (328 líneas) → carpeta `vistas/ayuda/` con 4 archivos (pantalla, instructivo 8D, ejemplos, ventana emergente).
+- `vistas/formulario.js` (421 líneas) → carpeta `vistas/formulario/` con 8 archivos (preparar, plantilla, clasificación de campos, acciones, montar, datos, rellenar).
+- `vistas/detalle.js` (392 líneas) → carpeta `vistas/detalle/` con 6 archivos (ciclo, plantilla, acciones, archivos, montar), sin dependencias circulares entre ellos.
+- Cada división se revisó con ESLint (`no-undef`) sobre todo `src/`: encontró y corrigió 4 errores reales que venían del código generado en la nube (importaciones faltantes y una variable `AREAS` que ya no existía en el modelo nuevo). Desde entonces, 0 errores en cada repaso.
+- 107 pruebas automáticas siguen pasando y la compilación funciona después de cada división.
