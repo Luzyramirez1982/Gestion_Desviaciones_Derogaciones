@@ -50,7 +50,7 @@ Dónde está cada cosa en el repositorio:
 | `src/dominio/` | Las reglas del procedimiento (etapas, firmas, 8D, vigencias, quién ve qué). |
 | `src/util/` | Fechas con hora de Colombia y protección de enlaces. |
 | `src/migracion/` | Convierte los datos de la versión 1 al modelo nuevo. |
-| `tests/` | Pruebas automáticas (124). |
+| `tests/` | Pruebas automáticas (132). |
 
 ## 4. Fallas que se están corrigiendo
 
@@ -87,7 +87,7 @@ Dónde está cada cosa en el repositorio:
 - [x] Pruebas de todo lo anterior sobre un PostgreSQL de prueba (incluye partir de una base con la versión 1).
 - [ ] Ejecutar las migraciones en el Supabase de **pruebas** y repetir las pruebas allí (hasta ahora solo se probó en un PostgreSQL simulado). 🔑
 - [ ] Activar actualización en vivo (Realtime) en la tabla `registros` para que varias personas vean los cambios sin recargar.
-- [ ] **Función del servidor para usuarios** (`supabase/functions/admin-usuarios`): crear cuenta con contraseña temporal, restablecer contraseña y desactivar. Solo la puede llamar un Administrador. La clave `service_role` queda como secreto, nunca en la aplicación.
+- [~] **Función del servidor para usuarios** (`supabase/functions/admin-usuarios`): crear cuenta con contraseña temporal, restablecer, desactivar y activar. Solo la puede llamar un Administrador. La clave `service_role` queda como secreto, nunca en la aplicación. Ya está escrita y su lógica probada (`logica.js`); falta **desplegarla y probarla en Supabase** (`supabase functions deploy admin-usuarios`). 🔑
 - [ ] Script para crear el **primer Administrador** (reemplaza la "activación" desde la pantalla).
 - [ ] En Supabase: apagar *Allow new users to sign up*, exigir contraseñas de 8+ caracteres con letras y números, configurar *Site URL* y *Redirect URLs*. 🔑
 - [ ] Activar verificación en dos pasos (TOTP, gratis) para las cuentas de Administrador. 🔑
@@ -155,5 +155,5 @@ Dónde está cada cosa en el repositorio:
 
 ```bash
 npm install     # una sola vez
-npm test        # corre las 124 pruebas (tardan unos 5 segundos, no necesitan internet)
+npm test        # corre las 132 pruebas (tardan unos 5 segundos, no necesitan internet)
 ```
