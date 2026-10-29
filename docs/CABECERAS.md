@@ -1,26 +1,26 @@
 # Cabeceras de seguridad (Cloudflare Pages)
 
-El archivo `app/public/_headers` se publica junto con la aplicación y le dice al navegador qué puede y qué no puede hacer la página. Protege contra que alguien meta código ajeno en la aplicación o la ponga dentro de otra página.
+El archivo `public/_headers` se publica junto con la aplicación y le dice al navegador qué puede y qué no puede hacer la página. Protege contra que alguien meta código ajeno en la aplicación o la ponga dentro de otra página.
 
 ## Qué incluye
 
 | Cabecera | Para qué sirve |
 |---|---|
-| `Content-Security-Policy` | Solo se ejecuta código de la propia aplicación; solo se conecta a ella y a Supabase. |
+| `Content-Security-Policy` | Solo se ejecuta código de la propia aplicación; por ahora solo se conecta a ella (al elegir la base de datos hay que agregar su dirección). |
 | `X-Content-Type-Options: nosniff` | El navegador no adivina el tipo de archivo. |
 | `Referrer-Policy` | No se manda la dirección completa a otros sitios. |
 | `frame-ancestors 'none'` y `X-Frame-Options: DENY` | Nadie puede mostrar la aplicación dentro de otra página. |
 | `Permissions-Policy` | La aplicación no pide cámara, micrófono ni ubicación. |
 | `Strict-Transport-Security` | Siempre se usa https. |
 
-## Lo único que hay que ajustar: la dirección de Supabase
+## Lo que hay que ajustar al conectar la base de datos
 
-Las cabeceras de Cloudflare **no pueden leer variables**, así que la dirección de Supabase no se escribe sola. El archivo ya permite todo `*.supabase.co` y `wss://*.supabase.co` (la actualización en vivo), así que **normalmente no hay que tocar nada**.
+Las cabeceras de Cloudflare **no pueden leer variables**, así que la dirección de la base de datos hay que escribirla a mano. Por ahora el archivo solo permite conexiones a la propia aplicación.
 
-Solo si el proyecto usa un dominio propio (por ejemplo `datos.empresa.com`), cambie en `app/public/_headers`:
+Cuando se elija la base de datos, en `public/_headers`:
 
-- `connect-src`: agregue `https://datos.empresa.com wss://datos.empresa.com`
-- `img-src`: agregue `https://datos.empresa.com`
+- `connect-src`: agregue su dirección (por ejemplo `https://datos.empresa.com`, y `wss://datos.empresa.com` si usa actualización en vivo)
+- `img-src`: agregue su dirección si las imágenes se sirven desde ahí
 
 y vuelva a publicar.
 

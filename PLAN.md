@@ -1,179 +1,66 @@
 # Plan del proyecto — Gestión de Desviaciones y Derogaciones (MATEC)
 
-Este documento es la guía para quien se una al proyecto: qué se quiere lograr, qué decisiones se tomaron, qué ya está hecho y qué falta.
-**Cuando termines algo, marca la casilla y actualiza la fecha de abajo.** Los detalles de cada cambio van en [HISTORIAL.md](HISTORIAL.md); las reglas de trabajo, en [CLAUDE.md](CLAUDE.md).
+Guía para quien se una al proyecto: qué se quiere lograr, qué se decidió, qué está hecho y qué falta.
+**Cuando termines algo, marca la casilla y cambia la fecha.** Detalle de cada sesión: [HISTORIAL.md](HISTORIAL.md). Reglas de trabajo: [CLAUDE.md](CLAUDE.md).
 
 _Última actualización: 29/10/2026_
 
-Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a las cuentas de la clienta (Supabase, Cloudflare, GitHub)
-
----
+Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a una cuenta de la clienta
 
 ## 1. Qué se quiere lograr
-
-La clienta (C.I. Matec Logística) usa una aplicación para gestionar **desviaciones y derogaciones** de proceso: cada solicitud pasa por tres etapas (Solicitud → Evaluación y Aprobación → Cierre), con firma en cada una, y las derogaciones exigen un reporte 8D.
-
-Lo que pidió: dejar la aplicación **lista para trabajar, compartirla con sus usuarios** (falta el enlace de acceso) y **garantizar que guarde los cambios**, sin perder información, sin retrasos y **sin costo**, porque no puede pagar planes ni registrar tarjetas.
-
-La revisión del proyecto encontró fallas que ponían en riesgo justo eso (ver sección 4). Por eso, antes de compartir el enlace, se está reconstruyendo la parte de datos y seguridad.
+La clienta (C.I. Matec Logística) necesita una aplicación para gestionar **desviaciones y derogaciones**, lista para trabajar, compartida con sus usuarios (falta el enlace de acceso) y que **guarde los cambios sin perder información**. Todo gratis y **sin tarjeta**: no puede pagar planes.
 
 ## 2. Decisiones tomadas
-
 | Tema | Decisión |
 |---|---|
-| Publicación | **Cloudflare Pages** (gratis), conectado a este repositorio de GitHub. El enlace será `<nombre>.pages.dev`. |
-| Base de datos | **Supabase gratis**, con respaldo diario fuera de Supabase y una consulta diaria para que no se pause por inactividad. |
-| Costos | Todo gratis y **sin tarjeta**. Si algo exige tarjeta, no se usa. |
-| Archivos (adjuntos y firmas) | Fuera de la base de datos, en un bucket privado. Se empieza en Supabase Storage (1 GB) con imágenes comprimidas. Cuando la clienta diga qué correo usa la empresa, se agrega Google Drive u OneDrive (más espacio, también gratis). |
-| Código | Se separa el `index.html` gigante en módulos con **Vite**, conservando la interfaz y las reglas actuales. No se reescribe en otro framework. |
-| Datos que ya existen | **Se empieza desde cero (decisión de la clienta, 29/10/2026):** no se migran registros ni usuarios de la versión 1. Solo existirá su usuario como Administradora. Las herramientas de migración (`src/migracion/`, `scripts/migrar-v1-a-v2.mjs`) se conservan por si hicieran falta, pero **no se usan**. |
-| Seguridad | Los permisos los exige la **base de datos** (no solo la pantalla): por rol, por área y por etapa. |
-| Excel | `write-excel-file` 4.1.1 (genera `.xlsx` de verdad, 0 vulnerabilidades en `npm audit`). Se descartó `xlsx` 0.18.5 por vulnerabilidades conocidas. |
-| Tiempo real | La tabla `registros` entra a la publicación `supabase_realtime` (migración 0006); la app refresca sola, al volver a la pestaña y al volver la conexión. |
-| Enlace de acceso | Se llena solo con la dirección publicada; el Administrador puede guardar otro enlace `https`. |
-| Seguridad del navegador | CSP estricta en `app/public/_headers`; solo se permite `*.supabase.co` para datos. |
-| Ramas | Todo el trabajo va en `feat/v2`. `main` es lo que se publica; no se toca hasta el cambio final. |
+| Arranque | **Desde cero (pedido de la clienta, 29/10/2026):** no se migran datos de la versión 1; solo existirá su usuario como Administradora. |
+| Publicación | Cloudflare Pages (gratis) desde este repositorio. |
+| Base de datos | **Supabase descartado.** La nueva base **está por elegir** (ver sección 4). Lo hecho con Supabase quedó en la marca `referencia-supabase`. |
+| Interfaz | Aplicación con Vite en `src/`, una pantalla por archivo y estilos separados por tema, para que un socio mejore lo visual. |
+| Costos | Todo gratis y sin tarjeta. Si algo pide tarjeta, no se usa. |
 
-## 3. Cómo está armado
+## 3. Estado actual
+- [x] Interfaz completa en modo demostración: ingreso, panel, lista (filtros y paginación), formulario de nuevo registro (8D, firma, borradores), detalle (firmas, devolver, rechazar, retroceder), usuarios, tipos y áreas, registros eliminados, instructivo, uso del almacenamiento.
+- [x] Reglas del procedimiento en `src/dominio/` (etapas, firmas, 8D, vigencias, quién ve qué) con pruebas.
+- [x] Guardado confiable en pantalla: indicador, reintentos y aviso de conflicto de versión.
+- [x] PDF de trazabilidad y Excel histórico.
+- [x] Compresión de fotos y límites de archivo (5 MB).
+- [x] Cabeceras de seguridad para Cloudflare (`public/_headers`).
+- [x] Estilos separados por tema en `src/estilos/`.
+- [x] 107 pruebas automáticas, 0 vulnerabilidades, compilación correcta.
 
-```
-Cloudflare Pages (la aplicación)  ──►  Supabase (gratis)
-                                         ├─ Auth: ingreso con correo y contraseña (registro abierto APAGADO)
-                                         ├─ Base de datos: tablas con permisos por rol + funciones que revisan las reglas
-                                         ├─ Función del servidor: crear y restablecer usuarios (solo Administrador)
-                                         └─ Storage privado: adjuntos e imágenes de firmas
-GitHub Actions (cada día) ──► copia cifrada de la base y de los archivos a un repositorio privado aparte
-```
+## 4. Pendiente: elegir la base de datos
+Lo que debe cumplir (aprendido con la versión 1):
+- Gratis, sin tarjeta y que **no se pause ni deje de guardar**.
+- **Seguridad por rol, área y etapa** exigida en el servidor, no solo en la pantalla (nadie debe poder saltarse una firma).
+- **Consecutivo `MTC-###` que no se repita** y **control de versión** para que dos personas no se pisen.
+- **Huella de eliminados** (quién, cuándo, por qué) que nadie pueda borrar.
+- **Archivos** de hasta 5 MB, privados.
+- **Respaldo** automático fuera del proveedor.
+- Cuentas creadas solo por el Administrador, con contraseña temporal.
 
-Dónde está cada cosa en el repositorio:
+Tareas una vez elegida:
+- [ ] Elegir la base de datos y dejar la decisión escrita aquí.
+- [ ] Escribir su adaptador en `src/datos/` (la interfaz está descrita en `src/datos/repositorio.js`; las pantallas no cambian).
+- [ ] Escribir las reglas de seguridad y del flujo en el servidor, con pruebas (las reglas están en `src/dominio/` y, como referencia, en la marca `referencia-supabase`).
+- [ ] Crear al Administrador (la clienta) y cargar el catálogo inicial de áreas y tipos (propuesta: las 8 áreas y sus tipos por defecto, editables; confirmar con ella). 🔑
+- [ ] Archivos privados con enlaces temporales.
+- [ ] Actualización en vivo (opcional: la interfaz ya la soporta si el adaptador ofrece `suscribir`).
+- [ ] Respaldo diario cifrado (hay un flujo de GitHub Actions que armó el equipo y quedó pendiente de adaptar a la nueva base).
+- [ ] Ajustar `public/_headers` con la dirección de la nueva base (ver `docs/CABECERAS.md`).
 
-| Carpeta o archivo | Qué contiene |
-|---|---|
-| `index.html`, `config.js`, `supabase_schema.sql` | La aplicación **actual** (versión 1). No se modifica hasta el cambio final. |
-| `supabase/migrations/` | La base de datos nueva, en 7 pasos numerados (0000 a 0006). |
-| `src/dominio/` | Las reglas del procedimiento (etapas, firmas, 8D, vigencias, quién ve qué). |
-| `src/util/` | Fechas con hora de Colombia y protección de enlaces. |
-| `src/migracion/` | Convierte los datos de la versión 1 al modelo nuevo. |
-| `src/respaldo/`, `scripts/`, `docs/respaldo-diario.yml` | Cifrado y copia de respaldos, y la plantilla del flujo diario de GitHub. |
-| `docs/` | Guías (por ahora, respaldos y restauración). |
-| `app/` | La aplicación nueva (Vite): pantallas, estilos y cabeceras de seguridad. |
-| `src/datos/` | Capa de datos con adaptador Supabase y adaptador de demostración. |
-| `tests/` | Pruebas automáticas (más de 260: base de datos, reglas, adaptadores e interfaz). |
+## 5. Pendiente: calidad del código y lo visual
+- [x] Un solo árbol `src/` con carpetas por responsabilidad.
+- [~] Dividir los archivos grandes (`vistas/formulario.js`, `vistas/detalle.js`, `vistas/ayuda.js`) en piezas de una sola responsabilidad.
+- [ ] Revisión visual y mejora de la interfaz (socio de diseño).
 
-## 4. Fallas que se están corrigiendo
+## 6. Pendiente: publicación y entrega
+- [ ] Publicar en Cloudflare Pages (`npm run build`, carpeta `dist`). 🔑
+- [ ] Probar desde celular y computador: primer ingreso, recuperación de contraseña, firmar, cerrar, PDF y Excel.
+- [ ] Actualizar `docs/MANUAL_ADMINISTRADOR.md` con la base elegida y entregarlo.
+- [ ] Fusionar `feat/v2` en `main`.
 
-| Falla de la versión 1 | Cómo se corrige | Estado |
-|---|---|---|
-| Cualquier persona con la clave pública podía registrarse y leer, editar o borrar todo. | Permisos por rol y área en la base de datos; registro abierto apagado. | Base de datos `[x]` · apagar registro en Supabase `[ ]` 🔑 |
-| Dos personas creando solicitudes a la vez recibían el mismo consecutivo y una pisaba a la otra. | Consecutivo asignado por la base de datos. | `[x]` |
-| Ediciones simultáneas se pisaban sin aviso. | Control de versión: avisa en vez de sobrescribir. | Base de datos `[x]` · aviso en pantalla `[~]` (probado con la base simulada; falta con dos personas reales) |
-| Errores al guardar no se mostraban. | Indicador "Guardando / Guardado / Error", reintentos. | `[~]` (hecho; falta probarlo contra Supabase real) |
-| Adjuntos y firmas dentro del registro llenaban los 500 MB y volvían lenta la app. | Archivos aparte, comprimidos, con límites. | Base de datos `[x]` · pantalla `[~]` (hecho; falta probarlo contra Storage real) |
-| Fechas con hora de Londres (desde las 7 p. m. mostraba el día siguiente). | Fechas con hora de Colombia. | Reglas `[x]` · uso en la pantalla `[x]` |
-| Enlaces con código malicioso posible (XSS). | Enlaces validados y textos escapados. | Funciones `[x]` · uso en la pantalla `[x]` (todo texto con `esc()`, todo enlace con `urlSegura()`, con prueba) |
-| Datos de ejemplo con correos reales subían a producción. | Datos de ejemplo solo en modo demostración (datos inventados, sin correos reales). | `[x]` |
-| Las reglas (quién firma, 8D completo) solo las revisaba la pantalla. | Las revisa la base de datos. | `[x]` |
-
----
-
-## 5. Avance por fases
-
-### Fase 0 — Preparación y resguardo
-- [x] Repositorio identificado: `Luzyramirez1982/Gestion_Desviaciones_Derogaciones` (cuenta de la clienta).
-- [x] Rama de trabajo `feat/v2` creada y publicada.
-- [ ] Confirmar que el repositorio sea **privado**. 🔑
-- [ ] **Exportar los datos actuales** del Supabase de la clienta (las 5 tablas en JSON y la lista de cuentas de acceso). Es la copia de seguridad inicial. 🔑
-- [ ] Crear el proyecto Supabase de **pruebas (staging)** para ensayar sin tocar el real. 🔑
-- [ ] Preguntar a la clienta: ¿el correo de la empresa es Google o Microsoft? ¿Qué nombre quiere para el enlace? 🔑
-
-### Fase 1 — Base de datos nueva (`supabase/migrations/`)
-- [x] `0000_apartar_version_anterior.sql`: aparta las tablas viejas como `*_v1` y las deja cerradas.
-- [x] `0001_tablas_y_permisos.sql`: tablas, permisos por rol y área, último Administrador protegido, consecutivo.
-- [x] `0002_funciones.sql`: crear, guardar (con control de versión), eliminar con huella, espacio usado.
-- [x] `0003_flujo.sql`: firmar, devolver, rechazar, retroceder, enviar, restaurar, convertir a derogación, ajustar alcance, adjuntos, renombrar áreas.
-- [x] `0004_almacenamiento.sql`: bucket privado de archivos (5 MB, solo documentos e imágenes).
-- [x] `0005_migracion.sql`: función para continuar el consecutivo tras migrar (solo la clave del servidor la puede usar).
-- [x] Pruebas de todo lo anterior sobre un PostgreSQL de prueba (incluye partir de una base con la versión 1).
-- [ ] Ejecutar las migraciones en el Supabase de **pruebas** y repetir las pruebas allí (hasta ahora solo se probó en un PostgreSQL simulado). 🔑
-- [~] Activar actualización en vivo (Realtime) en la tabla `registros` para que varias personas vean los cambios sin recargar. Hecho: `0006_tiempo_real.sql` (idempotente, probada en PGlite) y la suscripción en la app. Falta ejecutarla en el Supabase de pruebas y confirmar que llegan los avisos. 🔑
-- [~] **Función del servidor para usuarios** (`supabase/functions/admin-usuarios`): crear cuenta con contraseña temporal, restablecer, desactivar y activar. Solo la puede llamar un Administrador. La clave `service_role` queda como secreto, nunca en la aplicación. Ya está escrita y su lógica probada (`logica.js`); falta **desplegarla y probarla en Supabase** (`supabase functions deploy admin-usuarios`). 🔑
-- [x] Script para crear el **primer Administrador** (reemplaza la "activación" desde la pantalla). Hecho: `scripts/crear-primer-admin.mjs` (crea la cuenta y el perfil con contraseña temporal que se muestra una sola vez; crea las áreas y tipos iniciales; la parte de lógica tiene pruebas). Falta correrlo contra un Supabase real. 🔑
-- [ ] En Supabase: apagar *Allow new users to sign up*, exigir contraseñas de 8+ caracteres con letras y números, configurar *Site URL* y *Redirect URLs*. 🔑
-- [ ] Activar verificación en dos pasos (TOTP, gratis) para las cuentas de Administrador. 🔑
-
-### Fase 2 — Aplicación nueva con Vite (misma interfaz, mismas reglas)
-- [x] `src/dominio/`: constantes del procedimiento, 8D, firmas, vigencias, visibilidad. Con pruebas.
-- [x] `src/util/`: fechas de Colombia y enlaces seguros. Con pruebas.
-- [x] Montar Vite (`index.html` pasa a ser solo la entrada) con versiones fijas de supabase-js, jsPDF y xlsx. Dependencias con versión exacta (supabase-js 2.118.0, jsPDF 4.2.1, jspdf-autotable 5.0.9, write-excel-file 4.1.1; no se usó `xlsx` 0.18.5 por sus vulnerabilidades).
-- [~] Capa de datos: cliente de Supabase y funciones que llaman a las del servidor (reemplazan `dbLoadAll` y `dbSave*`). Hecho: interfaz única (`src/datos/repositorio.js`) con adaptador de demostración y adaptador Supabase (solo usa las funciones de la base), probado contra las funciones reales en PGlite. Falta probarlo contra un Supabase real. 🔑
-- [~] Ingreso, cambio y recuperación de contraseña (reutilizar la lógica actual de `index.html`). Hecho: ingreso, olvido, cambio y cambio obligatorio del primer ingreso (sin activar Administrador desde la pantalla). Falta probar el correo de recuperación en Supabase real. 🔑
-- [~] Vistas: panel, lista (con paginación y filtros en la base), nuevo registro, detalle, usuarios, tipos, registros eliminados, instructivo. Hecho: panel, lista (paginación y filtros), nuevo registro, detalle, usuarios (con tarjeta para compartir acceso), áreas, tipos, eliminados y instructivo. Falta recorrerlas contra un Supabase real. 🔑
-- [~] Guardado confiable: indicador de estado, reintentos, aviso de conflicto de versión, aviso al cerrar con cambios sin guardar. Hecho: indicador Guardando/Guardado/Error con «Reintentar», reintentos con espera si se cae la conexión, aviso de conflicto de versión con «Recargar registro» y aviso al cerrar con cambios sin guardar. Falta ver el conflicto entre dos personas reales. 🔑
-- [~] Adjuntos y firmas: subir a Storage, compresión de fotos en el navegador (máx. 1600 px), descarga con enlace temporal. Hecho: subida a Storage, fotos comprimidas (máx. 1600 px, WebP o JPEG), enlaces firmados temporales, límites de 5 MB y 10 por cargue. Falta probarlo contra Storage real. 🔑
-- [~] PDF de trazabilidad y Excel histórico con los archivos desde Storage. Hecho: PDF (jsPDF + autotable) y Excel (hojas Registros, Bitácora, Acciones 8D y Eliminados con `write-excel-file`), probados con las librerías reales y en un navegador real. Falta probar con firmas de Storage real. 🔑
-- [~] Panel **"Uso del almacenamiento"** para el Administrador (la función ya existe en la base de datos), con avisos al 70 % y 90 %. Hecho con avisos al 70 % y 90 %. Falta ver la cifra real de `uso_almacenamiento`. 🔑
-- [x] Campo **"Enlace de acceso a la aplicación"**: que se llene solo con la dirección publicada (es lo que pidió la clienta). Se llena solo con la dirección publicada (nunca con localhost ni un archivo local); el Administrador puede guardar otro enlace https.
-- [x] Modo demostración (datos de ejemplo) separado de producción. Sin `VITE_SUPABASE_URL` y `VITE_SUPABASE_KEY` la app arranca con datos inventados y aviso amarillo.
-- [~] Pruebas de recorrido completo en el navegador (Playwright). Hechas con jsdom y el modo demostración (crear, evaluar, devolver, reenviar, rechazar, cerrar, permisos por rol, usuarios, eliminar y restaurar, en vivo). No se agregó Playwright a las pruebas; el recorrido se comprobó a mano con el Chromium del entorno (incluida la descarga de PDF y Excel con la CSP puesta).
-
-### Fase 3 — Migración de los datos de la versión 1
-
-> **Cambio del 29/10/2026:** la clienta pidió iniciar desde cero con solo su usuario como Administradora, así que esta fase **ya no se ejecuta**. Lo que sí queda por hacer para ese arranque limpio está en la lista "Arranque desde cero" de abajo.
-- [x] `src/migracion/v1a2.js`: convierte registros (incluso de modelos muy antiguos), personas, áreas, tipos, firmas, adjuntos y huellas de eliminados. Avisa de lo que no se puede migrar.
-- [x] Pruebas: la conversión, guardarla en la base nueva y restaurar un registro migrado.
-- [x] `scripts/migrar-v1-a-v2.mjs` con tres pasos: **exportar** la versión anterior, **simular** (informe sin escribir nada) y **aplicar** (sube archivos y carga tablas). Se puede repetir sin duplicar, se niega a pisar una base con registros y pide el identificador del proyecto para no migrar en el equivocado. Probado contra la base de pruebas; falta correrlo contra un Supabase real. 🔑
-- [ ] Crear las cuentas de acceso de las personas que no la tienen (el informe las lista como "sin cuenta"), con la función `admin-usuarios`. 🔑
-- [ ] Ensayar todo en pruebas y comparar conteos y una muestra de registros. 🔑
-- [ ] Hacerlo en el proyecto real, conservando las tablas `*_v1` hasta que la clienta confirme que todo está bien. 🔑
-
-### Fase 4 — Respaldos y continuidad (gratis)
-- [x] Cifrado de los respaldos (AES-256, detecta archivos alterados o contraseña equivocada) y copia incremental de archivos, con pruebas (`src/respaldo/`, `scripts/respaldo.mjs`).
-- [~] GitHub Actions diario (plantilla en `docs/respaldo-diario.yml`, hay que copiarla a `.github/workflows/respaldo.yml`): copia de la base de datos **cifrada** y de los archivos hacia un **segundo repositorio privado**, guardando 90 días. Está escrito; falta copiarlo a `.github/workflows/`, crear el repositorio de respaldos, cargar los secretos y lanzarlo una vez a mano. 🔑
-- [~] La misma tarea evita que Supabase se pause por inactividad (se activa al correr el flujo anterior). 🔑
-- [x] Aviso si el respaldo falla (GitHub avisa por correo; ver `docs/RESPALDOS.md`).
-- [x] Procedimiento de restauración escrito (`docs/RESPALDOS.md`).
-- [ ] **Ensayar** la restauración completa en el proyecto de pruebas. 🔑
-- [ ] Revisar el correo de recuperación de contraseña: el correo integrado de Supabase gratis es muy limitado (confirmar en el proyecto real). Plan: que el Administrador restablezca contraseñas desde la aplicación y, si hace falta, configurar un servicio de correo gratuito. 🔑
-
-### Fase 5 — Publicación y entrega
-- [ ] Cloudflare Pages conectado al repositorio: `main` publica; las demás ramas generan vistas previas contra pruebas. 🔑
-- [~] Cabeceras de seguridad (CSP y otras) en Cloudflare. Hecho: `app/public/_headers` (CSP estricta) y `docs/CABECERAS.md`. Falta comprobarlas en Cloudflare con la dirección real. 🔑
-- [ ] Crear el primer Administrador y cargar el enlace en Usuarios → Enlace de acceso. 🔑
-- [~] Recorrido final desde celular y computador: primer ingreso con contraseña temporal, recuperación de contraseña, firmar, cerrar, PDF y Excel. Probado en un navegador real con el modo demostración (ingreso, firmar, cerrar, PDF, Excel, vista de celular); falta repetirlo contra el Supabase real. 🔑
-- [x] Manual corto del Administrador (usuarios, espacio usado, respaldos, restaurar) y actualizar `README.md`. `docs/MANUAL_ADMINISTRADOR.md` y README actualizados.
-- [ ] Fusionar `feat/v2` en `main` y retirar el `index.html` antiguo.
-
-### Fase 6 — Mejoras opcionales
-- [ ] Adaptador de adjuntos a Google Drive u OneDrive (según el correo de la empresa).
-- [ ] Archivo anual: mover adjuntos de registros cerrados hace mucho al respaldo para liberar espacio.
-- [ ] Validar con SST la lista de clasificación GTC 45 (pendiente desde la versión 1).
-
----
-
-### Arranque desde cero (pedido de la clienta)
-- [ ] Confirmar con ella: **nombre completo y correo** de su usuario Administrador.
-- [ ] Decidir qué pasa con lo que ya probó en su Supabase: (a) proyecto nuevo y vacío, o (b) ejecutar el paso 0000, que aparta las tablas viejas como `*_v1` (cerradas), y borrarlas cuando ella confirme. 🔑
-- [ ] Dejar **una sola cuenta** en Supabase → Authentication → Users (la suya); borrar las cuentas de prueba. 🔑
-- [ ] Crear su usuario con `scripts/crear-primer-admin.mjs`. 🔑
-- [ ] Definir el **catálogo inicial**: sin áreas ni tipos de desviación el formulario no se puede usar. Propuesta: cargar las 8 áreas y sus tipos por defecto (ella los puede editar). Hay que confirmarlo con ella.
-
-## 6. Lo que necesitamos de la clienta
-
-1. Acceso de colaborador a su **Supabase** (o la exportación de las tablas), a **Cloudflare** y a **GitHub**.
-2. Confirmar que el repositorio sea **privado**.
-3. Si el correo de la empresa es **Google o Microsoft**.
-4. El **nombre** que quiere para el enlace.
-
-## 7. Puntos de atención
-
-- Las migraciones SQL se probaron en un PostgreSQL simulado, **no en un Supabase real**. Lo primero al tener acceso es ejecutarlas en pruebas.
-- El plan gratuito de Supabase se **pausa tras 7 días sin uso**: por eso el respaldo diario también "despierta" la base.
-- Límites gratuitos: 500 MB de base de datos y 1 GB de archivos. Con archivos aparte y comprimidos alcanza para miles de registros, pero el panel de uso debe estar activo antes de entregar.
-- Las tablas `*_v1` no se borran hasta que la clienta confirme. Mientras la versión 1 siga publicada, dejará de funcionar apenas se ejecute el paso `0000` en el proyecto real: hacerlo solo el día del cambio.
-
-## 8. Cómo probar lo que ya está
-
-```bash
-npm install     # una sola vez
-npm test        # corre las 154 pruebas (tardan unos 5 segundos, no necesitan internet)
-```
+## 7. Lo que necesitamos de la clienta
+1. Nombre completo y correo de su usuario Administradora.
+2. Confirmar el catálogo inicial de áreas y tipos.
+3. El nombre que quiere para el enlace (`<nombre>.pages.dev`) y acceso a Cloudflare. 🔑

@@ -315,3 +315,11 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 **Lo que falta (necesita las cuentas de la clienta):** probar todo contra un Supabase real, desplegar la función `admin-usuarios`, copiar el flujo de respaldo a `.github/workflows/`, crear el primer Administrador, y publicar en Cloudflare Pages. Ver PLAN.md.
 
 **Decisión de la clienta (29/10/2026):** la nueva versión inicia desde cero, solo con su usuario como Administradora. No se migran datos de la versión 1; las herramientas de migración quedan guardadas pero sin usar. Pendiente: confirmar su nombre y correo, qué hacer con las tablas viejas de su Supabase y el catálogo inicial de áreas y tipos.
+
+## Sesión 9 — 29/10/2026 · Cambio de rumbo: sin Supabase y todo en `src/`
+- **Verificación del trabajo de la nube:** el informe era cierto (266 pruebas, compilación correcta y 0 vulnerabilidades), sin rastro de IA en los commits y sin tocar archivos prohibidos.
+- **Decisiones del equipo:** no se usará Supabase (la base de datos nueva se elegirá) y la clienta pidió **empezar desde cero**, solo con su usuario como Administradora.
+- **Limpieza:** se eliminó lo que dependía de Supabase (base de datos, función de usuarios, respaldos) y la migración de la versión 1. Todo quedó guardado en el historial con la marca `referencia-supabase`.
+- **Un solo árbol `src/`:** la carpeta `app/` pasó a `src/` (núcleo, componentes, vistas, estilos). `index.html` y `public/` quedan en la raíz.
+- **Estilos separados por tema** (30 archivos en `src/estilos/`) para que un socio mejore lo visual sin tocar lógica.
+- La aplicación funciona en modo demostración hasta conectar la nueva base de datos. 107 pruebas.

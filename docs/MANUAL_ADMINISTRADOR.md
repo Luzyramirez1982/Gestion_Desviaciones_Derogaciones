@@ -42,7 +42,7 @@ En **Usuarios → Enlace de acceso a la aplicación** queda la dirección que se
 
 ## 6. Cuánto espacio queda
 
-Entre a **Uso del almacenamiento**. Las barras muestran cuánto se usó de los límites gratuitos de Supabase: **500 MB** de base de datos y **1 GB** de archivos.
+Entre a **Uso del almacenamiento**. Las barras muestran cuánto se usó de los límites gratuitos de la base de datos y de los archivos (los valores exactos dependen de la base de datos que se elija).
 
 | Color | Qué significa | Qué hacer |
 |---|---|---|
