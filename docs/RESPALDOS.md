@@ -12,7 +12,7 @@ Esto es lo que protege el proyecto si Neon falla, se borra algo por error o hay 
 4. En GitHub: Settings > Secrets and variables > Actions > New repository secret:
    - `BACKUP_PASSPHRASE`: la contraseña del paso 2.
    - `NEON_DB_URL`: la dirección del paso 3.
-5. El archivo del flujo debe estar en **`.github/workflows/respaldo.yml` de la rama `main`**: GitHub solo ejecuta las tareas programadas (y deja lanzarlas a mano) desde la rama por defecto. El modelo está en `docs/respaldo-diario.yml`.
+5. El archivo del flujo ya está en `.github/workflows/respaldo.yml` (el modelo, `docs/respaldo-diario.yml`). GitHub solo ejecuta las tareas programadas (y deja lanzarlas a mano) desde la **rama por defecto**. Como `main` guarda el ejemplo de la versión 1 y no se va a usar, ponga `feat/v2` como rama por defecto: Settings > Branches > Default branch > cambiar a `feat/v2`.
 6. Pestaña **Actions** > *Respaldo diario* > **Run workflow**. Debe terminar en verde y dejar un archivo `base-AAAA-MM-DD.tar.gz.cif` en *Artifacts*.
 7. Si un día falla, GitHub envía un correo a quien administra el repositorio. Revíselo.
 

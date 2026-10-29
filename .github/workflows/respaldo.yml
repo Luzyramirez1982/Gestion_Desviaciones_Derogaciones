@@ -1,0 +1,68 @@
+# PLANTILLA del respaldo diario de la base de datos (Neon).
+# Para activarla hay que copiar este archivo a .github/workflows/respaldo.yml (ver docs/RESPALDOS.md).
+# Qué hace: cada noche saca una copia completa de la base (datos, archivos, firmas y cuentas de ingreso),
+# la cifra con una contraseña que solo conoce el equipo y la guarda 90 días en GitHub (pestaña Actions).
+# Así, si Neon falla o se pierde algo, la copia sirve para recuperar todo en Neon o en cualquier otro PostgreSQL.
+# El repositorio DEBE ser privado. Configuración (una sola vez) y cómo restaurar: ver docs/RESPALDOS.md
+name: Respaldo diario
+
+on:
+  schedule:
+    - cron: "17 7 * * *"   # 2:17 a. m. en Colombia
+  workflow_dispatch:        # también se puede lanzar a mano desde la pestaña Actions
+
+permissions:
+  contents: read
+
+concurrency:
+  group: respaldo
+  cancel-in-progress: false
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+      NEON_DB_URL: ${{ secrets.NEON_DB_URL }}
+    steps:
+      - name: Revisar que los secretos estén puestos
+        run: |
+          test -n "$BACKUP_PASSPHRASE" || { echo "Falta el secreto BACKUP_PASSPHRASE"; exit 1; }
+          test -n "$NEON_DB_URL" || { echo "Falta el secreto NEON_DB_URL"; exit 1; }
+
+      - name: Instalar las herramientas de PostgreSQL
+        run: |
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-18
+
+      - name: Copia de la base de datos
+        run: |
+          # Dos archivos: "public" (tablas, datos, archivos, reglas y PERMISOS: sin los permisos la app negaría todo al restaurar)
+          # y las cuentas de ingreso de Neon (solo datos: el esquema lo crea Neon en cada proyecto).
+          pg_dump "$NEON_DB_URL" --no-owner --schema=public -f public.sql
+          pg_dump "$NEON_DB_URL" --no-owner --no-privileges --data-only --schema=neon_auth -f cuentas.sql
+          test -s public.sql && test -s cuentas.sql
+          # Una copia incompleta no sirve: mejor fallar y que GitHub avise por correo.
+          grep -q "CREATE TABLE public.registros" public.sql
+          grep -q "CREATE TABLE public.archivos" public.sql
+          grep -q "CREATE POLICY" public.sql
+          grep -q "GRANT SELECT ON TABLE public.registros TO authenticated" public.sql
+          grep -q "COPY neon_auth" cuentas.sql
+          tar czf base.tar.gz public.sql cuentas.sql
+          rm public.sql cuentas.sql
+      - name: Cifrar (AES-256) y comprimir
+        run: |
+          FECHA=$(TZ=America/Bogota date +%F)
+          openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -pass env:BACKUP_PASSPHRASE -in base.tar.gz -out "base-$FECHA.tar.gz.cif"
+          rm base.tar.gz
+          echo "FECHA=$FECHA" >> "$GITHUB_ENV"
+
+      - name: Guardar 90 días
+        uses: actions/upload-artifact@v4
+        with:
+          name: base-${{ env.FECHA }}
+          path: base-${{ env.FECHA }}.tar.gz.cif
+          retention-days: 90
+          if-no-files-found: error

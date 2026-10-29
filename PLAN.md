@@ -57,7 +57,8 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 - [ ] Pantalla de «nueva contraseña» y correo de envío propio para «¿Olvidó su contraseña?» (hoy la Administradora restablece).
 - [ ] Vigilar las listas vacías de las primeras consultas tras un rato sin uso (el adaptador ya reintenta; falta la causa raíz).
 - [x] Plantilla del respaldo corregida para Postgres 18 (la 17 fallaba) y para conservar los permisos al restaurar; guía de restauración con el formato de dos archivos.
-- [ ] Poner el flujo en `.github/workflows/respaldo.yml` de **main** (las tareas programadas solo corren desde la rama por defecto), poner el repositorio en privado, cargar los secretos `BACKUP_PASSPHRASE` y `NEON_DB_URL`, lanzarlo a mano y **ensayar una restauración** en un proyecto de prueba. 🔑
+- [x] Flujo en `.github/workflows/respaldo.yml` (rama `feat/v2`). `main` no se toca (guarda el ejemplo de la versión 1).
+- [ ] En GitHub: poner el repositorio en privado, cambiar la **rama por defecto a `feat/v2`** (las tareas programadas solo corren desde ahí), cargar los secretos `BACKUP_PASSPHRASE` y `NEON_DB_URL`, lanzarlo a mano y **ensayar una restauración** en un proyecto de prueba. 🔑
 - [ ] Correo de «¿Olvidó su contraseña?»: configurar SMTP propio en Neon (el compartido tiene límite) o dejar que el Administrador restablezca.
 - [ ] Actualización en vivo: por ahora no hay (se refresca al volver a la pestaña) para no gastar horas de cómputo gratuitas. Revisar con el consumo real.
 - [ ] Revisar los 11 avisos de `npm audit` que trae el SDK de Neon (`@neondatabase/neon-js`): vienen de sus dependencias de servidor y de componentes de pantalla que la aplicación no usa; confirmar con el equipo de Neon o actualizar cuando publiquen una versión corregida.
