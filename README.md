@@ -36,3 +36,9 @@ Sin `config.js` (o sin conexión a Supabase) el aplicativo funciona en **modo lo
 - Los datos solo se leen y escriben con sesión iniciada (RLS para usuarios autenticados). Dentro del aplicativo, los permisos por rol los controla la interfaz.
 - Las contraseñas las guarda Supabase cifradas; el aplicativo no las almacena. La contraseña temporal solo se muestra al crear el acceso.
 - Eliminar un usuario en el aplicativo le quita el acceso; su cuenta queda en *Authentication → Users* de Supabase y se puede borrar allí.
+
+## Versión 2 (en construcción, rama `feat/v2`)
+Se está preparando una versión más segura y que no pierde datos. Mientras tanto, todo lo de arriba sigue siendo válido para la aplicación actual.
+- `supabase/migrations/` — base de datos nueva (tablas, permisos y funciones). Se ejecuta primero en un proyecto de pruebas.
+- `src/` — reglas del procedimiento ya separadas del `index.html`.
+- `tests/` — pruebas automáticas. Para correrlas: `npm install` y luego `npm test`.

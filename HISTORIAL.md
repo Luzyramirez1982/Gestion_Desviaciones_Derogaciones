@@ -245,3 +245,26 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - Validar con SST la lista de clasificación GTC 45 contra la norma.
 - Ejecutar el nuevo `supabase_schema.sql`, configurar el proveedor Email de Supabase, publicar la aplicación y activar la cuenta del Administrador (ver README).
 - Sincronizar `C:\COWORK\Gestión de proyectos` (equipo p-lramirez1) con la Solicitud 18 cuando ese equipo esté conectado.
+
+---
+
+## Sesión 8 — 29/10/2026
+
+### Solicitud 19
+> Dejar la aplicación lista para trabajar, compartirla con los usuarios (falta el enlace de acceso) y garantizar que guarde los cambios. Todo gratis, sin tarjeta, y que no se llene de golpe ni se pierda información.
+
+**Qué se decidió:**
+- Se revisó todo el proyecto y se encontraron fallas de seguridad y de guardado (ver el plan). Antes de compartir el enlace conviene corregirlas.
+- La aplicación se publicará en **Cloudflare Pages** (gratis) desde este mismo repositorio de GitHub.
+- La base de datos sigue en **Supabase gratis**, con copia de seguridad diaria fuera de Supabase y una consulta diaria para que no se pause por falta de uso.
+- Los archivos adjuntos y las firmas saldrán de la base de datos para que no se llene. Dónde se guardarán a largo plazo (Google Drive u OneDrive) se define cuando la clienta confirme qué correo usa la empresa.
+- El trabajo se hace en la rama `feat/v2`. **La aplicación actual (`index.html`) no se modificó** y sigue funcionando igual.
+
+**Qué se hizo en esta sesión:**
+1. **Base de datos nueva** (carpeta `supabase/migrations/`):
+   - `0001_tablas_y_permisos.sql`: tablas nuevas y permisos por rol y por área. Cada persona solo ve lo que le corresponde, y nadie puede cambiarse el rol.
+   - `0002_funciones.sql`: crear solicitud con consecutivo automático (no se repite), guardar sin pisar los cambios de otra persona, eliminar dejando huella y ver el espacio usado.
+2. **Reglas del procedimiento en archivos separados** (`src/`): firmas por etapa, 8D, vigencias, quién ve qué, fechas con hora de Colombia y protección de enlaces. Son las mismas reglas de antes, ahora con pruebas.
+3. **51 pruebas automáticas** (`npm test`): 24 de las reglas y 27 de la base de datos. Las de la base de datos usan un PostgreSQL de prueba que corre en el computador, sin tocar Supabase.
+
+**Todavía no se ha hecho** (se retoma al tener acceso al Supabase de la clienta): exportar los datos actuales, probar en el proyecto de pruebas, migrar los datos, firmar y avanzar de etapa desde la base de datos, adjuntos, respaldos y publicación.
