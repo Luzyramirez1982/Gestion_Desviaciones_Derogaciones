@@ -1,80 +1,18 @@
-// Detalle de un registro: etapas, firmas con sus requisitos, devolver, rechazar, retroceder, convertir en derogación,
-// ajustar alcance, bitácora y adjuntos. Los campos de cada rol se guardan solos (con aviso de estado).
-import { esc, urlSegura } from "../util/html.js";
-import { STAGES, STAGE_ROLE, FIRMA_SLOTS, MAX_FILE_MB, MAX_FILES_BATCH } from "../dominio/constantes.js";
-import { STAGE_COLORS } from "../dominio/presentacion.js";
-import { gtcLabel } from "../dominio/gtc45.js";
-import { d8Faltantes, is8DComplete } from "../dominio/d8.js";
-import { isClosed, esDueno, canSignSlot, requisitosFirma, vigenciaTexto } from "../dominio/registro.js";
-import { correoDeAviso } from "../dominio/mensajes.js";
-import { daysUntil } from "../util/fechas.js";
-import { crearGuardador, textoEstado } from "../util/guardador.js";
-import { icon } from "../componentes/iconos.js";
-import { areaBadge, tipoGestionBadge, criticidadBadge } from "../componentes/insignias.js";
-import { adjuntosHTML } from "../componentes/listaAdjuntos.js";
-import { fmtFecha } from "../util/formato.js";
-import { confirmar, pedirTexto } from "../componentes/dialogos.js";
-import { d8HTML, enlazarD8 } from "../componentes/editor8d.js";
-import { montarFirma } from "../componentes/firma.js";
-import { prepararArchivos } from "../componentes/adjuntos.js";
-import { abrirInstructivo8D } from "./ayuda/ventana8d.js";
+// El HTML del detalle: lo que ve la persona. La lógica de los botones vive en montar.js.
+import { esc } from "../../util/html.js";
+import { STAGES, STAGE_ROLE, FIRMA_SLOTS, MAX_FILE_MB, MAX_FILES_BATCH } from "../../dominio/constantes.js";
+import { STAGE_COLORS } from "../../dominio/presentacion.js";
+import { gtcLabel } from "../../dominio/gtc45.js";
+import { d8Faltantes, is8DComplete } from "../../dominio/d8.js";
+import { isClosed, esDueno, canSignSlot, vigenciaTexto } from "../../dominio/registro.js";
+import { correoDeAviso } from "../../dominio/mensajes.js";
+import { daysUntil } from "../../util/fechas.js";
+import { fmtFecha } from "../../util/formato.js";
+import { icon } from "../../componentes/iconos.js";
+import { areaBadge, tipoGestionBadge, criticidadBadge } from "../../componentes/insignias.js";
+import { adjuntosHTML } from "../../componentes/listaAdjuntos.js";
+import { d8HTML } from "../../componentes/editor8d.js";
 
-// ---------- Abrir y cerrar ----------
-export async function abrir(ctx, id){
-  if(ctx.abierto && ctx.abierto.id === id) return;
-  if(ctx.abierto) await cerrar(ctx, {sinRuta: true});
-  try {
-    const rec = await ctx.repo.cargarRegistro(id);
-    const abierto = {id, rec, guardador: null};
-    abierto.guardador = crearGuardador({
-      guardar: async () => { const nuevo = await ctx.repo.guardarRegistro(abierto.rec.id, abierto.rec.version, abierto.rec); abierto.rec.version = nuevo.version; },
-      alEstado: (estado, msg) => pintarEstado(ctx, estado, msg),
-    });
-    ctx.pendientes.add(abierto.guardador);
-    ctx.abierto = abierto;
-  } catch(e){ ctx.error(e); ctx.abierto = null; location.hash = "#/registros"; }
-}
-
-export async function cerrar(ctx, { sinRuta = false } = {}){
-  const a = ctx.abierto;
-  if(!a) return;
-  await a.guardador.ahora();
-  ctx.pendientes.delete(a.guardador);
-  ctx.abierto = null;
-  if(!sinRuta){ await ctx.recargar().catch(() => {}); ctx.ir("registros"); }
-}
-
-// Vuelve a leer el registro abierto (por ejemplo, tras un aviso de conflicto o un cambio de otra persona).
-export async function recargarAbierto(ctx){
-  const a = ctx.abierto;
-  if(!a) return;
-  a.rec = await ctx.repo.cargarRegistro(a.id);
-  a.guardador.reiniciar();
-  repintar(ctx);
-}
-
-export function repintar(ctx){
-  const capa = ctx.raiz.querySelector("#capaDetalle");
-  if(!capa) return ctx.render();
-  const arriba = capa.querySelector(".panel-body")?.scrollTop || 0;
-  capa.innerHTML = html(ctx);
-  montar(ctx, capa);
-  const cuerpo = capa.querySelector(".panel-body");
-  if(cuerpo) cuerpo.scrollTop = arriba;
-}
-
-function pintarEstado(ctx, estado, msg){
-  const caja = ctx.raiz.querySelector("#estadoGuardado");
-  if(!caja) return;
-  caja.className = "estado-guardado " + estado;
-  caja.innerHTML = esc(textoEstado(estado)) + (estado === "error" ? ` <button type="button" data-reintentar title="${esc(msg)}">Reintentar</button>` : "")
-    + (estado === "conflicto" ? ` <button type="button" data-recargar-registro>Recargar registro</button>` : "");
-  caja.title = msg || "";
-  const aviso = ctx.raiz.querySelector("#avisoConflicto");
-  if(aviso) aviso.style.display = estado === "conflicto" ? "flex" : "none";
-}
-
-// ---------- Pantalla ----------
 export function html(ctx){
   const { rec } = ctx.abierto, u = ctx.yo;
   const cerrado = isClosed(rec);
@@ -200,7 +138,7 @@ export function html(ctx){
     </div></div></div>`;
 }
 
-const estado8D = (rec) => is8DComplete(rec)
+export const estado8D = (rec) => is8DComplete(rec)
   ? `<div class="banner banner-green" style="margin:0 15px 10px;">${icon("check")} 8D completo.</div>`
   : `<div class="banner banner-amber" style="margin:0 15px 10px;">${icon("alert")} <span><b>8D incompleto</b> (requerido para aprobar la evaluación). Falta: ${d8Faltantes(rec.d8 || {}).map(esc).join("; ")}</span></div>`;
 
@@ -246,147 +184,4 @@ function firmasHTML(ctx, rec){
   return `<div class="card" style="margin-top:16px;" id="firmas-section"><h3>Firmas de aprobación (${firmadas}/${requeridas.length})</h3>
     <p class="hint" style="margin:-4px 0 12px;">Responsable del proceso (solicitud) → Aprobador autorizado (evaluación y aprobación) → Responsable del proceso que hizo la solicitud (cierre). Solo se firma la etapa en curso.</p>
     <div class="sign-grid">${casillas.map(c => c.html).join("")}</div></div>`;
-}
-
-// ---------- Eventos ----------
-export function montar(ctx, el){
-  const a = ctx.abierto, rec = a.rec, g = a.guardador;
-  const $ = (s) => el.querySelector(s);
-  pintarEstado(ctx, g.estado, g.mensaje);
-
-  $("#cerrarPanel").addEventListener("click", () => cerrar(ctx));
-  $("#panelOverlay").addEventListener("click", e => { if(e.target.id === "panelOverlay") cerrar(ctx); });
-  el.addEventListener("click", async e => {
-    if(e.target.closest("[data-reintentar]")) g.reintentar();
-    if(e.target.closest("[data-recargar-registro]")){ try { await recargarAbierto(ctx); } catch(err){ ctx.error(err); } }
-    const abrirArchivo = e.target.closest("[data-abrir-archivo]");
-    if(abrirArchivo){ e.preventDefault(); await abrirUrl(ctx, abrirArchivo.dataset.abrirArchivo); }
-  });
-
-  // Campos de cada rol: se guardan solos.
-  el.querySelectorAll("[data-campo]").forEach(c => c.addEventListener(c.tagName === "SELECT" ? "change" : "input", () => {
-    rec[c.dataset.campo] = c.value; g.marcar(); actualizarFaltantes(el, rec, ctx);
-  }));
-  if(rec.tipoGestion === "Derogación"){
-    rec.d8 = rec.d8 || {};
-    const puede8D = !isClosed(rec) && !rec.borrador && rec.stage === 1 && (["Aprobador autorizado", "Administrador"].includes(ctx.yo.rol) || esDueno(ctx.yo, rec));
-    enlazarD8($("#d8-section"), rec.d8, {
-      personas: ctx.base.perfiles, deshabilitado: !puede8D,
-      alCambiar: () => { g.marcar(); $("#estado8D").innerHTML = estado8D(rec); actualizarFaltantes(el, rec, ctx); },
-    });
-    $("#btnInstructivo8D").addEventListener("click", abrirInstructivo8D);
-  }
-  actualizarFaltantes(el, rec, ctx);
-
-  // Imágenes de las firmas: se piden con enlace temporal y solo se muestran si el enlace es seguro.
-  el.querySelectorAll("[data-firma-ruta]").forEach(async img => {
-    try { const url = urlSegura(await ctx.repo.urlArchivo(img.dataset.firmaRuta)); if(url) img.src = url; } catch { /* sin imagen */ }
-  });
-
-  // Antes de cualquier acción se guarda lo escrito; si no se pudo, no se sigue.
-  const accion = async (fn, { exito } = {}) => {
-    if(!(await g.ahora())){ ctx.error(new Error("No se pudo guardar lo que escribió. Revise el aviso de arriba antes de continuar.")); return; }
-    try {
-      const nuevo = await fn();
-      if(nuevo) a.rec = nuevo;
-      await ctx.recargar();
-      if(exito) ctx.ok(exito);
-      ctx.render();
-    } catch(err){
-      if(err.codigo === "conflicto_version") pintarEstado(ctx, "conflicto", err.message); else ctx.error(err);
-    }
-  };
-  const comentario = () => ($("#comentarioEtapa") ? $("#comentarioEtapa").value.trim() : "");
-
-  const firmarBtn = $("#btnFirmar");
-  if(firmarBtn){
-    const firma = montarFirma($("#firmaCanvas"));
-    $("#btnLimpiarFirma").addEventListener("click", () => firma.limpiar());
-    firmarBtn.addEventListener("click", () => {
-      if(!firma.hayFirma()) return ctx.error(new Error("Dibuje su firma en el recuadro antes de firmar."));
-      accion(() => ctx.repo.firmarEtapa(rec.id, firmarBtn.dataset.slot, firma.imagen(), comentario()), {exito: "Firma registrada."});
-    });
-  }
-  const quitar = $("#btnQuitarFirma");
-  if(quitar) quitar.addEventListener("click", () => accion(() => ctx.repo.quitarFirmaAdmin(rec.id), {exito: "Se borró su firma."}));
-
-  const motivo = async (titulo, mensaje, minimo = 3) => {
-    const escrito = comentario();
-    if(escrito.length >= minimo) return escrito;
-    return pedirTexto(titulo, mensaje, {placeholder: "Escriba el motivo…", minimo, error: "Escriba el motivo."}, {aceptar: "Continuar"});
-  };
-  $("#btnDevolver")?.addEventListener("click", async () => {
-    const m = await motivo("Devolver al Responsable del proceso", "Escriba el motivo para que pueda corregir la solicitud.");
-    if(m) accion(() => ctx.repo.devolverRegistro(rec.id, m), {exito: "Solicitud devuelta para ajustes."});
-  });
-  $("#btnRechazar")?.addEventListener("click", async () => {
-    const m = await motivo("Rechazar solicitud", "Escriba el motivo. Al rechazarla, la solicitud queda cerrada.");
-    if(m && await confirmar("¿Rechazar la solicitud?", "Esta acción cierra la solicitud como Rechazada y no se puede deshacer.", {aceptar: "Rechazar", peligro: true}))
-      accion(() => ctx.repo.rechazarRegistro(rec.id, m), {exito: "Solicitud rechazada."});
-  });
-  $("#btnRetroceder")?.addEventListener("click", async () => {
-    if(await confirmar("Volver a Evaluación y Aprobación", "Se anulan las firmas de aprobación y de cierre para volver a aprobarlas. Quedará registrado en la bitácora.", {aceptar: "Retroceder"}))
-      accion(() => ctx.repo.retrocederEtapa(rec.id, comentario()), {exito: "La solicitud volvió a Evaluación y Aprobación."});
-  });
-  $("#btnConvertir")?.addEventListener("click", async () => {
-    if(await confirmar("Convertir en derogación", "La desviación pasa a ser derogación y se activa el reporte 8D, que debe quedar completo antes de aprobar.", {aceptar: "Convertir"}))
-      accion(() => ctx.repo.convertirADerogacion(rec.id), {exito: "Convertida en derogación."});
-  });
-  $("#btnEliminar")?.addEventListener("click", async () => {
-    const m = await pedirTexto("Eliminar registro", `Se eliminará ${rec.id}. Queda una huella (quién, cuándo y por qué) y se puede restaurar desde «Registros eliminados».`,
-      {placeholder: "Motivo de la eliminación (mínimo 5 letras)", minimo: 5, error: "Escriba el motivo de la eliminación."}, {aceptar: "Eliminar", peligro: true});
-    if(!m) return;
-    try {
-      await ctx.repo.eliminarRegistro(rec.id, m);
-      g.reiniciar(); ctx.pendientes.delete(g); ctx.abierto = null;
-      await ctx.recargar(); ctx.ok("Registro eliminado."); ctx.ir("registros");
-    } catch(err){ ctx.error(err); }
-  });
-  $("#btnPdf")?.addEventListener("click", async () => {
-    try { const { descargarPDF } = await import("../exportar/descargas.js"); await descargarPDF(ctx, rec); } catch(err){ ctx.error(err); }
-  });
-  el.querySelector("[data-corregir]")?.addEventListener("click", async () => { await cerrar(ctx, {sinRuta: true}); ctx.formulario = null; ctx.ir("nuevo/" + rec.id); });
-
-  // Alcance de la derogación
-  if($("#btnAlcance")){
-    el.querySelectorAll('[name="alcEdit"]').forEach(r => r.addEventListener("change", () => {
-      const def = el.querySelector('[name="alcEdit"]:checked').value === "Definitiva";
-      $("#alcFinCaja").style.display = def ? "none" : ""; $("#lblAlcIni").textContent = def ? "Efectiva desde" : "Desde";
-    }));
-    $("#btnAlcance").addEventListener("click", () => {
-      const alcance = el.querySelector('[name="alcEdit"]:checked').value;
-      accion(() => ctx.repo.ajustarAlcance(rec.id, alcance, $("#alcIni").value, alcance === "Definitiva" ? "" : $("#alcFin").value), {exito: "Alcance actualizado."});
-    });
-  }
-
-  // Adjuntos
-  $("#btnAdjuntar")?.addEventListener("click", async () => {
-    const entrada = $("#archivosNuevos");
-    if(!entrada.files.length) return ctx.error(new Error("Elija uno o más archivos primero."));
-    const { validos, avisos } = await prepararArchivos(entrada.files, {yaHay: rec.adjuntos.length});
-    avisos.forEach(m => ctx.error(new Error(m)));
-    if(!validos.length) return;
-    $("#btnAdjuntar").disabled = true;
-    await accion(async () => {
-      for(const f of validos){ try { await ctx.repo.subirAdjunto(rec.id, f); } catch(err){ ctx.error(new Error(`${f.name}: ${err.message}`)); } }
-      return ctx.repo.cargarRegistro(rec.id);
-    }, {exito: "Archivos adjuntados."});
-  });
-}
-
-// Muestra qué falta para poder firmar, mientras la persona va escribiendo.
-function actualizarFaltantes(el, rec, ctx){
-  const caja = el.querySelector("#faltantesFirma");
-  if(!caja) return;
-  const slot = FIRMA_SLOTS.find(s => s.key === caja.dataset.slot);
-  const falta = slot ? requisitosFirma(rec, slot) : [];
-  caja.innerHTML = falta.length ? `<div class="banner banner-amber" style="margin-bottom:8px;">${icon("alert")} <span>Antes de firmar complete: ${falta.map(esc).join("; ")}.</span></div>` : "";
-}
-
-async function abrirUrl(ctx, ruta){
-  try {
-    const url = urlSegura(await ctx.repo.urlArchivo(ruta));
-    if(!url) throw new Error("No se pudo abrir el archivo.");
-    window.open(url, "_blank", "noopener");
-  } catch(e){ ctx.error(e); }
 }

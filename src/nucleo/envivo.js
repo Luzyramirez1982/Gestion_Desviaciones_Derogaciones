@@ -1,6 +1,6 @@
 // Actualización en vivo: cuando otra persona cambia un registro, la lista se refresca sola.
 // También se refresca al volver a la pestaña, y al volver la conexión se reintentan los guardados con error.
-import * as vDetalle from "../vistas/detalle.js";
+import * as vDetalle from "../vistas/detalle/index.js";
 
 // Estas pantallas no tienen formularios a medio llenar, así que se pueden repintar sin perder lo escrito.
 const REPINTABLES = ["panel", "registros", "eliminados", "almacenamiento"];
