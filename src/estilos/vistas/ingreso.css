@@ -1,9 +1,24 @@
 /* Pantalla de ingreso y de cambio de contraseña. */
-.auth-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:linear-gradient(160deg,#142E47 0%,#1f4e79 55%,#e8eef5 55%);}
-.auth-card{width:100%;max-width:420px;background:#fff;border-radius:14px;box-shadow:0 18px 40px rgba(15,23,42,.18);padding:26px 24px;}
-.auth-card h2{margin:0 0 4px;font-size:19px;color:#142E47;}
-.auth-card .sub{color:#64748b;font-size:12.5px;margin-bottom:16px;}
-.auth-card .links{display:flex;flex-direction:column;gap:6px;margin-top:14px;font-size:12.5px;}
-.auth-card .links a{color:#1d4ed8;text-decoration:none;}
-.auth-msg{border-radius:8px;padding:8px 10px;font-size:12.5px;margin-bottom:12px;}
-.auth-msg.err{background:#fee2e2;color:#b91c1c;} .auth-msg.ok{background:#dcfce7;color:#166534;} .auth-msg.info{background:#eff6ff;color:#1e40af;}
+.auth-wrap{
+  flex:1;display:flex;align-items:center;justify-content:center;padding:32px 16px;min-height:100vh;
+  background:
+    radial-gradient(ellipse 75% 60% at 50% 0%,rgba(46,116,181,.42),transparent 70%),
+    linear-gradient(180deg,var(--navy) 0%,var(--navy-dark) 100%);
+}
+.auth-card{
+  width:100%;max-width:440px;background:#fff;border-radius:18px;box-shadow:var(--sombra-3);padding:34px 32px 30px;
+  animation:ingreso-entra 420ms var(--salida);
+}
+.auth-card h2{margin:0 0 6px;font-size:22px;line-height:1.2;color:var(--navy);letter-spacing:-.02em;}
+.auth-card .sub{color:var(--muted);font-size:13.5px;margin-bottom:22px;}
+.auth-card .btn-primary{padding:11px 16px;font-size:14px;}
+.auth-card .links{display:flex;flex-direction:column;gap:8px;margin-top:18px;font-size:13.5px;}
+.auth-card .links a{color:var(--blue-dark);text-decoration:none;font-weight:500;}
+.auth-card .links a:hover{text-decoration:underline;text-underline-offset:3px;}
+.auth-msg{border-radius:var(--r-md);padding:10px 12px;font-size:13px;line-height:1.5;margin-bottom:14px;}
+.auth-msg.err{background:#FEF3F2;color:#8F1D1D;border:1px solid #F8C9C4;}
+.auth-msg.ok{background:#F0FBF4;color:#14532D;border:1px solid #B7E4C7;}
+.auth-msg.info{background:var(--blue-bg);color:#1B4468;border:1px solid #CFE0F1;}
+.auth-msg.info a{color:#1B4468;font-weight:600;}
+.auth-msg.info code{background:#fff;border:1px solid #CFE0F1;border-radius:6px;padding:1px 6px;font-size:12.5px;}
+@keyframes ingreso-entra{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}

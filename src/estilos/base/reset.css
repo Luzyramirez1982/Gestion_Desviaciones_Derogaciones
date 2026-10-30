@@ -1,8 +1,35 @@
 /* Punto de partida común: tipografía, fondo, enlaces, botones y barras de desplazamiento. */
 *{box-sizing:border-box;}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:14px;line-height:1.5;background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+h1,h2,h3{text-wrap:balance;letter-spacing:-.011em;}
+p{text-wrap:pretty;}
 a{color:inherit;}
 button{font-family:inherit;cursor:pointer;}
-input,select,textarea{font-family:inherit;font-size:13.5px;}
-::-webkit-scrollbar{width:9px;height:9px;}
-::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:99px;}
+input,select,textarea{font-family:inherit;font-size:14px;}
+table{font-variant-numeric:tabular-nums;}
+code{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;}
+img{max-width:100%;}
+
+:focus{outline:none;}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px;}
+button:focus-visible,.btn:focus-visible{box-shadow:var(--foco);outline-color:transparent;}
+
+::selection{background:rgba(46,116,181,.24);color:inherit;}
+::placeholder{color:#7A8BA0;opacity:1;}
+input,textarea{caret-color:var(--blue);}
+input[type=checkbox],input[type=radio]{accent-color:var(--navy);width:16px;height:16px;}
+
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:#C5D0DC;border-radius:99px;border:2px solid transparent;background-clip:content-box;}
+::-webkit-scrollbar-thumb:hover{background:#A9B8C8;background-clip:content-box;border:2px solid transparent;}
+*{scrollbar-color:#C5D0DC transparent;}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
+}

@@ -1,5 +1,6 @@
 /* Datos en pares título y valor. */
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;margin:14px 0;}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;font-size:14px;margin:16px 0;}
 .kv .full{grid-column:1/-1;}
-.kv .k{font-size:11px;color:#94a3b8;margin-bottom:2px;}
-.kv .v{color:#1e293b;}
+.kv .k{font-size:12px;font-weight:500;color:var(--faint);margin-bottom:3px;}
+.kv .v{color:var(--text);line-height:1.5;overflow-wrap:anywhere;}
+@media (max-width:560px){ .kv{grid-template-columns:1fr;} }

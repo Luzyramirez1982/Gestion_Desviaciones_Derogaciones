@@ -1,11 +1,12 @@
 /* Lista de registros con sus filas y la paginación. */
-.list{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.row{padding:13px 16px;border-bottom:1px solid #f1f5f9;cursor:pointer;}
+.list{background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--sombra-2);}
+.row{padding:16px 20px;border-bottom:1px solid var(--border-soft);cursor:pointer;transition:background var(--rapido) ease;}
 .row:last-child{border-bottom:none;}
-.row:hover{background:#f8fafc;}
-.row-top{display:flex;justify-content:space-between;gap:10px;}
-.row-title{font-weight:600;font-size:13.5px;color:#1e293b;}
-.row-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
-.row-badges{margin-top:8px;display:flex;flex-wrap:wrap;gap:6px;}
-.empty{padding:26px;text-align:center;color:#94a3b8;font-size:13px;}
-.paginas{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:12px;font-size:12.5px;color:var(--muted);}
+.row:hover{background:var(--hover);}
+.row:focus-visible{outline-offset:-2px;background:var(--hover);}
+.row-top{display:flex;justify-content:space-between;gap:12px;}
+.row-title{font-weight:600;font-size:14.5px;color:var(--text);line-height:1.35;}
+.row-sub{font-size:12.5px;color:var(--muted);margin-top:3px;}
+.row-badges{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.empty{padding:36px 24px;text-align:center;color:var(--muted);font-size:13.5px;}
+.paginas{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:16px;font-size:13px;color:var(--muted);}

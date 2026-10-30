@@ -1,6 +1,7 @@
 /* Barra de búsqueda y filtros sobre las listas. */
-.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
-.toolbar input[type=text], .toolbar select{border:1px solid var(--border);border-radius:8px;padding:7px 10px;background:#fff;}
-.search-wrap{position:relative;flex:1;min-width:200px;}
-.search-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:#94a3b8;}
-.search-wrap input{width:100%;padding-left:30px;}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+.toolbar input[type=text], .toolbar select{border:1px solid #CBD5E1;border-radius:var(--r-md);padding:9px 12px;background:#fff;color:var(--text);transition:border-color var(--rapido) ease,box-shadow var(--rapido) ease;}
+.toolbar select{cursor:pointer;}
+.search-wrap{position:relative;flex:1;min-width:220px;}
+.search-wrap svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--faint);pointer-events:none;}
+.toolbar .search-wrap input[type=text]{width:100%;padding-left:38px;}

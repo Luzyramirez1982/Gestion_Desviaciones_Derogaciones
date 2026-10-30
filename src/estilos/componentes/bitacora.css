@@ -1,6 +1,7 @@
 /* Línea de tiempo de la bitácora. */
-.bitacora{border-left:2px solid var(--border);margin-left:6px;padding-left:14px;}
-.bitacora-item{position:relative;padding-bottom:14px;}
-.bitacora-item::before{content:"";position:absolute;left:-19px;top:3px;width:8px;height:8px;border-radius:99px;background:var(--blue);}
-.bitacora-item .meta{font-size:11px;color:#94a3b8;}
-.bitacora-item .txt{font-size:13px;color:#334155;margin-top:2px;}
+.bitacora{position:relative;margin-left:6px;padding-left:18px;}
+.bitacora::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--border);border-radius:2px;}
+.bitacora-item{position:relative;padding-bottom:16px;}
+.bitacora-item::before{content:"";position:absolute;left:-24px;top:4px;width:10px;height:10px;border-radius:99px;background:var(--blue);box-shadow:0 0 0 3px #fff;}
+.bitacora-item .meta{font-size:12px;color:var(--faint);}
+.bitacora-item .txt{font-size:13.5px;color:var(--text-2);margin-top:3px;line-height:1.5;}

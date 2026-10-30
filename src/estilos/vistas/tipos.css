@@ -1,3 +1,4 @@
 /* Agregar tipos de desviación o derogación. */
-.type-add{display:flex;gap:8px;margin-top:8px;}
-.type-add input{flex:1;border:1px solid var(--border);border-radius:8px;padding:7px 10px;}
+.type-add{display:flex;gap:10px;margin-top:10px;}
+.type-add input{flex:1;border:1px solid #CBD5E1;border-radius:var(--r-md);padding:9px 12px;color:var(--text);transition:border-color var(--rapido) ease,box-shadow var(--rapido) ease;}
+@media (max-width:560px){ .type-add{flex-wrap:wrap;} .type-add input{flex-basis:100%;} }

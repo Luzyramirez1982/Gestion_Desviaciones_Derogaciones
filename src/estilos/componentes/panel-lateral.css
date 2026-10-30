@@ -1,9 +1,11 @@
 /* Panel que se abre a la derecha con el detalle de un registro. */
-.panel-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:40;display:flex;justify-content:flex-end;}
-.panel{width:100%;max-width:680px;background:#fff;height:100%;overflow-y:auto;box-shadow:-8px 0 30px rgba(0,0,0,.15);}
-.panel-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);padding:16px 20px;display:flex;justify-content:space-between;align-items:flex-start;z-index:2;}
-.panel-body{padding:18px 20px 40px;}
-.panel-close{border:none;background:#f1f5f9;border-radius:8px;padding:7px;color:#64748b;}
-.panel-body .field label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:5px;}
-.panel-body .field textarea,.panel-body .field select{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;background:#fff;color:#1e293b;font-size:13px;}
-.panel-body .field textarea:disabled,.panel-body .field select:disabled{background:#f8fafc;color:#64748b;}
+.panel-overlay{position:fixed;inset:0;background:rgba(11,32,54,.52);backdrop-filter:blur(2px);z-index:40;display:flex;justify-content:flex-end;}
+.panel{width:100%;max-width:700px;background:var(--bg);height:100%;overflow-y:auto;box-shadow:-16px 0 48px rgba(11,32,54,.22);}
+.panel-head{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--border);padding:18px 24px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;z-index:2;}
+.panel-body{padding:22px 24px 48px;}
+.panel-close{border:1px solid var(--border);background:#fff;border-radius:var(--r-sm);padding:8px;color:var(--muted);display:inline-flex;transition:background var(--rapido) ease,color var(--rapido) ease;}
+.panel-close:hover{background:var(--hover);color:var(--text);}
+.panel-body .field label{display:block;font-size:12.5px;font-weight:600;color:var(--text-2);margin-bottom:6px;}
+.panel-body .field textarea,.panel-body .field select{width:100%;border:1px solid #CBD5E1;border-radius:var(--r-md);padding:9px 12px;background:#fff;color:var(--text);font-size:13.5px;transition:border-color var(--rapido) ease,box-shadow var(--rapido) ease;}
+.panel-body .field textarea:disabled,.panel-body .field select:disabled{background:#F4F7FA;color:var(--muted);}
+@media (max-width:640px){ .panel-head{padding:14px 16px;} .panel-body{padding:16px 16px 40px;} }

@@ -1,3 +1,4 @@
 /* Esqueleto de la pantalla: menú a la izquierda y contenido a la derecha. */
 #app{display:flex;min-height:100vh;}
 .main{flex:1;min-width:0;display:flex;flex-direction:column;}
+@media (max-width:860px){ #app{flex-direction:column;} }

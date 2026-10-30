@@ -1,4 +1,5 @@
 /* Indicador Guardando, Guardado o Error. */
-.estado-guardado{font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;background:#f1f5f9;color:#475569;}
-.estado-guardado.guardado{background:#dcfce7;color:#15803d;} .estado-guardado.error,.estado-guardado.conflicto{background:#fee2e2;color:#b91c1c;}
-.estado-guardado button{border:none;background:none;color:inherit;text-decoration:underline;font-size:12px;padding:0;}
+.estado-guardado{font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:#EEF2F7;color:var(--text-2);}
+.estado-guardado.guardado{background:#EAF8EF;color:#146C36;} .estado-guardado.error,.estado-guardado.conflicto{background:#FEECEC;color:#9F1D1D;}
+.estado-guardado:empty{display:none;}
+.estado-guardado button{border:none;background:none;color:inherit;text-decoration:underline;font-size:12.5px;padding:0;}

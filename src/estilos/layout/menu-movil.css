@@ -1,6 +1,17 @@
 /* Menú que reemplaza al lateral en pantallas pequeñas. */
-.mobile-nav{display:none;gap:6px;padding:10px 14px 0;flex-wrap:wrap;background:#fff;border-bottom:1px solid var(--border);}
-.mobile-nav button{border:none;background:#f1f5f9;color:#475569;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:5px;}
-.mobile-nav button.active{background:var(--navy);color:#fff;}
+.mobile-nav{
+  display:none;gap:6px;padding:10px 16px;flex-wrap:nowrap;overflow-x:auto;background:var(--navy);
+  scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.mobile-nav::-webkit-scrollbar{display:none;}
+.mobile-nav button{
+  flex-shrink:0;border:none;background:rgba(255,255,255,.1);color:#D5E0EC;border-radius:99px;padding:8px 14px;
+  font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap;min-height:36px;
+  transition:background var(--rapido) ease;
+}
+.mobile-nav button:hover{background:rgba(255,255,255,.18);}
+.mobile-nav button.active{background:#fff;color:var(--navy);}
+.mobile-nav button:focus-visible{box-shadow:0 0 0 2px #fff;}
+.mobile-nav .icon{width:15px;height:15px;}
 
 @media (max-width:860px){ .sidebar{display:none;} .mobile-nav{display:flex;} }
