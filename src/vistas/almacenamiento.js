@@ -15,8 +15,11 @@ const barra = (nombre, usado, limite) => {
 
 export function html(ctx){
   const u = ctx.uso;
+  // Los límites se toman siempre de lo que responde la base de datos (nunca un número fijo aquí),
+  // así este texto no se vuelve a desactualizar si el plan gratuito cambia.
+  const limites = u ? `${bytesLegibles(u.base_datos_limite_bytes)} de base de datos y ${bytesLegibles(u.archivos_limite_bytes)} de archivos` : "los límites del plan gratuito";
   return `<div class="card" style="max-width:720px;"><h3>${icon("db")} Uso del almacenamiento</h3>
-    <p class="hint" style="margin:-4px 0 12px;">La aplicación usa los planes gratuitos de Supabase: 500 MB de base de datos y 1 GB de archivos. Aquí se ve cuánto queda.</p>
+    <p class="hint" style="margin:-4px 0 12px;">La aplicación usa un plan gratuito con ${esc(limites)}. Aquí se ve cuánto queda.</p>
     ${!u ? `<p class="empty">Consultando…</p>` : `${barra("Base de datos", u.base_datos_bytes, u.base_datos_limite_bytes)}${barra("Archivos (adjuntos y firmas)", u.archivos_bytes, u.archivos_limite_bytes)}
       <p class="hint">Registros guardados: <b>${u.registros}</b>. El tamaño de archivos suma solo los adjuntos; las firmas pesan muy poco.</p>`}
     ${ctx.usoError ? `<div class="banner banner-red">${icon("alert")} ${esc(ctx.usoError)}</div>` : ""}</div>`;

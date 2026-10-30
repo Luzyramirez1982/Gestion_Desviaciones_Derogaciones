@@ -138,7 +138,7 @@ export function html(ctx){
 
     <h2>Persistencia de datos</h2>
     <ul>
-      <li><b>Modo conectado</b> (indicador verde "Base de datos conectada"): todo se guarda en Supabase, incluidos los borradores, y lo ven los usuarios autorizados.</li>
+      <li><b>Modo conectado</b> (indicador verde "Base de datos conectada"): todo se guarda en la base de datos, incluidos los borradores, y lo ven los usuarios autorizados.</li>
       <li><b>Modo demostración</b> (indicador amarillo): los datos son de ejemplo y se pierden al recargar la página. No se usa con datos reales.</li>
     </ul>
     <p class="hint">Los archivos adjuntos se guardan aparte, en un espacio privado, y se abren con un enlace temporal. Cada archivo puede pesar hasta ${MAX_FILE_MB} MB y las fotos se reducen automáticamente. Mientras escribe, la aplicación guarda sola y muestra «Guardando…», «Guardado» o «Error al guardar» (con la opción de reintentar).</p>
