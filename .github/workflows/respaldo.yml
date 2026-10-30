@@ -1,9 +1,9 @@
-# PLANTILLA del respaldo diario (Neon): la base de datos y los archivos del bucket.
-# El archivo que GitHub ejecuta es .github/workflows/respaldo.yml (copia de este; mantener los dos iguales).
+# Respaldo diario (Neon): la base de datos y los archivos del bucket.
 # Qué hace: cada noche (1) saca una copia completa de la base (datos, reglas, permisos y cuentas de ingreso) y
 # (2) copia los archivos nuevos del bucket. Cifra todo con una contraseña que solo conoce el equipo y lo guarda 90 días
 # en GitHub (pestaña Actions). Si Neon falla o se pierde algo, con esas copias se recupera todo.
-# El repositorio DEBE ser privado. Configuración (una sola vez) y cómo restaurar: ver docs/RESPALDOS.md
+# Corre igual si el repositorio está público o privado (la copia queda cifrada; la contraseña nunca está en el
+# repositorio). Configuración (una sola vez) y cómo restaurar: ver docs/RESPALDOS.md
 name: Respaldo diario
 
 on:

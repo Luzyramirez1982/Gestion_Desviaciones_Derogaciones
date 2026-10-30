@@ -2,7 +2,7 @@
 
 Aplicación web para gestionar **desviaciones y derogaciones** de proceso. Cada solicitud pasa por tres etapas (Solicitud → Evaluación y Aprobación → Cierre), con firma en cada una; las derogaciones exigen el reporte 8D completo. Hay tres roles: Administrador, Responsable del proceso y Aprobador autorizado.
 
-**Estado:** la interfaz está completa y la base de datos (Neon) está escrita y probada con una base de prueba. Sin `VITE_NEON_URL` la aplicación funciona en **modo demostración** (datos de ejemplo en memoria). Falta ponerla en un Neon real: ver [docs/NEON_PASOS.md](docs/NEON_PASOS.md) y [PLAN.md](PLAN.md).
+**Estado:** la interfaz está completa y la base de datos (Neon) está escrita y probada con una base de prueba. Sin `VITE_NEON_URL` la aplicación funciona en **modo demostración** (datos de ejemplo en memoria). Falta ponerla en un Neon real: ver [docs/NEON_PASOS.md](docs/NEON_PASOS.md).
 
 ## Cómo correrla
 ```bash
@@ -45,7 +45,7 @@ docs/                 Guías (poner en Neon, respaldos, manual del Administrador
 - **Cómo se ve cada pieza:** `src/estilos/componentes/` (un archivo por pieza) y `src/estilos/vistas/` (lo propio de una pantalla).
 - **Qué HTML tiene cada pantalla:** `src/vistas/` y `src/componentes/`.
 - **No tocar** `src/dominio/` ni `src/datos/`: son las reglas del procedimiento y el acceso a datos; si se cambian, hay que cambiar también las pruebas.
-- Antes de subir cambios: `npm test` y `npm run build` deben pasar. Más reglas del equipo en [CLAUDE.md](CLAUDE.md).
+- Antes de subir cambios: `npm test` y `npm run build` deben pasar.
 
 ## Historia
-La versión 1 (un solo `index.html`) sigue en la rama `main`. La nueva versión está en `feat/v2`. Las reglas que se escribieron primero para Supabase quedaron guardadas en la marca `referencia-supabase`; la base actual es Neon. Detalle de cada sesión en [HISTORIAL.md](HISTORIAL.md).
+La versión 1 (un solo `index.html`) sigue en la rama `main`. La nueva versión está en `feat/v2`. Las reglas que se escribieron primero para Supabase quedaron guardadas en la marca `referencia-supabase`; la base actual es Neon.

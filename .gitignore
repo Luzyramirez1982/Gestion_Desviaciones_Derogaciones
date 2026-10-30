@@ -20,3 +20,8 @@ config.js
 .claude/
 .mcp.json
 skills-lock.json
+
+# Notas internas del equipo (quedan solo en el computador de cada persona, no en el repositorio)
+CLAUDE.md
+PLAN.md
+HISTORIAL.md

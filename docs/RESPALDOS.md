@@ -8,14 +8,14 @@ Esto es lo que protege el proyecto si Neon falla, se borra algo por error o hay 
 
 ## Activarlo (una sola vez)
 
-1. **El repositorio debe ser privado** (Settings > General > Danger Zone > Change visibility). Las copias están cifradas, pero no deben estar a la vista de nadie.
+1. El repositorio puede estar público o privado: la copia sale **cifrada con AES-256** y la contraseña para abrirla solo vive en los secretos de GitHub (nunca en el repositorio), así que nadie puede abrirla sin esa contraseña en ninguno de los dos casos. Con el repositorio privado, además, solo quien tenga acceso al repositorio puede siquiera descargar el archivo cifrado; con el repositorio público, cualquiera puede descargarlo (pero no abrirlo). Si en algún momento se prefiere que nadie pueda ni descargarlo, hay que guardar la copia en un repositorio aparte que siempre sea privado (no es lo que hace hoy este flujo).
 2. Cree una **contraseña larga** para cifrar las copias (30 caracteres o más, al azar; un gestor de contraseñas la genera). **Guárdela en dos lugares distintos**: sin ella las copias no se pueden abrir.
 3. Copie la dirección de conexión de Neon (Neon > Connect > Connection string, la de la base real).
 4. En GitHub: Settings > Secrets and variables > Actions > New repository secret:
    - `BACKUP_PASSPHRASE`: la contraseña del paso 2.
    - `NEON_DB_URL`: la dirección del paso 3.
    - Los de los archivos, tomados del `.env`: `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` y `S3_BUCKET`.
-5. El archivo del flujo ya está en `.github/workflows/respaldo.yml` (el modelo, `docs/respaldo-diario.yml`). GitHub solo ejecuta las tareas programadas (y deja lanzarlas a mano) desde la **rama por defecto**. Como `main` guarda el ejemplo de la versión 1 y no se va a usar, ponga `feat/v2` como rama por defecto: Settings > Branches > Default branch > cambiar a `feat/v2`.
+5. El archivo del flujo ya está en `.github/workflows/respaldo.yml`. GitHub solo ejecuta las tareas programadas (y deja lanzarlas a mano desde la pestaña Actions) desde la **rama por defecto**. Como `main` guarda el ejemplo de la versión 1 y no se va a usar, ponga `feat/v2` como rama por defecto: Settings > Branches > Default branch > cambiar a `feat/v2`.
 6. Pestaña **Actions** > *Respaldo diario* > **Run workflow**, **marcando «todo»** la primera vez (copia todos los archivos que ya existan). Debe terminar en verde y dejar dos archivos en *Artifacts*: `base-AAAA-MM-DD.tar.gz.cif` y `archivos-AAAA-MM-DD.tar.gz.cif`.
 7. Si un día falla, GitHub envía un correo a quien administra el repositorio. Revíselo.
 

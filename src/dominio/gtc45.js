@@ -1,5 +1,5 @@
 // Clasificación de peligros según la GTC 45 (Anexo A), para solicitudes de Seguridad y Salud en el Trabajo.
-// Falta que SST valide esta lista (ver PLAN.md).
+// Falta que SST valide esta lista.
 export const GTC45_DESCRIPCION = {
   "Biológico": ["Virus","Bacterias","Hongos","Ricketsias","Parásitos","Picaduras","Mordeduras","Fluidos o excrementos"],
   "Físico": [
