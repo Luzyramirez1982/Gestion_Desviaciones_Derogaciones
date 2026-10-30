@@ -3,7 +3,7 @@
 Guía para quien se una al proyecto: qué se quiere lograr, qué se decidió, qué está hecho y qué falta.
 **Cuando termines algo, marca la casilla y cambia la fecha.** Detalle de cada sesión: [HISTORIAL.md](HISTORIAL.md). Reglas de trabajo: [CLAUDE.md](CLAUDE.md).
 
-_Última actualización: 30/10/2026 (accesibilidad: etiquetas de formularios asociadas a su campo)_
+_Última actualización: 30/10/2026 (causa de la sesión perdida al despertar Neon, encontrada y reforzada)_
 
 Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a una cuenta de la clienta
 
@@ -58,7 +58,7 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 - [x] El respaldo nocturno copia también los archivos del bucket (`scripts/respaldo-archivos.mjs`, `scripts/restaurar-archivos.mjs`, probados contra el bucket real); la copia de la base sola no los trae.
 - [ ] Probar si crear cuentas sigue funcionando con el registro abierto apagado (`--disable-sign-up true`) y apagarlo.
 - [ ] Pantalla de «nueva contraseña» y correo de envío propio para «¿Olvidó su contraseña?» (hoy la Administradora restablece).
-- [ ] Primeras consultas tras un rato sin uso (el procesador gratis de Neon se duerme a los 5 min): a veces no reconocen la sesión. Las lecturas completas en una consulta y los reintentos lo cubren; falta la causa raíz (¿plan de pago sin «dormir», o reporte a Neon?).
+- [x] Primeras consultas tras un rato sin uso (el procesador gratis de Neon se duerme a los 5 min): a veces no reconocen la sesión. Causa encontrada (30/10/2026): problema ya reportado de Neon, su función `auth.user_id()` a veces no reconoce el token justo al despertar aunque sí llegó. Se agregó `mi_id()` (migración 0008) como segunda forma de leerlo, además de las lecturas completas en una consulta y los reintentos que ya había (ver docs/NEON_PASOS.md). En un plan de pago se puede apagar el «dormir» del procesador.
 - [x] Plantilla del respaldo corregida para Postgres 18 (la 17 fallaba) y para conservar los permisos al restaurar; guía de restauración con el formato de dos archivos.
 - [x] Flujo en `.github/workflows/respaldo.yml` (rama `feat/v2`). `main` no se toca (guarda el ejemplo de la versión 1).
 - [ ] En GitHub: poner el repositorio en privado, cambiar la **rama por defecto a `feat/v2`** (las tareas programadas solo corren desde ahí), cargar los secretos (`BACKUP_PASSPHRASE`, `NEON_DB_URL` y los cinco del bucket: `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET`), lanzarlo a mano **marcando «todo»** y **ensayar una restauración** (base y archivos) en un proyecto de prueba. 🔑

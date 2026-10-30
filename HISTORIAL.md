@@ -410,3 +410,13 @@ En el editor del reporte 8D (`src/componentes/editor8d.js`) —no estaba en el h
 Se dejó sin asociar la etiqueta "La derogación es" (encabezado del grupo de radios Temporal/Definitiva): no corresponde a un solo campo, como un `<legend>`.
 
 **Verificado:** 281 pruebas unitarias, compilación y las 20 pruebas de extremo a extremo, todas en verde después del cambio.
+
+### Causa de fondo: por qué a veces no reconoce la sesión al despertar Neon
+La clienta preguntó si UptimeRobot evitaría que la base de Neon «se apague». Se le explicó que Neon gratis no apaga el proyecto (solo el procesador se duerme y despierta solo); mantenerlo despierto con pings constantes además arriesga a gastar antes la cuota gratis de horas de cómputo. Se investigó en cambio la causa de fondo del hallazgo ya anotado en PLAN.md (listas vacías o permisos negados justo al despertar):
+
+- Es un problema **ya reportado de Neon**, no de esta aplicación: justo al despertar, su función interna que identifica a la persona (`auth.user_id()`, de su extensión de sesión) a veces todavía no reconoce el token en la primera consulta, aunque el token sí llegó con la petición. Lo mismo reportaron otras personas tanto en el repositorio de la extensión como en el de Neon; no hay fecha de corrección.
+- Se agregó `mi_id()` (migración `db/migraciones/0008_identidad_robusta.sql`): pregunta "quién soy yo" de una segunda forma —leyendo el token directo de la petición— cuando `auth.user_id()` no responde, y se usa en las funciones que decidían permisos (`mi_rol`, `mi_area`, `puede_ver_registro` y la política de lectura de perfiles), que son las que cubren casi todas las reglas de quién ve qué.
+- Es un refuerzo, no un remplazo de los reintentos que ya hacía la aplicación (`src/datos/neon.js`, de una sesión anterior): si Neon no manda el token en absoluto con la petición (otro problema de Neon, más de fondo), ninguna de las dos formas lo puede recuperar y ahí el reintento sigue siendo necesario.
+- Prueba nueva (`tests/identidad.test.js`): simula justo el caso (el token llega pero `auth.user_id()` no responde) y comprueba que la persona se sigue reconociendo; y el caso contrario (no llega nada), que sigue sin ver nada.
+
+**Verificado:** 283 pruebas unitarias (las 281 de antes más las 2 nuevas), compilación y las 20 pruebas de extremo a extremo, todas en verde.
