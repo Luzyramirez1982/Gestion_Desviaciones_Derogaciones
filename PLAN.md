@@ -51,7 +51,7 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 - [x] Cabeceras de seguridad con `*.neon.tech` en `connect-src`.
 - [x] **Probado contra un Neon real** (resultados en `docs/NEON_PASOS.md`).
 - [x] Proyecto de Neon, Data API, migraciones y catálogo aplicados (8 áreas, 35 tipos).
-- [ ] Crear a la Administradora real con `scripts/crear-primer-admin.mjs` y confirmar con ella el catálogo inicial. 🔑
+- [~] Perfil de la Administradora creado con `scripts/crear-primer-admin.mjs`. Falta que ella ingrese por primera vez con la contraseña temporal (a propósito no se ha usado esa cuenta, para que sea ella quien ponga su propia contraseña) y confirmar con ella el catálogo inicial. 🔑
 - [x] **Archivos en el bucket de Neon** (`uploads`, 5 GB): una función de servidor (`functions/archivos/`) guarda las claves, valida la sesión y le pregunta a la base si hay permiso; la base anota qué archivo existe (migraciones 0006 y 0007). Probado contra el Neon real y desplegado.
 - [ ] **Publicar de nuevo el sitio** con `VITE_ARCHIVOS_URL` (`npm run build` y `npx wrangler pages deploy dist --project-name desviaciones-matec --branch main`): la dirección de la función queda escrita dentro del sitio. 🔑
 - [x] El respaldo nocturno copia también los archivos del bucket (`scripts/respaldo-archivos.mjs`, `scripts/restaurar-archivos.mjs`, probados contra el bucket real); la copia de la base sola no los trae.
