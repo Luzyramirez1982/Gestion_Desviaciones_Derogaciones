@@ -375,3 +375,27 @@ Decisiones tomadas con la usuaria: ingreso con **Supabase Auth**; correo de bien
 - **CSS (hallazgos de la revisión de `feat/frontend`):** el Instructivo se desbordaba de lado en celular (tablas anchas sin contenedor); el texto de ejemplo de los campos y los textos secundarios (`--faint`, `--muted`) no llegaban a contraste 4.5:1; la etiqueta «8D» tenía 4,41:1 y sus estilos estaban escritos dentro del JavaScript (ahora es la clase `.badge-8d`, 5,9:1); se quitaron 9 variables CSS sin uso.
 - **Verificado en el navegador (celular, 8 pantallas):** sin desborde y sin textos de bajo contraste.
 - **Pruebas:** 281 pasan y la compilación funciona.
+
+## Sesión 14 — 30/10/2026
+
+### Pruebas de extremo a extremo (navegador real)
+Se montó Playwright con Chromium real (no simulado) contra la aplicación ya compilada, en modo demostración. 20 pruebas, 7 archivos, cada una representa algo que de verdad le puede pasar a una persona usando la aplicación:
+- **Ingreso:** aviso de modo demostración, correo o contraseña incorrectos, entrar y salir, enlaces de cuentas de ejemplo.
+- **Ciclo completo de una Desviación:** Responsable del proceso la crea y firma → Aprobador autorizado evalúa, aprueba y firma → el mismo Responsable la cierra. Tres sesiones distintas, en el mismo navegador.
+- **Derogación y 8D:** se crea con el 8D vacío (está permitido), el Aprobador no puede aprobarla sin completarlo, se completa y entonces sí se aprueba.
+- **Devolver y rechazar:** el motivo es obligatorio; al devolver, el dueño la corrige y la reenvía con el mismo consecutivo.
+- **Permisos:** el menú muestra solo lo que cada rol puede usar; un Responsable de otra área no ve un registro ajeno; el Administrador ve todos.
+- **Pantallas de Administrador:** crear un usuario (contraseña temporal real), agregar y quitar un tipo, renombrar un área, registros eliminados, uso del almacenamiento (ya sin «Supabase»), instructivo.
+- **Exportar:** la descarga del Excel y del PDF de trazabilidad ocurre de verdad (se espera el evento de descarga del navegador, no solo que el botón exista).
+
+**Un hallazgo real a mitad de camino, no de la aplicación sino de mis propias pruebas:** en modo demostración los datos solo viven en la memoria de esa carga de página («se pierden al recargar», como ya dice el instructivo). Las primeras versiones de las pruebas recargaban la página al cambiar de usuario y perdían lo recién creado. Se corrigió: solo se recarga la primera vez; después de «salir» se usa el mismo formulario de ingreso sin recargar, así la sesión siguiente ve lo que dejó la anterior (igual que pasaría conectado a una base real).
+
+**Hallazgo de accesibilidad (anotado en PLAN.md, sin corregir todavía):** las etiquetas de los formularios no están asociadas a su campo (falta `for`/`id`); un lector de pantalla no puede saltar al campo tocando la etiqueta.
+
+**Comando:** `npm run test:e2e` (compila y corre las 20 pruebas, unos 25 segundos).
+
+### Quitadas las menciones a Supabase que quedaron del cambio a Neon
+El instructivo decía que todo se guarda «en Supabase». La pantalla de Uso del almacenamiento, además de nombrar a Supabase, mostraba los límites viejos (500 MB y 1 GB) cuando ya son 1 GB y 5 GB desde que los archivos pasaron al bucket de Neon — las barras de la misma pantalla ya mostraban los números correctos, solo el texto de arriba estaba desactualizado. Se corrigió para que ese texto tome los límites de lo que responde la base de datos, en vez de un número escrito a mano.
+
+### Urgencia: GitHub Pages en blanco
+La clienta reportó la demo (`main`) en blanco. Causa: se cambió el origen de GitHub Pages a la rama `feat/v2` (código fuente de Vite sin compilar; el navegador no puede resolver sus módulos sin el empaquetador) para probar la v2, y el intento de volver a apuntar a `main` no se guardó. Se resolvió sin tocar código: se volvió a ejecutar el flujo `publicar-pagina.yml` (`gh workflow run`), que restablece la publicación por GitHub Actions. Verificado con una petición fresca y con un navegador real (sin errores en la consola). La causa de que algunas personas siguieran viendo la versión en blanco después fue la caché del navegador (`Ctrl+Shift+R` lo resolvió).

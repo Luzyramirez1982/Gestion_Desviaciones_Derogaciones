@@ -8,6 +8,11 @@ dist/
 exportacion/
 informe-migracion.json
 
+# Resultados de las pruebas de extremo a extremo (capturas, trazas); se generan al correrlas
+test-results/
+playwright-report/
+blob-report/
+
 # Configuración de la versión 1 (con claves); no se versiona
 config.js
 

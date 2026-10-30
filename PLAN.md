@@ -3,7 +3,7 @@
 Guía para quien se una al proyecto: qué se quiere lograr, qué se decidió, qué está hecho y qué falta.
 **Cuando termines algo, marca la casilla y cambia la fecha.** Detalle de cada sesión: [HISTORIAL.md](HISTORIAL.md). Reglas de trabajo: [CLAUDE.md](CLAUDE.md).
 
-_Última actualización: 29/10/2026 (noche, probado contra Neon real)_
+_Última actualización: 30/10/2026 (pruebas de extremo a extremo)_
 
 Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a una cuenta de la clienta
 
@@ -28,7 +28,8 @@ La clienta (C.I. Matec Logística) necesita una aplicación para gestionar **des
 - [x] Compresión de fotos y límites de archivo (5 MB).
 - [x] Cabeceras de seguridad para Cloudflare (`public/_headers`).
 - [x] Estilos separados por tema en `src/estilos/`.
-- [x] 107 pruebas automáticas, 0 vulnerabilidades, compilación correcta.
+- [x] 281 pruebas automáticas (unitarias y de base de datos), 0 vulnerabilidades, compilación correcta.
+- [x] 20 pruebas de extremo a extremo con un navegador real (Playwright): ingreso, el ciclo completo de una Desviación (crear → evaluar/aprobar → cerrar), una Derogación que exige el 8D completo antes de aprobar, devolver y rechazar, permisos por rol y por área, las pantallas de Administrador (usuarios, tipos, áreas, eliminados, uso del almacenamiento, instructivo) y la descarga real de PDF y Excel. Corren en modo demostración (sin tocar ninguna base real). `npm run test:e2e`.
 
 ## 4. Base de datos: Neon
 Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
@@ -69,10 +70,11 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 - [x] Dividir los archivos grandes (`vistas/formulario.js`, `vistas/detalle.js`, `vistas/ayuda.js`, `componentes/ui.js`) en piezas de una sola responsabilidad. Revisado con ESLint (`no-undef`) sobre todo `src/`.
 - [x] Mejora visual con solo CSS (LuisBrito-11), ya dentro de `feat/v2`; corregidos el desborde del Instructivo en celular y los contrastes (HISTORIAL, sesión 13).
 - [ ] Revisión visual con ojos humanos de las pantallas (la revisión automática midió desbordes y contrastes, no la estética).
+- [ ] Accesibilidad: las etiquetas (`<label>`) de los formularios no están asociadas a su campo (falta `for`/`id`); se nota, por ejemplo, en el ingreso (correo y contraseña). Quien usa un lector de pantalla no puede saltar al campo tocando la etiqueta. Hallazgo de las pruebas E2E de hoy.
 
 ## 6. Pendiente: publicación y entrega
 - [ ] Publicar en Cloudflare Pages (`npm run build`, carpeta `dist`). 🔑
-- [ ] Probar desde celular y computador: primer ingreso, recuperación de contraseña, firmar, cerrar, PDF y Excel.
+- [ ] Probar desde celular y computador: primer ingreso y recuperación de contraseña contra el Neon real (firmar, cerrar, PDF y Excel ya quedaron cubiertos por las pruebas E2E automáticas).
 - [ ] Actualizar `docs/MANUAL_ADMINISTRADOR.md` con la base elegida y entregarlo.
 - [ ] Fusionar `feat/v2` en `main`.
 
