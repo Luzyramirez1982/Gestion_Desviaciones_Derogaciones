@@ -1,0 +1,56 @@
+# PLANTILLA: publica la aplicación en GitHub Pages sin que la clave de Supabase quede en el
+# código del repositorio. En el momento de publicar, arma config.js con los secretos del
+# ambiente "github-pages" y sube solo ese resultado — nunca se guarda en git.
+#
+# Para activarla: copiar este archivo a .github/workflows/publicar-pagina.yml (desde la web de
+# GitHub, Add file → Create new file, porque el token normal no tiene permiso "workflow").
+#
+# Antes de activarla:
+#   1. Settings → Environments → github-pages → Environment secrets: agregar SUPABASE_URL y
+#      SUPABASE_KEY (así quedan restringidos a despliegues desde la rama main).
+#   2. Settings → Pages → Source: debe decir "GitHub Actions" (no "Deploy from a branch").
+name: Publicar en GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Armar config.js con los secretos del ambiente
+        run: |
+          cat > config.js << EOF
+          // Generado al publicar; no se guarda en el repositorio.
+          window.SUPABASE_URL = "${{ secrets.SUPABASE_URL }}";
+          window.SUPABASE_KEY = "${{ secrets.SUPABASE_KEY }}";
+          EOF
+
+      - name: Preparar la publicación
+        uses: actions/configure-pages@v5
+
+      - name: Subir el sitio (todo el repositorio, con el config.js recién armado)
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Publicar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
