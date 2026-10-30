@@ -54,10 +54,10 @@ export function html(ctx){
     <div class="card" style="margin-bottom:16px;"><h3>Crear usuario</h3>
       <p class="hint" style="margin:-4px 0 10px;">Al crear el usuario se genera una <b>contraseña temporal</b> y se muestra la tarjeta para compartirle el enlace, el usuario (correo) y la contraseña. La persona la cambia en su primer ingreso.</p>
       <form id="formUsuario">
-        <div class="row2"><div class="field"><label>Nombre completo</label><input type="text" name="nombre" required minlength="3"></div>
-          <div class="field"><label>Correo electrónico</label><input type="email" name="correo" required></div></div>
-        <div class="row2"><div class="field"><label>Rol</label><select name="rol">${ROLES.map(r => `<option ${r === "Responsable del proceso" ? "selected" : ""}>${esc(r)}</option>`).join("")}</select></div>
-          <div class="field"><label>Área</label><select name="area">${opcionesArea(ctx, "")}</select><div class="hint">Recomendada para el Responsable del proceso: además de sus propias solicitudes, podrá consultar las dirigidas a su área.</div></div></div>
+        <div class="row2"><div class="field"><label>Nombre completo<input type="text" name="nombre" required minlength="3"></label></div>
+          <div class="field"><label>Correo electrónico<input type="email" name="correo" required></label></div></div>
+        <div class="row2"><div class="field"><label>Rol<select name="rol">${ROLES.map(r => `<option ${r === "Responsable del proceso" ? "selected" : ""}>${esc(r)}</option>`).join("")}</select></label></div>
+          <div class="field"><label>Área<select name="area">${opcionesArea(ctx, "")}</select></label><div class="hint">Recomendada para el Responsable del proceso: además de sus propias solicitudes, podrá consultar las dirigidas a su área.</div></div></div>
         <button type="submit" class="btn btn-primary" id="btnCrearUsuario">${icon("plus")} Crear usuario y generar acceso</button></form></div>
 
     <div class="card"><h3>Usuarios registrados (${perfiles.length})</h3>

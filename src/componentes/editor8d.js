@@ -24,26 +24,26 @@ export function d8HTML(d8, { deshabilitado = false, personas = [] } = {}){
   d8 = d8 || emptyD8();
   const dis = deshabilitado ? "disabled" : "";
   return D8_FIELDS.map(f => {
-    if(f.key === "d2") return `<div class="d8-field"><label>${esc(f.label)}</label>
+    if(f.key === "d2") return `<div class="d8-field"><label for="d8-campo-d2">${esc(f.label)}</label>
       <div class="tool-box"><div class="tool-title">Herramienta 5W2H</div>
-        ${W2H_FIELDS.map(w => `<div class="tool-row"><div class="tool-q"><b>${esc(w.label)}</b><span>${esc(w.pregunta)}</span></div>
-          <textarea data-w2h="${w.key}" rows="1" ${dis}>${esc(d8.w2h ? d8.w2h[w.key] : "")}</textarea></div>`).join("")}
+        ${W2H_FIELDS.map(w => `<div class="tool-row"><div class="tool-q"><label for="d8-w2h-${esc(w.key)}"><b>${esc(w.label)}</b><span>${esc(w.pregunta)}</span></label></div>
+          <textarea id="d8-w2h-${esc(w.key)}" data-w2h="${w.key}" rows="1" ${dis}>${esc(d8.w2h ? d8.w2h[w.key] : "")}</textarea></div>`).join("")}
       </div>
-      <textarea data-d8="d2" rows="2" placeholder="${esc(f.hint)}" ${dis}>${esc(d8.d2)}</textarea></div>`;
+      <textarea id="d8-campo-d2" data-d8="d2" rows="2" placeholder="${esc(f.hint)}" ${dis}>${esc(d8.d2)}</textarea></div>`;
     if(f.key === "d4"){
       const porques = d8.whys || [];
-      return `<div class="d8-field"><label>${esc(f.label)}</label>
+      return `<div class="d8-field"><label for="d8-campo-d4">${esc(f.label)}</label>
         <div class="tool-box"><div class="tool-title">Herramienta 5 Porqués <span class="hint" style="font-weight:400;">— pregunte "¿por qué?" sobre la respuesta anterior hasta llegar a la causa raíz (mínimo ${WHYS_REQUIRED}).</span></div>
-          ${Array.from({length: WHYS_COUNT}, (_, i) => `<div class="tool-row"><div class="tool-q"><b>¿Por qué? ${i + 1}</b><span>${i < WHYS_REQUIRED ? "Obligatorio" : "Si aplica"}</span></div>
-            <textarea data-why="${i}" rows="1" ${dis}>${esc(porques[i] || "")}</textarea></div>`).join("")}
+          ${Array.from({length: WHYS_COUNT}, (_, i) => `<div class="tool-row"><div class="tool-q"><label for="d8-why-${i}"><b>¿Por qué? ${i + 1}</b><span>${i < WHYS_REQUIRED ? "Obligatorio" : "Si aplica"}</span></label></div>
+            <textarea id="d8-why-${i}" data-why="${i}" rows="1" ${dis}>${esc(porques[i] || "")}</textarea></div>`).join("")}
         </div>
-        <textarea data-d8="d4" rows="2" placeholder="${esc(f.hint)}" ${dis}>${esc(d8.d4)}</textarea></div>`;
+        <textarea id="d8-campo-d4" data-d8="d4" rows="2" placeholder="${esc(f.hint)}" ${dis}>${esc(d8.d4)}</textarea></div>`;
     }
-    if(f.key === "d3" || f.key === "d5") return `<div class="d8-field"><label>${esc(f.label)}</label>
+    if(f.key === "d3" || f.key === "d5") return `<div class="d8-field"><label for="d8-campo-${f.key}">${esc(f.label)}</label>
       <div data-caja-acciones="${f.key}">${tablaAcciones(f.key, d8[ACT_TABLES[f.key].prop], {deshabilitado, personas})}</div>
-      <textarea data-d8="${f.key}" rows="1" placeholder="${esc(f.hint)}" ${dis}>${esc(d8[f.key])}</textarea></div>`;
-    return `<div class="d8-field"><label>${esc(f.label)}</label>
-      <textarea data-d8="${f.key}" rows="2" placeholder="${esc(f.hint)}" ${dis}>${esc(d8[f.key])}</textarea></div>`;
+      <textarea id="d8-campo-${f.key}" data-d8="${f.key}" rows="1" placeholder="${esc(f.hint)}" ${dis}>${esc(d8[f.key])}</textarea></div>`;
+    return `<div class="d8-field"><label for="d8-campo-${f.key}">${esc(f.label)}</label>
+      <textarea id="d8-campo-${f.key}" data-d8="${f.key}" rows="2" placeholder="${esc(f.hint)}" ${dis}>${esc(d8[f.key])}</textarea></div>`;
   }).join("");
 }
 

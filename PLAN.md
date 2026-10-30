@@ -3,7 +3,7 @@
 Guía para quien se una al proyecto: qué se quiere lograr, qué se decidió, qué está hecho y qué falta.
 **Cuando termines algo, marca la casilla y cambia la fecha.** Detalle de cada sesión: [HISTORIAL.md](HISTORIAL.md). Reglas de trabajo: [CLAUDE.md](CLAUDE.md).
 
-_Última actualización: 30/10/2026 (pruebas de extremo a extremo)_
+_Última actualización: 30/10/2026 (accesibilidad: etiquetas de formularios asociadas a su campo)_
 
 Leyenda: `[x]` hecho · `[~]` en curso · `[ ]` pendiente · 🔑 necesita acceso a una cuenta de la clienta
 
@@ -70,7 +70,7 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 - [x] Dividir los archivos grandes (`vistas/formulario.js`, `vistas/detalle.js`, `vistas/ayuda.js`, `componentes/ui.js`) en piezas de una sola responsabilidad. Revisado con ESLint (`no-undef`) sobre todo `src/`.
 - [x] Mejora visual con solo CSS (LuisBrito-11), ya dentro de `feat/v2`; corregidos el desborde del Instructivo en celular y los contrastes (HISTORIAL, sesión 13).
 - [ ] Revisión visual con ojos humanos de las pantallas (la revisión automática midió desbordes y contrastes, no la estética).
-- [ ] Accesibilidad: las etiquetas (`<label>`) de los formularios no están asociadas a su campo (falta `for`/`id`); se nota, por ejemplo, en el ingreso (correo y contraseña). Quien usa un lector de pantalla no puede saltar al campo tocando la etiqueta. Hallazgo de las pruebas E2E de hoy.
+- [x] Accesibilidad: las etiquetas (`<label>`) de los formularios no estaban asociadas a su campo. Corregido envolviendo cada campo dentro de su `<label>` (o con `for`/`id` donde el texto cambia por código, como en el 8D). Quien usa un lector de pantalla ya puede saltar al campo tocando la etiqueta.
 
 ## 6. Pendiente: publicación y entrega
 - [ ] Publicar en Cloudflare Pages (`npm run build`, carpeta `dist`). 🔑

@@ -62,7 +62,7 @@ export function html(ctx){
           <button class="btn btn-outline btn-sm" id="btnDevolver">${icon("chevronLeft")} Devolver al Responsable del proceso</button>
           <button class="btn btn-danger-outline btn-sm" id="btnRechazar">${icon("x")} Rechazar solicitud</button></div>
           <div class="hint" style="margin-top:4px;">Devolver y Rechazar exigen escribir el motivo en el comentario.</div>` : ""}
-        ${!cerrado && !rec.devuelta ? `<div class="field" style="margin-top:10px;"><label>Comentario para la bitácora (opcional; obligatorio al devolver o rechazar)</label><textarea id="comentarioEtapa" rows="2" placeholder="Se guardará en la bitácora…"></textarea></div>` : ""}
+        ${!cerrado && !rec.devuelta ? `<div class="field" style="margin-top:10px;"><label>Comentario para la bitácora (opcional; obligatorio al devolver o rechazar)<textarea id="comentarioEtapa" rows="2" placeholder="Se guardará en la bitácora…"></textarea></label></div>` : ""}
       </div>
 
       ${rec.recurrente && puedeConvertir ? `<div class="banner banner-amber">${icon("repeat")} Esta desviación es recurrente. Evalúe si debe convertirse en derogación.
@@ -104,9 +104,9 @@ export function html(ctx){
 
       <div class="card" style="margin-top:12px;${enEval ? "border-color:#c4b5fd;" : ""}"><h3>Etapa 2 · Evaluación y Aprobación — Aprobador autorizado</h3>
         ${!puedeAprobar && enEval ? `<p class="hint" style="margin-top:-4px;">La diligencia el Aprobador autorizado.</p>` : ""}
-        <div class="field"><label>Concepto de evaluación</label><textarea data-campo="conceptoEvaluacion" rows="2" ${puedeAprobar ? "" : "disabled"} placeholder="Viabilidad, riesgos y condiciones bajo las que se acepta la ${palabra}">${esc(rec.conceptoEvaluacion)}</textarea></div>
-        <div class="field"><label>Medidas de control durante la ${palabra}</label><textarea data-campo="controlesCompensatorios" rows="2" ${puedeAprobar ? "" : "disabled"}>${esc(rec.controlesCompensatorios)}</textarea></div>
-        <div class="field"><label>Observaciones de la aprobación (opcional)</label><textarea data-campo="observacionesAprobacion" rows="2" ${puedeAprobar ? "" : "disabled"} placeholder="Condiciones o recomendaciones de la aprobación">${esc(rec.observacionesAprobacion)}</textarea></div>
+        <div class="field"><label>Concepto de evaluación<textarea data-campo="conceptoEvaluacion" rows="2" ${puedeAprobar ? "" : "disabled"} placeholder="Viabilidad, riesgos y condiciones bajo las que se acepta la ${palabra}">${esc(rec.conceptoEvaluacion)}</textarea></label></div>
+        <div class="field"><label>Medidas de control durante la ${palabra}<textarea data-campo="controlesCompensatorios" rows="2" ${puedeAprobar ? "" : "disabled"}>${esc(rec.controlesCompensatorios)}</textarea></label></div>
+        <div class="field"><label>Observaciones de la aprobación (opcional)<textarea data-campo="observacionesAprobacion" rows="2" ${puedeAprobar ? "" : "disabled"} placeholder="Condiciones o recomendaciones de la aprobación">${esc(rec.observacionesAprobacion)}</textarea></label></div>
         <p class="hint" style="margin:0;">Los campos se guardan automáticamente; puede volver después a terminar.</p></div>
 
       ${rec.tipoGestion === "Derogación" ? `<div class="d8box" id="d8-section">
@@ -119,10 +119,10 @@ export function html(ctx){
       <div class="card" style="margin-top:12px;${rec.stage === 2 && !cerrado ? "border-color:#86efac;" : ""}"><h3>Etapa 3 · Cierre — Responsable del proceso que hizo la solicitud</h3>
         ${!cerrado && rec.stage < 2 ? `<p class="hint" style="margin-top:-4px;">Se habilita cuando la solicitud está aprobada y la actividad ha finalizado.</p>` : ""}
         ${!cerrado && rec.stage === 2 && !dueno ? `<p class="hint" style="margin-top:-4px;">La cierra ${esc(rec.reportadoPor)}, quien hizo la solicitud.</p>` : ""}
-        <div class="field"><label>Observaciones de cierre</label><textarea data-campo="observacionesCierre" rows="2" ${puedeCerrar ? "" : "disabled"} placeholder="Resultado de la actividad y estado final de la condición">${esc(rec.observacionesCierre)}</textarea></div>
-        <div class="field" style="max-width:240px;"><label>¿Se cumplieron los controles?</label>
+        <div class="field"><label>Observaciones de cierre<textarea data-campo="observacionesCierre" rows="2" ${puedeCerrar ? "" : "disabled"} placeholder="Resultado de la actividad y estado final de la condición">${esc(rec.observacionesCierre)}</textarea></label></div>
+        <div class="field" style="max-width:240px;"><label>¿Se cumplieron los controles?
           <select data-campo="cumplimientoControl" ${puedeCerrar ? "" : "disabled"}><option value="">Sin definir</option>
-            <option value="Sí" ${rec.cumplimientoControl === "Sí" ? "selected" : ""}>Sí</option><option value="No" ${rec.cumplimientoControl === "No" ? "selected" : ""}>No</option></select></div></div>
+            <option value="Sí" ${rec.cumplimientoControl === "Sí" ? "selected" : ""}>Sí</option><option value="No" ${rec.cumplimientoControl === "No" ? "selected" : ""}>No</option></select></label></div></div>
 
       <div class="card" style="margin-top:12px;"><h3>Evidencias adjuntas (${rec.adjuntos.length})</h3>
         <div id="listaAdjuntos">${adjuntosHTML(rec.adjuntos)}</div>
@@ -150,8 +150,8 @@ function alcanceHTML(rec){
       <label class="checkline" style="margin:0;"><input type="radio" name="alcEdit" value="Temporal" ${!def ? "checked" : ""}> Temporal</label>
       <label class="checkline" style="margin:0;"><input type="radio" name="alcEdit" value="Definitiva" ${def ? "checked" : ""}> Definitiva</label></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
-      <div class="field" style="margin:0;"><label id="lblAlcIni">${def ? "Efectiva desde" : "Desde"}</label><input type="date" id="alcIni" value="${esc(def ? (rec.fechaEfectiva || rec.vigenciaInicio) : rec.vigenciaInicio)}"></div>
-      <div class="field" style="margin:0;${def ? "display:none;" : ""}" id="alcFinCaja"><label>Hasta</label><input type="date" id="alcFin" value="${esc(rec.vigenciaFin)}"></div>
+      <div class="field" style="margin:0;"><label><span id="lblAlcIni">${def ? "Efectiva desde" : "Desde"}</span><input type="date" id="alcIni" value="${esc(def ? (rec.fechaEfectiva || rec.vigenciaInicio) : rec.vigenciaInicio)}"></label></div>
+      <div class="field" style="margin:0;${def ? "display:none;" : ""}" id="alcFinCaja"><label>Hasta<input type="date" id="alcFin" value="${esc(rec.vigenciaFin)}"></label></div>
       <button type="button" class="btn btn-outline btn-sm" id="btnAlcance">${icon("check")} Guardar alcance</button></div></div>`;
 }
 

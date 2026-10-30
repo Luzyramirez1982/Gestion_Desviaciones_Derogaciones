@@ -30,45 +30,45 @@ export function html(ctx){
   <form id="formNuevo" style="max-width:760px;" novalidate>
     <fieldset><legend>1. Información del solicitante (Responsable del proceso)</legend>
       <div class="row2">
-        <div class="field"><label>Fecha y hora</label><input type="datetime-local" name="fechaHora" value="${nowLocal()}" required></div>
-        <div class="field"><label>Nombre y apellido</label><input type="text" name="reportadoPor" value="${esc(u.nombre)}" required></div>
+        <div class="field"><label>Fecha y hora<input type="datetime-local" name="fechaHora" value="${nowLocal()}" required></label></div>
+        <div class="field"><label>Nombre y apellido<input type="text" name="reportadoPor" value="${esc(u.nombre)}" required></label></div>
       </div>
       <div class="row3">
-        <div class="field"><label>Cargo</label><input type="text" name="cargo" required></div>
-        <div class="field"><label>Área (según organigrama)</label><input type="text" name="areaSolicitante" required></div>
-        <div class="field"><label>Proceso</label><input type="text" name="procesoSolicitante" required></div>
+        <div class="field"><label>Cargo<input type="text" name="cargo" required></label></div>
+        <div class="field"><label>Área (según organigrama)<input type="text" name="areaSolicitante" required></label></div>
+        <div class="field"><label>Proceso<input type="text" name="procesoSolicitante" required></label></div>
       </div>
       <p class="hint" style="margin:0;">Quien diligencia la solicitud es el <b>Responsable del proceso</b>: la firma, hace el seguimiento y la cierra cuando termine la actividad. La evaluación y aprobación la hace el Aprobador autorizado.</p>
     </fieldset>
 
     <fieldset><legend>2. Clasificación y proyecto</legend>
       <div class="row2">
-        <div class="field"><label>Solicitud dirigida al área de</label>
-          <select name="area" id="areaSelect">${areas.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}</select></div>
-        <div class="field"><label>Solicitud relacionada con temas de</label>
-          <select name="tema" id="temaSelect">${areas.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}<option value="${OTRO}">${OTRO_LABEL}</option></select>
+        <div class="field"><label>Solicitud dirigida al área de
+          <select name="area" id="areaSelect">${areas.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}</select></label></div>
+        <div class="field"><label>Solicitud relacionada con temas de
+          <select name="tema" id="temaSelect">${areas.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join("")}<option value="${OTRO}">${OTRO_LABEL}</option></select></label>
           <input type="text" name="temaOtro" id="temaOtroInput" maxlength="120" placeholder="Escriba el tema de su solicitud" style="display:none;margin-top:6px;">
           <div class="hint">Por defecto es el mismo del área. Si ninguno se ajusta a su reporte, elija "${OTRO_LABEL}" y escríbalo.</div></div>
       </div>
-      <div class="field"><label>Tipo específico de Desviación o Derogación</label>
-        <select name="tipoEspecifico" id="tipoEspecificoSelect"></select>
+      <div class="field"><label>Tipo específico de Desviación o Derogación
+        <select name="tipoEspecifico" id="tipoEspecificoSelect"></select></label>
         <input type="text" name="tipoEspecificoOtro" id="tipoOtroInput" maxlength="150" placeholder="Describa el tipo específico de desviación o derogación" style="display:none;margin-top:6px;">
         <div class="hint" id="tipoDescHint"></div>
-        <div id="gtcWrap" style="display:none;margin-top:10px;"><label id="gtcLabel">Condición de seguridad específica (GTC 45)</label>
-          <select name="condicionSeguridad" id="gtcSelect"></select>
+        <div id="gtcWrap" style="display:none;margin-top:10px;"><label><span id="gtcLabel">Condición de seguridad específica (GTC 45)</span>
+          <select name="condicionSeguridad" id="gtcSelect"></select></label>
           <div class="hint">Clasificación según la tabla de peligros del Anexo A de la GTC 45.</div></div>
       </div>
       <div class="row3">
-        <div class="field"><label>OT</label><input type="text" name="ot" placeholder="Ej. OT-2026-045" required></div>
-        <div class="field"><label>Nombre del proyecto</label><input type="text" name="proyecto" placeholder="Ej. Línea de corrugado Cliente XYZ" required></div>
-        <div class="field"><label>Línea de negocio</label><select name="lineaNegocio" required><option value="">Seleccione…</option>${LINEAS_NEGOCIO.map(l => `<option>${esc(l)}</option>`).join("")}</select></div>
+        <div class="field"><label>OT<input type="text" name="ot" placeholder="Ej. OT-2026-045" required></label></div>
+        <div class="field"><label>Nombre del proyecto<input type="text" name="proyecto" placeholder="Ej. Línea de corrugado Cliente XYZ" required></label></div>
+        <div class="field"><label>Línea de negocio<select name="lineaNegocio" required><option value="">Seleccione…</option>${LINEAS_NEGOCIO.map(l => `<option>${esc(l)}</option>`).join("")}</select></label></div>
       </div>
       <div class="row2">
-        <div class="field"><label>Figura: Desviación o Derogación</label>
-          <select name="tipoGestion" id="tipoGestionSelect"><option>Desviación</option><option>Derogación</option></select>
+        <div class="field"><label>Figura: Desviación o Derogación
+          <select name="tipoGestion" id="tipoGestionSelect"><option>Desviación</option><option>Derogación</option></select></label>
           <div class="hint" id="tipoGestionHint">${esc(TIPO_GESTION_DESC["Desviación"])}</div></div>
-        <div class="field"><label>Nivel de criticidad</label>
-          <select name="criticidad" id="criticidadSelect">${CRITICIDADES_DESVIACION.map(c => `<option>${esc(c)}</option>`).join("")}</select></div>
+        <div class="field"><label>Nivel de criticidad
+          <select name="criticidad" id="criticidadSelect">${CRITICIDADES_DESVIACION.map(c => `<option>${esc(c)}</option>`).join("")}</select></label></div>
       </div>
       <label class="checkline"><input type="checkbox" name="recurrente"> Es una condición recurrente</label>
       <div id="derogacionWarning" class="banner banner-red" style="display:none;margin-top:12px;">${icon("alert")} Al seleccionar Derogación se habilita el Reporte 8D. Diligencie lo que conozca; debe quedar completo antes de aprobar la evaluación.</div>
@@ -76,26 +76,26 @@ export function html(ctx){
 
     <fieldset><legend id="lblFieldsetDesc">3. Descripción de la desviación</legend>
       <div class="row2">
-        <div class="field"><label>Política, estándar, procedimiento o requisito incumplido</label><input type="text" name="requisitoIncumplido" required></div>
-        <div class="field"><label>Equipo, herramienta, método o procedimiento involucrado</label><input type="text" name="equipoInvolucrado" required></div>
+        <div class="field"><label>Política, estándar, procedimiento o requisito incumplido<input type="text" name="requisitoIncumplido" required></label></div>
+        <div class="field"><label>Equipo, herramienta, método o procedimiento involucrado<input type="text" name="equipoInvolucrado" required></label></div>
       </div>
-      <div class="field"><label>Descripción breve de la tarea o requerimiento a realizar</label><textarea name="tareaDescripcion" rows="2" required></textarea></div>
-      <div class="field"><label id="lblMotivo">Motivo por el cual se requiere la desviación</label><textarea name="motivoDesviacion" rows="2" required></textarea></div>
-      <div class="field"><label>Consecuencias potenciales</label><textarea name="consecuenciasPotenciales" rows="2" required></textarea></div>
-      <div class="field"><label id="lblMedidasControl">Medidas de control implementadas durante la desviación</label><textarea name="controlesCompensatorios" rows="2" required></textarea></div>
+      <div class="field"><label>Descripción breve de la tarea o requerimiento a realizar<textarea name="tareaDescripcion" rows="2" required></textarea></label></div>
+      <div class="field"><label><span id="lblMotivo">Motivo por el cual se requiere la desviación</span><textarea name="motivoDesviacion" rows="2" required></textarea></label></div>
+      <div class="field"><label>Consecuencias potenciales<textarea name="consecuenciasPotenciales" rows="2" required></textarea></label></div>
+      <div class="field"><label><span id="lblMedidasControl">Medidas de control implementadas durante la desviación</span><textarea name="controlesCompensatorios" rows="2" required></textarea></label></div>
       <div class="field" id="alcanceDerogWrap" style="display:none;"><label>La derogación es</label>
         <div class="radio-line">
           <label class="checkline" style="margin:0;"><input type="radio" name="alcanceDerogacion" value="Temporal" checked> Temporal</label>
           <label class="checkline" style="margin:0;"><input type="radio" name="alcanceDerogacion" value="Definitiva"> Definitiva</label></div>
         <div class="hint">Temporal: registre el rango de fechas en que aplica. Definitiva: registre la fecha a partir de la cual se hace efectiva de forma permanente.</div></div>
       <div class="row2" id="vigenciaRango">
-        <div class="field"><label id="lblVigIni">Vigencia — inicio</label><input type="date" name="vigenciaInicio" value="${todayISO(0)}"></div>
-        <div class="field"><label id="lblVigFin">Vigencia — fin</label><input type="date" name="vigenciaFin" value="${todayISO(7)}"></div>
+        <div class="field"><label><span id="lblVigIni">Vigencia — inicio</span><input type="date" name="vigenciaInicio" value="${todayISO(0)}"></label></div>
+        <div class="field"><label><span id="lblVigFin">Vigencia — fin</span><input type="date" name="vigenciaFin" value="${todayISO(7)}"></label></div>
       </div>
-      <div class="field" id="fechaEfectivaWrap" style="display:none;max-width:340px;"><label>Fecha a partir de la cual es efectiva de forma permanente</label>
-        <input type="date" name="fechaEfectiva" value="${todayISO(0)}"></div>
-      <div class="field"><label>Adjuntar evidencias (fotos, PDF, Word, Excel…)</label>
-        <input type="file" id="inputArchivos" multiple>
+      <div class="field" id="fechaEfectivaWrap" style="display:none;max-width:340px;"><label>Fecha a partir de la cual es efectiva de forma permanente
+        <input type="date" name="fechaEfectiva" value="${todayISO(0)}"></label></div>
+      <div class="field"><label>Adjuntar evidencias (fotos, PDF, Word, Excel…)
+        <input type="file" id="inputArchivos" multiple></label>
         <div class="hint">Puede seleccionar varios archivos a la vez y volver a usar el botón para agregar más (máx. ${MAX_FILE_MB} MB por archivo, ${MAX_FILES_BATCH} por cargue). Las fotos se reducen automáticamente.</div>
         <div id="listaArchivos">${listaPendientes(f)}</div></div>
     </fieldset>
@@ -103,10 +103,10 @@ export function html(ctx){
     <fieldset id="sstFieldset" style="display:none;"><legend>Detalle de Seguridad y Salud en el Trabajo (SST)</legend>
       <p class="hint" style="margin:0 0 10px;">Se diligencia porque la solicitud está dirigida al área de Seguridad y Salud en el Trabajo.</p>
       <div class="row2">
-        <div class="field"><label>EPP adicionales requeridos</label><input type="text" name="eppAdicional"></div>
-        <div class="field"><label>Procedimientos alternativos</label><input type="text" name="procedimientosAlternativos"></div>
+        <div class="field"><label>EPP adicionales requeridos<input type="text" name="eppAdicional"></label></div>
+        <div class="field"><label>Procedimientos alternativos<input type="text" name="procedimientosAlternativos"></label></div>
       </div>
-      <div class="field"><label>Compañero de apoyo</label><input type="text" name="companeroApoyo"></div>
+      <div class="field"><label>Compañero de apoyo<input type="text" name="companeroApoyo"></label></div>
     </fieldset>
 
     <fieldset id="d8Fieldset" style="display:none;"><legend>4. Reporte 8D (obligatorio en toda derogación — se completa a más tardar en la Evaluación)</legend>

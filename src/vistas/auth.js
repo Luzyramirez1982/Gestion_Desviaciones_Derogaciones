@@ -15,8 +15,8 @@ export function html(ctx){
     const forzado = a.modo === "recuperar" || a.forzado;
     cuerpo = `<form id="formCambiar">
       <p class="hint" style="margin:0 0 12px;">${forzado && a.modo === "cambiar" ? "Por seguridad, reemplace la contraseña temporal por una personal antes de continuar." : "Escriba su nueva contraseña."}</p>
-      <div class="field"><label>Nueva contraseña</label><input type="password" name="p1" autocomplete="new-password" required minlength="8"></div>
-      <div class="field"><label>Repita la nueva contraseña</label><input type="password" name="p2" autocomplete="new-password" required minlength="8"></div>
+      <div class="field"><label>Nueva contraseña<input type="password" name="p1" autocomplete="new-password" required minlength="8"></label></div>
+      <div class="field"><label>Repita la nueva contraseña<input type="password" name="p2" autocomplete="new-password" required minlength="8"></label></div>
       <div class="hint" style="margin:-4px 0 12px;">Mínimo 8 caracteres, con letras y números.</div>
       <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Guardar contraseña</button>
       <div class="links">${forzado ? `<a href="#" data-salir>Cerrar sesión</a>` : `<a href="#" data-cancelar>Cancelar</a>`}</div>
@@ -24,14 +24,14 @@ export function html(ctx){
   } else if(a.modo === "olvido"){
     cuerpo = `<form id="formOlvido">
       <p class="hint" style="margin:0 0 12px;">Le enviaremos un correo con un enlace para crear una nueva contraseña.</p>
-      <div class="field"><label>Correo electrónico (usuario)</label><input type="email" name="correo" autocomplete="username" required></div>
+      <div class="field"><label>Correo electrónico (usuario)<input type="email" name="correo" autocomplete="username" required></label></div>
       <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Enviar enlace</button>
       <div class="links"><a href="#" data-volver>Volver al ingreso</a></div>
     </form>`;
   } else {
     cuerpo = `<form id="formIngreso">
-      <div class="field"><label>Usuario (correo electrónico)</label><input type="email" name="correo" autocomplete="username" required></div>
-      <div class="field"><label>Contraseña</label><input type="password" name="clave" autocomplete="current-password" required></div>
+      <div class="field"><label>Usuario (correo electrónico)<input type="email" name="correo" autocomplete="username" required></label></div>
+      <div class="field"><label>Contraseña<input type="password" name="clave" autocomplete="current-password" required></label></div>
       <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Ingresar</button>
       <div class="links"><a href="#" data-olvido>¿Olvidó su contraseña?</a></div>
     </form>

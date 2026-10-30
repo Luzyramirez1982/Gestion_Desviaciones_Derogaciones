@@ -390,7 +390,7 @@ Se montó Playwright con Chromium real (no simulado) contra la aplicación ya co
 
 **Un hallazgo real a mitad de camino, no de la aplicación sino de mis propias pruebas:** en modo demostración los datos solo viven en la memoria de esa carga de página («se pierden al recargar», como ya dice el instructivo). Las primeras versiones de las pruebas recargaban la página al cambiar de usuario y perdían lo recién creado. Se corrigió: solo se recarga la primera vez; después de «salir» se usa el mismo formulario de ingreso sin recargar, así la sesión siguiente ve lo que dejó la anterior (igual que pasaría conectado a una base real).
 
-**Hallazgo de accesibilidad (anotado en PLAN.md, sin corregir todavía):** las etiquetas de los formularios no están asociadas a su campo (falta `for`/`id`); un lector de pantalla no puede saltar al campo tocando la etiqueta.
+**Hallazgo de accesibilidad:** las etiquetas de los formularios no estaban asociadas a su campo (falta `for`/`id`); un lector de pantalla no podía saltar al campo tocando la etiqueta. Corregido más adelante en esta misma sesión (ver abajo).
 
 **Comando:** `npm run test:e2e` (compila y corre las 20 pruebas, unos 25 segundos).
 
@@ -399,3 +399,14 @@ El instructivo decía que todo se guarda «en Supabase». La pantalla de Uso del
 
 ### Urgencia: GitHub Pages en blanco
 La clienta reportó la demo (`main`) en blanco. Causa: se cambió el origen de GitHub Pages a la rama `feat/v2` (código fuente de Vite sin compilar; el navegador no puede resolver sus módulos sin el empaquetador) para probar la v2, y el intento de volver a apuntar a `main` no se guardó. Se resolvió sin tocar código: se volvió a ejecutar el flujo `publicar-pagina.yml` (`gh workflow run`), que restablece la publicación por GitHub Actions. Verificado con una petición fresca y con un navegador real (sin errores en la consola). La causa de que algunas personas siguieran viendo la versión en blanco después fue la caché del navegador (`Ctrl+Shift+R` lo resolvió).
+
+### Accesibilidad: etiquetas asociadas a su campo
+Se corrigió el hallazgo de las pruebas E2E: en casi todos los campos (ingreso, usuarios, formulario de solicitud, detalle, reporte 8D) la etiqueta ahora **envuelve** el campo (`<label>Texto<input>...</label>`), en vez de quedar suelta al lado. Se eligió envolver en lugar de agregar pares `for`/`id` porque varias filas de formulario se repiten o pueden aparecer más de una vez en la pantalla, y generar identificadores únicos sin choques era más riesgoso.
+
+Donde el texto de la etiqueta cambia por código según lo que elige la persona (por ejemplo "Desde" / "Efectiva desde" en el alcance de una derogación, o los títulos del paso 3 según sea desviación o derogación), envolver no servía porque el código reemplaza el contenido completo de la etiqueta y borraría el campo. En esos casos se dejó un `<span>` con el identificador adentro de la etiqueta para que el texto siga cambiando sin afectar el campo.
+
+En el editor del reporte 8D (`src/componentes/editor8d.js`) —no estaba en el hallazgo original, se encontró al revisar el resto del código— cada paso agrupa varios campos bajo una sola etiqueta (5W2H, 5 Porqués, tablas de acciones), así que envolver todo habría sido confuso; se usó `for`/`id` apuntando al campo principal de cada paso, con identificadores fijos por la clave del paso (`d1`...`d8`), que no se repiten en una misma pantalla.
+
+Se dejó sin asociar la etiqueta "La derogación es" (encabezado del grupo de radios Temporal/Definitiva): no corresponde a un solo campo, como un `<legend>`.
+
+**Verificado:** 281 pruebas unitarias, compilación y las 20 pruebas de extremo a extremo, todas en verde después del cambio.
