@@ -27,7 +27,7 @@ export function html(ctx){
     <div class="grid two-col" style="grid-template-columns:1fr 1fr;margin-bottom:16px;">
       <div class="card"><h3>Registros por etapa del ciclo</h3>${barChart(porEtapa, Math.max(1, ...porEtapa.map(e => e.total)))}</div>
       <div class="card"><h3>Desviaciones vs. Derogaciones</h3>${barChart(porTipo, Math.max(1, ...porTipo.map(e => e.total)))}
-        <p class="hint" style="margin-top:10px;">Solo las derogaciones activan el análisis 8D, según el procedimiento SST-pro-XX.</p></div>
+        <p class="hint" style="margin-top:10px;">Solo las derogaciones activan el análisis 8D, según el procedimiento de la empresa.</p></div>
     </div>
     <div class="card">
       <h3 style="display:flex;align-items:center;gap:7px;">${icon("alert")} Vigencias próximas a vencer</h3>

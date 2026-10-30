@@ -163,11 +163,7 @@ export function crearAdaptadorNeon(cliente, almacen, { esperaMs = ESPERA_REINTEN
       perfilActual = perfil;
       return perfil;
     },
-    // El enlace de recuperación por correo de Neon necesita una pantalla de «nueva contraseña» que todavía no existe
-    // y un correo de envío propio (el compartido tiene límite). Mientras tanto, el Administrador restablece la contraseña.
-    async recuperarClave(){
-      throw new Error("Pida al Administrador que restablezca su contraseña: le dará una temporal para entrar y cambiarla.");
-    },    async cambiarClave(nueva){
+    async cambiarClave(nueva){
       // Neon pide la contraseña actual. Si se recargó la página no la tenemos: se pide volver a ingresar.
       if(!claveEnUso){
         await auth.signOut();
@@ -181,7 +177,7 @@ export function crearAdaptadorNeon(cliente, almacen, { esperaMs = ESPERA_REINTEN
       perfilActual = user ? await cargarPerfil(user.id) : perfilActual;
       return perfilActual;
     },
-    // Neon no avisa por eventos cuando llega el enlace de recuperar contraseña: la pantalla de ingreso lo maneja.
+    // Neon no avisa por eventos de sesión como otros servicios; no hace falta escuchar nada.
     alEventoSesion(){ return () => {}; },
 
     async cargarBase(){

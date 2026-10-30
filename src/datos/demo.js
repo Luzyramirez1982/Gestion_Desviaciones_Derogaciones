@@ -62,9 +62,6 @@ export function crearAdaptadorDemo(){
     },
     async cerrarSesion(){ yo = null; },
     async sesionActual(){ return yo ? perfil(yo) : null; },
-    async recuperarClave(correo){
-      if(!personas.some(p => p.correo === String(correo).trim().toLowerCase())) return;
-    },
     async cambiarClave(nueva){ const p = necesitaSesion(); p.clave = nueva; p.debeCambiarClave = false; return perfil(p); },
 
     async cargarBase(){

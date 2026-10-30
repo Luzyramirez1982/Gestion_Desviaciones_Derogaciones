@@ -123,7 +123,7 @@ export function html(ctx){
     ])}
 
     <h2>Ejemplos de flujo por tipo de solicitud</h2>
-    <p>El flujo es el mismo para todas las áreas; cambia el área y quién es el Responsable del proceso. Los registros de ejemplo del aplicativo (MTC-001 a MTC-005) siguen estos casos.</p>
+    <p>El flujo es el mismo para todas las áreas; cambia el área y quién es el Responsable del proceso. Los registros de ejemplo del modo demostración (MTC-001 a MTC-005) siguen estos casos.</p>
     ${flujosEjemploHTML()}
 
     ${instructivo8DHTML()}

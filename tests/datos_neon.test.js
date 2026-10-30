@@ -250,10 +250,7 @@ describe("personas y contraseñas", () => {
     const admin = (await repo.cargarBase()).perfiles.find(p => p.rol === "Administrador");
     await expect(repo.cambiarActivo(admin.id, false)).rejects.toThrow("al menos un Administrador");
   });
-  it("recuperar la contraseña por correo pide hablar con el Administrador (aún no hay pantalla de enlace)", async () => {
-    await expect(repo.recuperarClave("laura@x.co")).rejects.toThrow("Administrador");
-    expect(c.llamadas.some(l => l[0] === "recuperar")).toBe(false);
-  });
+
 });
 
 describe("listas vacías por error de arranque de Neon", () => {

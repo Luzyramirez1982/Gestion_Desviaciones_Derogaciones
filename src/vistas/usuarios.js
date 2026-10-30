@@ -24,7 +24,7 @@ function tarjetaCompartir(ctx){
     <div class="kv" style="margin:0 0 10px;">
       <div class="full"><div class="k">Enlace de acceso</div><div class="v">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a>` : "—"}</div></div>
       <div><div class="k">Usuario</div><div class="v">${esc(sa.correo)}</div></div>
-      <div><div class="k">${sa.clave ? "Contraseña temporal" : "Contraseña"}</div><div class="v">${sa.clave ? `<code id="claveTemporal">${esc(sa.clave)}</code>` : "La que ya tiene (o «¿Olvidó su contraseña?»)"}</div></div>
+      <div><div class="k">${sa.clave ? "Contraseña temporal" : "Contraseña"}</div><div class="v">${sa.clave ? `<code id="claveTemporal">${esc(sa.clave)}</code>` : "La que ya tiene (si la olvidó, use «Restablecer contraseña»)"}</div></div>
       <div><div class="k">Rol</div><div class="v">${esc(sa.rol)}</div></div>
       <div><div class="k">Área</div><div class="v">${esc(sa.area || "—")}</div></div></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">

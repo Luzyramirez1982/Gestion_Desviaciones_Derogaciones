@@ -2,7 +2,7 @@
 
 Aplicación web para gestionar **desviaciones y derogaciones** de proceso. Cada solicitud pasa por tres etapas (Solicitud → Evaluación y Aprobación → Cierre), con firma en cada una; las derogaciones exigen el reporte 8D completo. Hay tres roles: Administrador, Responsable del proceso y Aprobador autorizado.
 
-**Estado:** la interfaz está completa y la base de datos (Neon) está escrita y probada con una base de prueba. Sin `VITE_NEON_URL` la aplicación funciona en **modo demostración** (datos de ejemplo en memoria). Falta ponerla en un Neon real: ver [docs/NEON_PASOS.md](docs/NEON_PASOS.md).
+**Estado:** la aplicación está publicada en Cloudflare Pages (https://desviaciones-matec.pages.dev) y conectada a Neon (base de datos, ingreso y archivos en el bucket). Falta activar el respaldo nocturno y probarlo, y hacer la limpieza final de datos de prueba antes de entregarla: ver [PLAN.md](PLAN.md). Sin `VITE_NEON_URL` la aplicación funciona en **modo demostración** (datos de ejemplo en memoria).
 
 ## Cómo correrla
 ```bash

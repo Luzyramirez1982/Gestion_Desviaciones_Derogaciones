@@ -23,7 +23,7 @@ Las cosas que solo hace el Administrador están en el menú de la izquierda: **U
 ## 2. Compartir el acceso otra vez
 
 - Para reenviar el enlace y el usuario: en la lista de usuarios, **Compartir**.
-- Si alguien olvidó su contraseña, puede usar **¿Olvidó su contraseña?** en la pantalla de ingreso. Si no le llega el correo, use **Restablecer contraseña**: genera una contraseña temporal nueva (se muestra una sola vez) y la persona tendrá que cambiarla al entrar.
+- Si alguien olvidó su contraseña, **la restablece usted**: en la lista de usuarios, **Restablecer contraseña**. Genera una contraseña temporal nueva (se muestra una sola vez) y la persona tendrá que cambiarla al entrar. (La opción **¿Olvidó su contraseña?** de la pantalla de ingreso solo le indica a la persona que se lo pida a usted: la recuperación por correo todavía no está disponible.)
 
 ## 3. Enlace de acceso a la aplicación
 
@@ -63,7 +63,7 @@ Solo el Administrador puede devolver un registro de **Cierre** a **Evaluación y
 
 ## 9. Respaldos
 
-Todas las noches se hace una copia **cifrada** de toda la base de datos (solicitudes, archivos, firmas y personas) en GitHub, y se guarda 90 días. El Administrador no tiene que hacer nada, pero conviene:
+Cuando el respaldo esté activado (se activa una sola vez, ver [RESPALDOS.md](RESPALDOS.md)), todas las noches se hace una copia **cifrada** de toda la base de datos y de los archivos nuevos (solicitudes, firmas, adjuntos y personas) en GitHub, y se guarda 90 días. **Mientras no esté activado, no hay copias automáticas.** El Administrador no tiene que hacer nada, pero conviene:
 
 - Revisar de vez en cuando en GitHub (pestaña **Actions → Respaldo diario**) que las ejecuciones salgan en verde. Si una falla, GitHub avisa por correo.
 - Guardar en un lugar seguro la **contraseña de los respaldos**: sin ella no se pueden abrir.

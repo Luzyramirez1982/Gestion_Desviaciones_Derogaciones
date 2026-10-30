@@ -34,11 +34,11 @@ export function mensajeAcceso({ nombre, correo, clave, rol, area }, enlace, admi
     "Se creó su usuario en el aplicativo Gestión de Desviaciones y Derogaciones de C.I. Matec Logística S.A.S.", "",
     `Enlace de acceso: ${enlace || "(el Administrador le enviará el enlace)"}`,
     `Usuario: ${correo}`,
-    clave ? `Contraseña temporal: ${clave}` : "Contraseña: use su contraseña actual o la opción «¿Olvidó su contraseña?» de la pantalla de ingreso.",
+    clave ? `Contraseña temporal: ${clave}` : "Contraseña: use su contraseña actual (si la olvidó, pídale al Administrador que la restablezca).",
     `Rol asignado: ${rol}${area ? " — Área: " + area : ""}`, "",
     clave ? "Al ingresar por primera vez el aplicativo le pedirá cambiar la contraseña temporal por una personal."
       : "Puede cambiar su contraseña cuando quiera con el botón «Cambiar contraseña».",
-    "Si olvida su contraseña, use «¿Olvidó su contraseña?» en la pantalla de ingreso.", "",
+    "Si olvida su contraseña, pídale al Administrador que la restablezca: le dará una contraseña temporal para entrar y cambiarla.", "",
     "Cordialmente,", `${administrador} — Administrador del aplicativo`,
   ].join("\n");
 }

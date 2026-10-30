@@ -2,8 +2,7 @@
 //
 // Interfaz (todas las funciones son async; los errores traen un mensaje claro para la clienta,
 // y el conflicto de versión trae error.codigo === "conflicto_version"):
-//   sesión:      iniciarSesion(correo, clave), cerrarSesion(), sesionActual(), recuperarClave(correo),
-//                cambiarClave(nueva), alEventoSesion(cb)
+//   sesión:      iniciarSesion(correo, clave), cerrarSesion(), sesionActual(), cambiarClave(nueva), alEventoSesion(cb)
 //   lectura:     cargarBase(), listarRegistros(), cargarRegistro(id), listarEliminados(), usoAlmacenamiento()
 //   registros:   crearRegistro({data, borrador, firma}), guardarRegistro(id, version, data),
 //                enviarRegistro(id, version, data, firma), firmarEtapa(id, espacio, firma, comentario),

@@ -59,12 +59,13 @@ describe("primer ingreso y contraseñas", () => {
     c2.dispatchEvent(new Event("submit", {cancelable: true, bubbles: true}));
     await hasta(() => app.raiz.querySelector("#btnSalir"), "entrar tras cambiar la clave");
   });
-  it("olvidé mi contraseña responde igual exista o no la cuenta", async () => {
+  it("«¿Olvidó su contraseña?» explica que el Administrador la restablece, sin formulario que no envía nada", async () => {
     clic(app.raiz.querySelector("[data-olvido]"));
-    const f = await hasta(() => app.raiz.querySelector("#formOlvido"), "formulario de olvido");
-    f.elements.correo.value = "cualquiera@x.co";
-    f.dispatchEvent(new Event("submit", {cancelable: true, bubbles: true}));
-    await hasta(() => app.raiz.textContent.includes("recibirá un correo"), "mensaje neutro");
+    await hasta(() => app.raiz.querySelector("#avisoOlvido"), "aviso de olvido");
+    expect(app.raiz.querySelector("#formOlvido")).toBeNull();
+    expect(app.raiz.textContent).toContain("restablezca su contraseña");
+    clic(app.raiz.querySelector("[data-volver]"));
+    await hasta(() => app.raiz.querySelector("#formIngreso"), "volver al ingreso");
   });
 });
 

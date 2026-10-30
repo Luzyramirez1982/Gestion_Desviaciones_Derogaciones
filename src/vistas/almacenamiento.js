@@ -21,7 +21,7 @@ export function html(ctx){
   return `<div class="card" style="max-width:720px;"><h3>${icon("db")} Uso del almacenamiento</h3>
     <p class="hint" style="margin:-4px 0 12px;">La aplicación usa un plan gratuito con ${esc(limites)}. Aquí se ve cuánto queda.</p>
     ${!u ? `<p class="empty">Consultando…</p>` : `${barra("Base de datos", u.base_datos_bytes, u.base_datos_limite_bytes)}${barra("Archivos (adjuntos y firmas)", u.archivos_bytes, u.archivos_limite_bytes)}
-      <p class="hint">Registros guardados: <b>${u.registros}</b>. El tamaño de archivos suma solo los adjuntos; las firmas pesan muy poco.</p>`}
+      <p class="hint">Registros guardados: <b>${u.registros}</b>. El tamaño de archivos suma los adjuntos y las firmas (las firmas pesan muy poco).</p>`}
     ${ctx.usoError ? `<div class="banner banner-red">${icon("alert")} ${esc(ctx.usoError)}</div>` : ""}</div>`;
 }
 

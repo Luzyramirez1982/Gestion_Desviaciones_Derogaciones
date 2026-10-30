@@ -94,7 +94,6 @@ export async function crearClientePglite(){
       c.clave = newPassword;
       return { data: {}, error: null };
     },
-    async requestPasswordReset({ email }){ llamadas.push(["recuperar", email]); return sinError; },
     admin: {
       async createUser({ email, password, name }){
         if(cuentas.has(email)) return falla("User already exists");

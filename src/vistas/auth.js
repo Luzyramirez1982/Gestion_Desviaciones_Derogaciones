@@ -22,12 +22,12 @@ export function html(ctx){
       <div class="links">${forzado ? `<a href="#" data-salir>Cerrar sesión</a>` : `<a href="#" data-cancelar>Cancelar</a>`}</div>
     </form>`;
   } else if(a.modo === "olvido"){
-    cuerpo = `<form id="formOlvido">
-      <p class="hint" style="margin:0 0 12px;">Le enviaremos un correo con un enlace para crear una nueva contraseña.</p>
-      <div class="field"><label>Correo electrónico (usuario)<input type="email" name="correo" autocomplete="username" required></label></div>
-      <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center;">Enviar enlace</button>
+    // La recuperación por correo todavía no está disponible: la contraseña la restablece el Administrador.
+    cuerpo = `<div id="avisoOlvido">
+      <p style="margin:0 0 10px;">Para recuperar el acceso, pídale al <b>Administrador</b> que restablezca su contraseña.</p>
+      <p class="hint" style="margin:0 0 14px;">Le dará una contraseña temporal; con ella ingresa y la aplicación le pedirá crear una personal.</p>
       <div class="links"><a href="#" data-volver>Volver al ingreso</a></div>
-    </form>`;
+    </div>`;
   } else {
     cuerpo = `<form id="formIngreso">
       <div class="field"><label>Usuario (correo electrónico)<input type="email" name="correo" autocomplete="username" required></label></div>
@@ -63,19 +63,6 @@ export function montar(ctx, raiz){
     try {
       const perfil = await ctx.repo.iniciarSesion(ingreso.elements.correo.value, ingreso.elements.clave.value);
       await ctx.entrar(perfil);
-    } catch(err){ falla(err); }
-  });
-
-  const olvido = raiz.querySelector("#formOlvido");
-  if(olvido) olvido.addEventListener("submit", async e => {
-    e.preventDefault();
-    const correo = olvido.elements.correo.value.trim();
-    ocupado(olvido, "Enviando…");
-    try {
-      await ctx.repo.recuperarClave(correo);
-      // El mensaje es el mismo exista o no la cuenta, para no revelar quién tiene acceso.
-      a.modo = null; a.err = ""; a.msg = `Si ${correo} tiene una cuenta, recibirá un correo con el enlace para crear una nueva contraseña.`;
-      ctx.render();
     } catch(err){ falla(err); }
   });
 
