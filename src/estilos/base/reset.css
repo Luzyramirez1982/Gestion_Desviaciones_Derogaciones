@@ -20,7 +20,7 @@ img{max-width:100%;}
 button:focus-visible,.btn:focus-visible{box-shadow:var(--foco);outline-color:transparent;}
 
 ::selection{background:rgba(46,116,181,.24);color:inherit;}
-::placeholder{color:#7A8BA0;opacity:1;}
+::placeholder{color:#5A6C81;opacity:1;}   /* 5.4:1 sobre blanco (antes 3.5:1) */
 input,textarea{caret-color:var(--blue);}
 input[type=checkbox],input[type=radio]{accent-color:var(--navy);width:16px;height:16px;}
 

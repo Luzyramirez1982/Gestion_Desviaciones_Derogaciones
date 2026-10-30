@@ -5,3 +5,4 @@
 .chip{display:inline-flex;align-items:center;gap:6px;background:#EEF2F7;color:var(--text-2);border-radius:99px;padding:5px 10px 5px 13px;font-size:12.5px;margin:0 6px 6px 0;}
 .chip button{border:none;background:none;color:var(--faint);font-size:15px;line-height:1;padding:0 2px;border-radius:99px;}
 .chip button:hover{color:var(--red);}
+.badge-8d{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;}   /* 5.9:1 (antes 4.4:1) */

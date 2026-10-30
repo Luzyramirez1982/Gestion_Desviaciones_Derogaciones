@@ -206,3 +206,51 @@ describe("cuando la base, en las primeras consultas, no reconoce la sesión", ()
     expect(l.status).toBe(404);
   });
 });
+
+describe("contenido enorme o sin fin: la función no se deja agotar", () => {
+  // Un cuerpo que nunca termina (trozos de 1 MB) y cuenta cuántos trozos le pidieron.
+  function cuerpoSinFin(){
+    const estado = { pedidos: 0 };
+    const flujo = new ReadableStream({
+      pull(controlador){ estado.pedidos++; controlador.enqueue(new Uint8Array(MB).fill(1)); },
+    }, { highWaterMark: 0 });
+    return { flujo, estado };
+  }
+  const enviar = (ruta, uid, flujo) => e.manejar(new Request(url(ruta), {
+    method: "PUT", body: flujo, duplex: "half",
+    headers: { Authorization: "Bearer " + e.token(uid), "Content-Type": PDF },   // sin Content-Length: contenido en trozos
+  }));
+
+  it("con permiso pero sin avisar el tamaño: corta la lectura al pasar 5 MB y no guarda nada", async () => {
+    const { flujo, estado } = cuerpoSinFin();
+    const antes = e.bucket.size;
+    const r = await enviar(rutaAdj("sinfin.pdf"), RESP_CALIDAD, flujo);
+    expect(r.status).toBe(413);
+    expect(estado.pedidos).toBeLessThanOrEqual(7);          // 5 MB permitidos + el trozo que lo pasó (no los 50, ni infinito)
+    expect(e.bucket.size).toBe(antes);
+    expect(await c.q("select ruta from archivos where ruta = $1", [rutaAdj("sinfin.pdf")])).toHaveLength(0);
+  });
+  it("sin permiso: se rechaza ANTES de leer el contenido (no gasta memoria con quien no debe)", async () => {
+    for(const quien of ["ffffffff-ffff-ffff-ffff-ffffffffffff", RESP_PRODUCCION]){   // sin alta en la app / de otra área
+      const { flujo, estado } = cuerpoSinFin();
+      const r = await enviar(rutaAdj("intruso-sinfin.pdf"), quien, flujo);
+      expect(r.status).toBe(403);
+      expect(estado.pedidos, quien).toBe(0);                // ni un solo trozo leído
+    }
+  });
+  it("un tipo no permitido también se rechaza antes de leer", async () => {
+    const { flujo, estado } = cuerpoSinFin();
+    const r = await e.manejar(new Request(url(rutaAdj("malo-sinfin.bin")), {
+      method: "PUT", body: flujo, duplex: "half", headers: { Authorization: "Bearer " + e.token(RESP_CALIDAD), "Content-Type": "application/x-msdownload" },
+    }));
+    expect(r.status).toBe(403);
+    expect(estado.pedidos).toBe(0);
+  });
+  it("un archivo normal sin Content-Length (en trozos) se sigue subiendo bien", async () => {
+    const trozos = [bytes(1000, 1), bytes(1500, 2)];
+    const flujo = new ReadableStream({ pull(k){ const t = trozos.shift(); t ? k.enqueue(t) : k.close(); } }, { highWaterMark: 0 });
+    const r = await enviar(rutaAdj("en-trozos.pdf"), RESP_CALIDAD, flujo);
+    expect(r.status).toBe(201);
+    expect(e.bucket.get(rutaAdj("en-trozos.pdf")).bytes).toHaveLength(2500);
+  });
+});

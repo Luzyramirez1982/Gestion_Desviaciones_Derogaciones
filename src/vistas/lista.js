@@ -43,7 +43,7 @@ export function html(ctx){
             ${r.devuelta ? `<span class="badge" style="background:#ffedd5;color:#c2410c;">Devuelta para ajustes</span>` : stageBadge(r.stage)}
             ${isClosed(r) && r.resultado !== "Rechazada" ? `<span class="badge" style="background:#dcfce7;color:#15803d;">${icon("check")} Cerrada</span>` : ""}
             ${r.resultado === "Rechazada" ? `<span class="badge" style="background:#fee2e2;color:#b91c1c;">Rechazada</span>` : ""}
-            ${r.tipoGestion === "Derogación" ? `<span class="badge" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">${icon("link")} 8D</span>` : ""}
+            ${r.tipoGestion === "Derogación" ? `<span class="badge badge-8d">${icon("link")} 8D</span>` : ""}
           </div></div>`).join("")}
     </div>
     ${paginas > 1 ? `<div class="paginas"><button class="btn btn-outline btn-sm" data-pag="-1" ${f.pagina <= 1 ? "disabled" : ""}>Anterior</button>

@@ -67,7 +67,8 @@ Lo que debe cumplir (aprendido con la versión 1) y cómo se cubre:
 ## 5. Pendiente: calidad del código y lo visual
 - [x] Un solo árbol `src/` con carpetas por responsabilidad.
 - [x] Dividir los archivos grandes (`vistas/formulario.js`, `vistas/detalle.js`, `vistas/ayuda.js`, `componentes/ui.js`) en piezas de una sola responsabilidad. Revisado con ESLint (`no-undef`) sobre todo `src/`.
-- [ ] Revisión visual y mejora de la interfaz (socio de diseño).
+- [x] Mejora visual con solo CSS (LuisBrito-11), ya dentro de `feat/v2`; corregidos el desborde del Instructivo en celular y los contrastes (HISTORIAL, sesión 13).
+- [ ] Revisión visual con ojos humanos de las pantallas (la revisión automática midió desbordes y contrastes, no la estética).
 
 ## 6. Pendiente: publicación y entrega
 - [ ] Publicar en Cloudflare Pages (`npm run build`, carpeta `dist`). 🔑

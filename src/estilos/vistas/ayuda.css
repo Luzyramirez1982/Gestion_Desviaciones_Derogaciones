@@ -20,3 +20,6 @@
 .benefit{border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;background:#fff;box-shadow:var(--sombra-1);}
 .benefit b{display:block;color:var(--navy);font-size:14px;margin-bottom:4px;}
 .benefit span{font-size:13.5px;color:var(--text-2);line-height:1.55;}
+
+/* En pantallas angostas las tablas del instructivo se desplazan de lado dentro de su tarjeta, sin ensanchar toda la página. */
+@media (max-width:760px){ .help table.simple{display:block;max-width:100%;overflow-x:auto;} }

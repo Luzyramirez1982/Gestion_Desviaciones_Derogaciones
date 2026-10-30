@@ -17,6 +17,24 @@ const SIN_PERFIL = "No tiene permiso para subir archivos.";
 const REINTENTOS = 2;
 const RUTA_VALIDA = /^(registros|firmas)\/[A-Za-z0-9_-]+\/[A-Za-z0-9._() -]+$/;
 
+// Lee el cuerpo de la petición hasta `max` bytes. Si lo supera, deja de leer y devuelve null (no se queda esperando el resto).
+async function leerAcotado(request, max){
+  if(!request.body) return new Uint8Array(0);
+  const lector = request.body.getReader();
+  const partes = [];
+  let total = 0;
+  for(;;){
+    const { done, value } = await lector.read();
+    if(done) break;
+    total += value.length;
+    if(total > max){ await lector.cancel().catch(() => {}); return null; }
+    partes.push(value);
+  }
+  const todo = new Uint8Array(total);
+  let desde = 0;
+  for(const parte of partes){ todo.set(parte, desde); desde += parte.length; }
+  return todo;
+}
 export function crearManejador({ dataApiUrl, almacen, origenes = [], esperaMs = 400 }){
   const permitidos = new Set(origenes);
 
@@ -75,16 +93,19 @@ export function crearManejador({ dataApiUrl, almacen, origenes = [], esperaMs = 
     const largo = Number(request.headers.get("content-length"));
     if(largo > MAX_BYTES) return error(request, 413, "Cada archivo puede pesar hasta 5 MB.");
 
-    const bytes = new Uint8Array(await request.arrayBuffer());
-    if(bytes.length === 0 || bytes.length > MAX_BYTES) return error(request, 413, "Cada archivo puede pesar hasta 5 MB.");
-
-    const args = { p_ruta: ruta, p_tipo: tipo, p_tamano: bytes.length };
-    const permiso = await preguntar(token, "puede_subir_archivo", args);
+    // Primero el permiso, ANTES de leer el contenido: quien no tiene permiso (por ejemplo una cuenta de ingreso sin alta
+    // en la aplicación) nunca logra que la función gaste memoria leyendo un archivo. Se revisa con el tamaño que
+    // anuncia la petición (o 1 si no lo anuncia); el tamaño real se vuelve a revisar al anotar.
+    const permiso = await preguntar(token, "puede_subir_archivo", { p_ruta: ruta, p_tipo: tipo, p_tamano: largo > 0 ? largo : 1 });
     if(!permiso.ok) return error(request, permiso.estado, permiso.mensaje);
+
+    // Se lee con tope: si el contenido pasa de 5 MB se corta la lectura en ese momento (no se espera a que termine).
+    const bytes = await leerAcotado(request, MAX_BYTES);
+    if(!bytes || bytes.length === 0) return error(request, 413, "Cada archivo puede pesar hasta 5 MB.");
+    const args = { p_ruta: ruta, p_tipo: tipo, p_tamano: bytes.length };
 
     try { await almacen.poner(ruta, bytes, tipo); }
     catch { return error(request, 502, "No se pudo guardar el archivo. Intente de nuevo."); }
-
     // Se anota en la base; si eso falla, se quita el archivo para no dejar uno huérfano.
     const anotado = await preguntar(token, "registrar_archivo", args);
     if(!anotado.ok){

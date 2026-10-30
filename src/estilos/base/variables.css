@@ -5,16 +5,15 @@
 
   --bg:#F2F5F9; --card:#FFFFFF; --border:#DDE4EC; --border-soft:#EAEFF4; --hover:#F6F8FB;
 
-  --text:#16263A; --text-2:#3B4B5F; --muted:#586A7F; --faint:#66788C;
+  --text:#16263A; --text-2:#3B4B5F; --muted:#4F6177; --faint:#5A6C81;   /* todos con contraste mínimo 4.5:1 sobre blanco y sobre los fondos grises */
 
-  --green:#15803d; --green-bg:#dcfce7; --amber:#92400e; --amber-bg:#fef3c7; --red:#b91c1c; --red-bg:#fee2e2;
+  --green:#15803d; --green-bg:#dcfce7; --red:#b91c1c;
 
   --r-sm:8px; --r-md:10px; --r-lg:14px;
   --sombra-1:0 1px 2px rgba(16,42,67,.05);
   --sombra-2:0 1px 2px rgba(16,42,67,.05), 0 8px 20px -10px rgba(16,42,67,.14);
   --sombra-3:0 24px 56px -16px rgba(11,32,54,.38), 0 4px 12px rgba(11,32,54,.10);
 
-  --e1:4px; --e2:8px; --e3:12px; --e4:16px; --e5:24px; --e6:32px;
   --rapido:140ms; --suave:220ms; --salida:cubic-bezier(.22,1,.36,1);
 
   --foco:0 0 0 3px rgba(46,116,181,.32);
